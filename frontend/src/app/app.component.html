@@ -4,6 +4,18 @@
   <span>{{ projectTitle }}</span>
 </div>
 
-<div class="content" role="main"></div>
+<div class="content" role="main">
+  <div class="request-container">
+    <mat-form-field class="url-container">
+      <input matInput placeholder="Video URL" [value]="request.url">
+    </mat-form-field>
+    <div class="request-controls">
+      <mat-slide-toggle [checked]="request.audioOnly">Audio only</mat-slide-toggle>
+      <button mat-raised-button color="primary" (click)="test()">Request convert</button>
+    </div>
+  </div>
+
+  <p>{{ uuids }}</p>
+</div>
 
 <router-outlet></router-outlet>

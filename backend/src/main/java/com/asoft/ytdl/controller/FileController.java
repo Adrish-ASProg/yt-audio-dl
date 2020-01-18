@@ -7,6 +7,7 @@ import com.asoft.ytdl.utils.DownloadManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -27,6 +28,7 @@ import java.util.UUID;
 import static com.asoft.ytdl.utils.FileUtils.getFile;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:4200")
 public class FileController {
 
     private Map<String, FileStatus> filesStatus = new HashMap<>();
