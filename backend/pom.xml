@@ -4,7 +4,6 @@
     <modelVersion>4.0.0</modelVersion>
 
 
-    <groupId>com.asoft</groupId>
     <artifactId>yt-audio-dl-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>yt-audio-dl-backend</name>
@@ -44,7 +43,6 @@
         </dependency>
 
 
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -61,6 +59,11 @@
             <artifactId>spring-boot-starter-web</artifactId>
             <version>RELEASE</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.10</version>
         </dependency>
     </dependencies>
 

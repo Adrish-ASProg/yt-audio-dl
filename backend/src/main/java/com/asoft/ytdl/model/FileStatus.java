@@ -1,0 +1,13 @@
+package com.asoft.ytdl.model;
+
+import com.asoft.ytdl.enums.ProgressStatus;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class FileStatus {
+    private String uuid;
+    private String name;
+    private ProgressStatus status;
+}
