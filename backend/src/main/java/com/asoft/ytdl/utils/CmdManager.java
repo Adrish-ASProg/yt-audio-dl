@@ -16,27 +16,13 @@ abstract class CmdManager {
         try {
             Process process = Runtime.getRuntime().exec(command);
 
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(process.getInputStream()));
-
-            BufferedReader errReader = new BufferedReader(
-                    new InputStreamReader(process.getErrorStream()));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedReader errReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
 
             String line, errLine;
-            while ((line = reader.readLine()) != null) {
-                handleOutput(line);
-            }
-            while ((errLine = errReader.readLine()) != null) {
-                handleError(errLine);
-            }
+            while ((line = reader.readLine()) != null) { handleOutput(line); }
+            while ((errLine = errReader.readLine()) != null) { handleError(errLine); }
             reader.close();
-
-            // int exitVal = process.waitFor();
-            // if (exitVal == 0) {
-            //     System.out.println("Success!");
-            // } else {
-            //     System.out.println("Exited with error : " + exitVal);
-            // }
 
         } catch (IOException e) {
             e.printStackTrace();

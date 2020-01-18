@@ -32,16 +32,28 @@ public abstract class DownloadManager {
         System.out.println(command);
 
         final StringBuilder fileName = new StringBuilder();
-        final String fileNamePrefix = "[ffmpeg] Destination: ";
-        final String downloadPrefix = "[download]";
-        final String convertPrefix = "[ffmpeg]";
-
-        CmdManager cmdManager = new CmdManager() {
+        new CmdManager() {
             @Override
             void handleOutput(String text) {
-                if (text.startsWith(fileNamePrefix)) {
-                    fileName.append(text.substring(fileNamePrefix.length()));
-                } else if (text.startsWith(downloadPrefix)) {
+                if (!text.startsWith("Process terminated")) {
+                    fileName.append(text);
+                    System.out.println("File name: " + fileName);
+                }
+            }
+
+            @Override
+            void handleError(String text) {
+                System.err.println(text);
+            }
+        }.ExecuteCommand("youtube-dl -e " + url);
+
+
+        final String downloadPrefix = "[download]";
+        final String convertPrefix = "[ffmpeg]";
+        new CmdManager() {
+            @Override
+            void handleOutput(String text) {
+                if (text.startsWith(downloadPrefix)) {
                     onProgress(ProgressStatus.DOWNLOADING_VIDEO);
                 } else if (text.startsWith(convertPrefix)) {
                     onProgress(ProgressStatus.CONVERTING_TO_AUDIO);
@@ -54,8 +66,7 @@ public abstract class DownloadManager {
             void handleError(String text) {
                 System.err.println(text);
             }
-        };
-        cmdManager.ExecuteCommand(command);
+        }.ExecuteCommand(command);
 
         System.out.println("Completed, file name: " + fileName);
         onDownloadCompleted(fileName.toString());
