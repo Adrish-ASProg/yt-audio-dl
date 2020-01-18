@@ -28,7 +28,6 @@ import java.util.UUID;
 import static com.asoft.ytdl.utils.FileUtils.getFile;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:4200")
 public class FileController {
 
     private final Map<String, FileStatus> filesStatus = new HashMap<>();
