@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-
 abstract class CmdManager {
 
     abstract void handleOutput(String text);
@@ -32,12 +31,12 @@ abstract class CmdManager {
             }
             reader.close();
 
-            //			int exitVal = process.waitFor();
-            //			if (exitVal == 0) {
-            //				System.out.println("Success!");
-            //			} else {
-            //				System.out.println("Exited with error : " + exitVal);
-            //			}
+            // int exitVal = process.waitFor();
+            // if (exitVal == 0) {
+            //     System.out.println("Success!");
+            // } else {
+            //     System.out.println("Exited with error : " + exitVal);
+            // }
 
         } catch (IOException e) {
             e.printStackTrace();
