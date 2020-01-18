@@ -7,7 +7,6 @@ import com.asoft.ytdl.utils.DownloadManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -21,6 +20,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -28,17 +30,21 @@ import java.util.UUID;
 import static com.asoft.ytdl.utils.FileUtils.getFile;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:4200")
 public class FileController {
 
     private final Map<String, FileStatus> filesStatus = new HashMap<>();
 
     @RequestMapping(value = "/convert", method = RequestMethod.POST)
-    public ResponseEntity<String> convert(@RequestBody ConvertRequest convertRequest) {
+    public ResponseEntity<Object> convert(@RequestBody ConvertRequest convertRequest) {
         UUID uuid = UUID.randomUUID();
 
         filesStatus.put(uuid.toString(),
-                new FileStatus() {{ setUuid(uuid.toString()); }}
+                new FileStatus() {{
+                    setUuid(uuid.toString());
+                    setName("N/A");
+                    setStatus(ProgressStatus.INITIALIZING);
+                    setStartDate(new Date().getTime());
+                }}
         );
 
         DownloadManager ytManager = new DownloadManager() {
@@ -56,7 +62,7 @@ public class FileController {
         };
         ytManager.download(convertRequest.getUrl(), convertRequest.getAudioOnly());
 
-        return new ResponseEntity<>(uuid.toString(), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(Collections.singletonMap("uuid", uuid), HttpStatus.ACCEPTED);
     }
 
 
@@ -78,11 +84,12 @@ public class FileController {
         }
 
         try {
-            File file = getFile(fileStatus.getName());
+            File file = getFile("downloaded/" + fileStatus.getName() + ".mp3");
             InputStream in = new FileInputStream(file);
             response.setContentType("audio/mpeg");
             response.setHeader("Content-Disposition", "attachment; filename=" + file.getName());
             response.setHeader("Content-Length", String.valueOf(file.length()));
+            response.setHeader("FileName", fileStatus.getName() + ".mp3");
             FileCopyUtils.copy(in, response.getOutputStream());
         } catch (IOException e) {
             System.err.println("IOException, see logs below");
@@ -103,8 +110,8 @@ public class FileController {
     }
 
     @RequestMapping(value = "/status/all", method = RequestMethod.GET)
-    public ResponseEntity<Map<String, FileStatus>> statusAll() {
-        return new ResponseEntity<>(filesStatus, HttpStatus.ACCEPTED);
+    public ResponseEntity<Collection<FileStatus>> statusAll() {
+        return new ResponseEntity<>(this.filesStatus.values(), HttpStatus.ACCEPTED);
     }
 
     // #endregion

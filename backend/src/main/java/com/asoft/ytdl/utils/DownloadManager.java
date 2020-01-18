@@ -20,9 +20,7 @@ public abstract class DownloadManager {
     }
 
     public void downloadInNewThread(String url, boolean audioOnly) {
-        // String destination = destinationFolder + "%(title)s.%(ext)s";
-        // String destination = "C:\\Users\\10130383\\" + "%(title)s.%(ext)s";
-        String destination = "E:\\Adri\\" + "%(title)s.%(ext)s";
+        String destination = "downloaded/%(title)s.%(ext)s";
         String format = audioOnly ? "mp3" : "best";
 
         // Retrieve filename
@@ -41,13 +39,13 @@ public abstract class DownloadManager {
             void handleError(String text) {
                 System.err.println(text);
             }
-        }.ExecuteCommand("youtube-dl -e " + url);
+        }.ExecuteCommand("youtube-dl -e --no-playlist " + url);
 
 
         // Prepare download
         String command = audioOnly
-                ? String.format("youtube-dl -o \"%s\" --extract-audio --audio-format %s %s", destination, format, url)
-                : String.format("youtube-dl -o \"%s\" -f %s %s", destination, format, url);
+                ? String.format("youtube-dl -o \"%s\" --no-playlist --extract-audio --audio-format %s %s", destination, format, url)
+                : String.format("youtube-dl -o \"%s\" --no-playlist -f %s %s", destination, format, url);
 
         System.out.println(command);
 
