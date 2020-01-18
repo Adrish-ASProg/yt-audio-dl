@@ -5,7 +5,7 @@ public enum ProgressStatus {
     CONVERTING_TO_AUDIO("Converting"),
     COMPLETED("Completed");
 
-    String value;
+    final String value;
 
     ProgressStatus(String val) {
         this.value = val;

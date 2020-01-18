@@ -31,7 +31,7 @@ import static com.asoft.ytdl.utils.FileUtils.getFile;
 @CrossOrigin(origins = "http://localhost:4200")
 public class FileController {
 
-    private Map<String, FileStatus> filesStatus = new HashMap<>();
+    private final Map<String, FileStatus> filesStatus = new HashMap<>();
 
     @RequestMapping(value = "/convert", method = RequestMethod.POST)
     public ResponseEntity<String> convert(@RequestBody ConvertRequest convertRequest) {

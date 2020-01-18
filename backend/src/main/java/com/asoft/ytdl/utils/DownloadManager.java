@@ -25,13 +25,9 @@ public abstract class DownloadManager {
         String destination = "E:\\Adri\\" + "%(title)s.%(ext)s";
         String format = audioOnly ? "mp3" : "best";
 
-        String command = audioOnly
-                ? String.format("youtube-dl -o \"%s\" --extract-audio --audio-format %s %s", destination, format, url)
-                : String.format("youtube-dl -o \"%s\" -f %s %s", destination, format, url);
-
-        System.out.println(command);
-
+        // Retrieve filename
         final StringBuilder fileName = new StringBuilder();
+        System.out.println("youtube-dl -e " + url);
         new CmdManager() {
             @Override
             void handleOutput(String text) {
@@ -48,6 +44,14 @@ public abstract class DownloadManager {
         }.ExecuteCommand("youtube-dl -e " + url);
 
 
+        // Prepare download
+        String command = audioOnly
+                ? String.format("youtube-dl -o \"%s\" --extract-audio --audio-format %s %s", destination, format, url)
+                : String.format("youtube-dl -o \"%s\" -f %s %s", destination, format, url);
+
+        System.out.println(command);
+
+        // Handle progress
         final String downloadPrefix = "[download]";
         final String convertPrefix = "[ffmpeg]";
         new CmdManager() {
@@ -67,6 +71,7 @@ public abstract class DownloadManager {
                 System.err.println(text);
             }
         }.ExecuteCommand(command);
+
 
         System.out.println("Completed, file name: " + fileName);
         onDownloadCompleted(fileName.toString());
