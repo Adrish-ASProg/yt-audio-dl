@@ -1,4 +1,4 @@
 export interface ConvertRequest {
-  url: string;
-  audioOnly: boolean;
+    url: string;
+    audioOnly: boolean;
 }
