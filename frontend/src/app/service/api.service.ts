@@ -34,7 +34,7 @@ export class APIService {
 
     /** POST: download file */
     downloadFile(uuid: string): Observable<any> {
-        return this.http.get<any>(`${this.apiUrl}${this.downloadUrl}?uuid=` + uuid, audioHttpOptions);
+        return this.http.get<any>(`${this.apiUrl}${this.downloadUrl}?uuid=${uuid}`, audioHttpOptions);
     }
 
     /** GET: get all files status */

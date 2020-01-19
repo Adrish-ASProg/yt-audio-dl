@@ -20,8 +20,6 @@
 
     <br/>
 
-    <button (click)="getFileStatus()" color="primary" mat-raised-button>getFileStatus</button>
-
     <!--  Table files status -->
     <div class="status-container">
 
@@ -61,11 +59,21 @@
                 </td>
             </ng-container>
 
+            <!-- Refresh Column -->
+            <ng-container matColumnDef="refresh">
+                <th *matHeaderCellDef mat-header-cell>
+                    <button (click)="getAllFileStatus()" class="refresh_button" mat-icon-button>
+                        <mat-icon>refresh</mat-icon>
+                    </button>
+                </th>
+                <td *matCellDef="let element" mat-cell></td>
+            </ng-container>
+
             <tr *matHeaderRowDef="displayedColumns" mat-header-row></tr>
             <tr *matRowDef="let row; columns: displayedColumns;" mat-row></tr>
         </table>
 
-        <mat-paginator [length]="fileStatus.length" [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="5" [showFirstLastButtons]="true">
+        <mat-paginator [length]="filesStatus.length" [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="5" [showFirstLastButtons]="true">
         </mat-paginator>
     </div>
 </div>

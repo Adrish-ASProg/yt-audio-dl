@@ -18,9 +18,9 @@ export class AppComponent implements OnInit {
     @ViewChild(MatPaginator, {static: true}) paginator: MatPaginator;
     @ViewChild(MatSort, {static: true}) sort: MatSort;
 
-    displayedColumns: string[] = ['uuid', 'name', 'status', 'startDate', 'download'];
-    fileStatus: FileStatus[] = [];
-    dataSource = new MatTableDataSource<FileStatus>(this.fileStatus);
+    displayedColumns: string[] = ['uuid', 'name', 'status', 'startDate', 'download', 'refresh'];
+    filesStatus: FileStatus[] = [];
+    dataSource = new MatTableDataSource<FileStatus>(this.filesStatus);
 
     refreshRate: number = 3000;
     intervalId: number;
@@ -34,14 +34,12 @@ export class AppComponent implements OnInit {
 
     constructor(public apiService: APIService) {}
 
-    ngOnInit() {
-        this.getFileStatus();
-        this.intervalId = setInterval(() => { this.getFileStatus() }, this.refreshRate);
-    }
+    ngOnInit() { this.getAllFileStatus(); }
+
 
     sendConvertRequest() {
         this.apiService.requestConvert(this.request)
-            .subscribe(uuid => { this.getFileStatus(); });
+            .subscribe(uuid => { this.getAllFileStatus(); });
     }
 
     sendDownloadRequest(uuid: string) {
@@ -50,7 +48,6 @@ export class AppComponent implements OnInit {
     }
 
     saveFile(response) {
-        console.log(response);
         // It is necessary to create a new blob object with mime-type explicitly set
         // otherwise only Chrome works like it should
         const newBlob = new Blob([response.body], {type: "audio/mpeg"});
@@ -78,21 +75,21 @@ export class AppComponent implements OnInit {
         }, 100);
     }
 
-    getFileStatus() {
+    getAllFileStatus() {
         this.updateRefreshLoop();
 
         this.apiService.getAllFileStatus()
             .subscribe(filesStatus => {
-                this.fileStatus = [...filesStatus];
+                this.filesStatus = [...filesStatus];
 
-                this.dataSource = new MatTableDataSource(this.fileStatus);
+                this.dataSource = new MatTableDataSource(this.filesStatus);
                 this.dataSource.paginator = this.paginator;
                 this.dataSource.sort = this.sort;
             });
     }
 
     updateRefreshLoop() {
-        clearInterval(this.intervalId);
-        this.intervalId = setInterval(() => { this.getFileStatus() }, this.refreshRate);
+        if (this.intervalId != void 0) clearInterval(this.intervalId);
+        this.intervalId = setInterval(() => { this.getAllFileStatus() }, this.refreshRate);
     }
 }
