@@ -1,6 +1,9 @@
 package com.asoft.ytdl.utils;
 
 import com.asoft.ytdl.enums.ProgressStatus;
+import com.asoft.ytdl.service.ApplicationService;
+
+import java.io.File;
 
 public abstract class DownloadManager {
 
@@ -20,7 +23,7 @@ public abstract class DownloadManager {
     }
 
     public void downloadInNewThread(String url, boolean audioOnly) {
-        String destination = "downloaded/%(title)s.%(ext)s";
+        String destination = ApplicationService.DOWNLOAD_FOLDER + File.separator + "%(title)s.%(ext)s";
         String format = audioOnly ? "mp3" : "best";
 
         // Retrieve filename
