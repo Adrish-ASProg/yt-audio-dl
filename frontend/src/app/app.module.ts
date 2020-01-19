@@ -14,6 +14,7 @@ import {MatSortModule} from "@angular/material/sort";
 import {MatPaginatorModule} from "@angular/material/paginator";
 import {MatIconModule} from "@angular/material/icon";
 import {FormsModule} from "@angular/forms";
+import {MatToolbarModule} from "@angular/material/toolbar";
 
 @NgModule({
     declarations: [
@@ -35,7 +36,8 @@ import {FormsModule} from "@angular/forms";
         MatSortModule,
         MatPaginatorModule,
         MatIconModule,
-        FormsModule
+        FormsModule,
+        MatToolbarModule
     ],
     providers: [],
     bootstrap: [AppComponent]
