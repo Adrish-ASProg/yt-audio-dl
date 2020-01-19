@@ -21,61 +21,8 @@
     <br/>
 
     <!--  Table files status -->
-    <div class="status-container">
-
-        <table [dataSource]="dataSource" class="mat-elevation-z8" mat-table matSort matSortActive="startDate" matSortDirection="desc">
-
-            <!-- UUID Column -->
-            <ng-container matColumnDef="uuid">
-                <th *matHeaderCellDef mat-header-cell mat-sort-header> UUID</th>
-                <td *matCellDef="let element" mat-cell> {{element.uuid}} </td>
-            </ng-container>
-
-            <!-- Name Column -->
-            <ng-container matColumnDef="name">
-                <th *matHeaderCellDef mat-header-cell mat-sort-header> Name</th>
-                <td *matCellDef="let element" mat-cell> {{element.name}} </td>
-            </ng-container>
-
-            <!-- Status Column -->
-            <ng-container matColumnDef="status">
-                <th *matHeaderCellDef mat-header-cell mat-sort-header> Status</th>
-                <td *matCellDef="let element" mat-cell> {{element.status}} </td>
-            </ng-container>
-
-            <!-- Date Column -->
-            <ng-container matColumnDef="startDate">
-                <th *matHeaderCellDef mat-header-cell mat-sort-header> Date</th>
-                <td *matCellDef="let element" mat-cell> {{element.startDate | date:"dd/MM/yyyy HH:mm"}} </td>
-            </ng-container>
-
-            <!-- Download Column -->
-            <ng-container matColumnDef="download">
-                <th *matHeaderCellDef mat-header-cell> Download</th>
-                <td *matCellDef="let element" mat-cell>
-                    <button (click)="sendDownloadRequest(element.uuid)" color="primary" mat-icon-button>
-                        <mat-icon>cloud_download</mat-icon>
-                    </button>
-                </td>
-            </ng-container>
-
-            <!-- Refresh Column -->
-            <ng-container matColumnDef="refresh">
-                <th *matHeaderCellDef mat-header-cell>
-                    <button (click)="getAllFileStatus()" class="refresh_button" mat-icon-button>
-                        <mat-icon>refresh</mat-icon>
-                    </button>
-                </th>
-                <td *matCellDef="let element" mat-cell></td>
-            </ng-container>
-
-            <tr *matHeaderRowDef="displayedColumns" mat-header-row></tr>
-            <tr *matRowDef="let row; columns: displayedColumns;" mat-row></tr>
-        </table>
-
-        <mat-paginator [length]="filesStatus.length" [pageSizeOptions]="[5, 10, 25, 100]" [pageSize]="5" [showFirstLastButtons]="true">
-        </mat-paginator>
-    </div>
+    <app-file-status-table
+        (downloadButtonClicked)="sendDownloadRequest($event)" (refreshButtonClicked)="sendUpdateRequest()"
+        [displayedColumns]="displayedColumns" [filesStatus]="filesStatus">
+    </app-file-status-table>
 </div>
-
-<!--<router-outlet></router-outlet>-->

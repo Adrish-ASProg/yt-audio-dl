@@ -1,5 +1,3 @@
-@import "src/variables";
-
 :host {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
@@ -35,17 +33,6 @@
                 margin-left: 15px;
                 margin-right: 15px;
             }
-        }
-    }
-
-
-    /* Files status table */
-    table {
-        width: 100%;
-        margin-top: 15px;
-
-        .refresh_button {
-            color: $grey;
         }
     }
 }

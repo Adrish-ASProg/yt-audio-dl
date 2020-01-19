@@ -1,8 +1,7 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {APIService} from "./service/api.service";
 import {ConvertRequest} from "./model/convertrequest.model";
 import {FileStatus} from "./model/filestatus.model";
-import {MatPaginator, MatSort, MatTableDataSource} from "@angular/material";
 
 @Component({
     selector: 'app-root',
@@ -14,17 +13,11 @@ export class AppComponent implements OnInit {
     // Toolbar
     projectTitle: string = 'yt-audio-dl';
 
-    // Table File Status
-    @ViewChild(MatPaginator, {static: true}) paginator: MatPaginator;
-    @ViewChild(MatSort, {static: true}) sort: MatSort;
-
     displayedColumns: string[] = ['uuid', 'name', 'status', 'startDate', 'download', 'refresh'];
     filesStatus: FileStatus[] = [];
-    dataSource = new MatTableDataSource<FileStatus>(this.filesStatus);
 
     refreshRate: number = 3000;
     intervalId: number;
-
 
     request: ConvertRequest = {
         url: "https://www.youtube.com/watch?v=zhsfn9IyiLQ",
@@ -34,18 +27,26 @@ export class AppComponent implements OnInit {
 
     constructor(public apiService: APIService) {}
 
-    ngOnInit() { this.getAllFileStatus(); }
+    ngOnInit() { this.sendUpdateRequest(); }
 
 
     sendConvertRequest() {
         this.apiService.requestConvert(this.request)
-            .subscribe(uuid => { this.getAllFileStatus(); });
+            .subscribe(uuid => { this.sendUpdateRequest(); });
+    }
+
+    sendUpdateRequest() {
+        this.updateRefreshLoop();
+
+        this.apiService.getAllFileStatus()
+            .subscribe(filesStatus => this.filesStatus = [...filesStatus]);
     }
 
     sendDownloadRequest(uuid: string) {
         this.apiService.downloadFile(uuid)
             .subscribe(response => this.saveFile(response));
     }
+
 
     saveFile(response) {
         // It is necessary to create a new blob object with mime-type explicitly set
@@ -75,21 +76,8 @@ export class AppComponent implements OnInit {
         }, 100);
     }
 
-    getAllFileStatus() {
-        this.updateRefreshLoop();
-
-        this.apiService.getAllFileStatus()
-            .subscribe(filesStatus => {
-                this.filesStatus = [...filesStatus];
-
-                this.dataSource = new MatTableDataSource(this.filesStatus);
-                this.dataSource.paginator = this.paginator;
-                this.dataSource.sort = this.sort;
-            });
-    }
-
     updateRefreshLoop() {
         if (this.intervalId != void 0) clearInterval(this.intervalId);
-        this.intervalId = setInterval(() => { this.getAllFileStatus() }, this.refreshRate);
+        this.intervalId = setInterval(() => { this.sendUpdateRequest() }, this.refreshRate);
     }
 }

@@ -15,10 +15,12 @@ import {MatPaginatorModule} from "@angular/material/paginator";
 import {MatIconModule} from "@angular/material/icon";
 import {FormsModule} from "@angular/forms";
 import {MatToolbarModule} from "@angular/material/toolbar";
+import {FileStatusTableComponent} from './components/file-status-table/file-status-table.component';
 
 @NgModule({
     declarations: [
-        AppComponent
+        AppComponent,
+        FileStatusTableComponent
     ],
     imports: [
         BrowserModule,
