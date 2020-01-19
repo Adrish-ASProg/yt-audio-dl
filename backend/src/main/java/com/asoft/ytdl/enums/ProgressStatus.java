@@ -2,6 +2,7 @@ package com.asoft.ytdl.enums;
 
 public enum ProgressStatus {
     INITIALIZING("Initializing"),
+    DOWNLOADING_WEBPAGE("Downloading webpage"),
     DOWNLOADING_VIDEO("Downloading"),
     CONVERTING_TO_AUDIO("Converting"),
     COMPLETED("Completed");

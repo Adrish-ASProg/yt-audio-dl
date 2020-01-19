@@ -50,12 +50,15 @@ public abstract class DownloadManager {
         System.out.println(command);
 
         // Handle progress
+        final String downloadPagePrefix = "[youtube]";
         final String downloadPrefix = "[download]";
         final String convertPrefix = "[ffmpeg]";
         new CmdManager() {
             @Override
             void handleOutput(String text) {
-                if (text.startsWith(downloadPrefix)) {
+                if (text.startsWith(downloadPagePrefix)) {
+                    onProgress(ProgressStatus.DOWNLOADING_WEBPAGE);
+                } else if (text.startsWith(downloadPrefix)) {
                     onProgress(ProgressStatus.DOWNLOADING_VIDEO);
                 } else if (text.startsWith(convertPrefix)) {
                     onProgress(ProgressStatus.CONVERTING_TO_AUDIO);
