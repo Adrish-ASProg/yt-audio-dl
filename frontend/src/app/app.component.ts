@@ -4,6 +4,7 @@ import {ConvertRequest} from "./model/convertrequest.model";
 import {FileStatus} from "./model/filestatus.model";
 import {Observable, Observer} from "rxjs";
 import {HttpErrorResponse} from "@angular/common/http";
+import {ActivatedRoute} from "@angular/router";
 
 @Component({
     selector: 'app-root',
@@ -27,9 +28,21 @@ export class AppComponent implements OnInit {
     };
 
 
-    constructor(public apiService: APIService) {}
+    constructor(private route: ActivatedRoute, private apiService: APIService) {
+    }
 
-    ngOnInit() { this.sendUpdateRequest(); }
+    ngOnInit() {
+        this.route.queryParams.subscribe(params => {
+            const videoId = params["videoId"];
+            if (videoId == void 0) return;
+
+            if (videoId.length === 11) {
+                this.request.url = `https://www.youtube.com/watch?v=${videoId}`;
+                this.sendConvertRequest();
+            }
+        });
+        this.sendUpdateRequest();
+    }
 
 
     sendConvertRequest() {
