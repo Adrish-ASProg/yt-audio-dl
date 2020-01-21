@@ -2,6 +2,8 @@ import {Component, OnInit} from '@angular/core';
 import {APIService} from "./service/api.service";
 import {ConvertRequest} from "./model/convertrequest.model";
 import {FileStatus} from "./model/filestatus.model";
+import {Observable, Observer} from "rxjs";
+import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({
     selector: 'app-root',
@@ -32,19 +34,38 @@ export class AppComponent implements OnInit {
 
     sendConvertRequest() {
         this.apiService.requestConvert(this.request)
-            .subscribe(uuid => { this.sendUpdateRequest(); });
+            .subscribe(
+                uuid => this.sendUpdateRequest(),
+                response => {
+                    console.error(response.error);
+                    alert(response.error.message);
+                }
+            );
     }
 
     sendUpdateRequest() {
         this.updateRefreshLoop();
 
         this.apiService.getAllFileStatus()
-            .subscribe(filesStatus => this.filesStatus = [...filesStatus]);
+            .subscribe(
+                filesStatus => this.filesStatus = [...filesStatus],
+                response => {
+                    console.error(response.error);
+                    if (response.error != void 0 && response.error.message != void 0)
+                        alert(response.error.message);
+                }
+            );
     }
 
     sendDownloadRequest(uuid: string) {
         this.apiService.downloadFile(uuid)
-            .subscribe(response => this.saveFile(response));
+            .subscribe(
+                response => this.saveFile(response),
+                response => {
+                    this.parseErrorBlob(response)
+                        .subscribe(e => alert(e.message));
+                }
+            );
     }
 
 
@@ -78,6 +99,22 @@ export class AppComponent implements OnInit {
 
     updateRefreshLoop() {
         if (this.intervalId != void 0) clearInterval(this.intervalId);
-        this.intervalId = setInterval(() => { this.sendUpdateRequest() }, this.refreshRate);
+        this.intervalId = setInterval(() => this.sendUpdateRequest(), this.refreshRate);
+    }
+
+
+    parseErrorBlob(err: HttpErrorResponse): Observable<any> {
+        const reader: FileReader = new FileReader();
+
+        const obs = new Observable((observer: Observer<any>) => {
+            reader.onloadend = e => {
+                if (typeof reader.result === "string") {
+                    observer.next(JSON.parse(reader.result));
+                }
+                observer.complete();
+            }
+        });
+        reader.readAsText(err.error);
+        return obs;
     }
 }

@@ -1,6 +1,7 @@
 package com.asoft.ytdl.service;
 
 import com.asoft.ytdl.enums.ProgressStatus;
+import com.asoft.ytdl.exception.UncompletedDownloadException;
 import com.asoft.ytdl.model.ConvertRequest;
 import com.asoft.ytdl.model.FileStatus;
 import com.asoft.ytdl.utils.DownloadManager;
@@ -29,17 +30,20 @@ public class ApplicationService {
     private final Map<String, FileStatus> filesStatus = new HashMap<>();
 
     ApplicationService() {
+        retrieveFilesOnDisk();
+    }
+
+    private void retrieveFilesOnDisk() {
+        File downloadFolder = null;
         try {
-            retrieveFilesOnDisk();
+            downloadFolder = getFile(DOWNLOAD_FOLDER);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             System.err.println("Unable to retrieve files in « " + DOWNLOAD_FOLDER + " » folder");
+            return;
         }
-    }
 
-    private void retrieveFilesOnDisk() throws FileNotFoundException {
-
-        FileUtils.getAllFilesInDirectory(getFile(DOWNLOAD_FOLDER))
+        FileUtils.getAllFilesInDirectory(downloadFolder)
                 .forEach(file -> {
                     UUID uuid = UUID.randomUUID();
                     filesStatus.put(uuid.toString(),
@@ -51,6 +55,8 @@ public class ApplicationService {
                             }}
                     );
                 });
+
+        System.err.println("Files in « " + DOWNLOAD_FOLDER + " » folder retrieved successfully");
     }
 
     public String convertFile(ConvertRequest convertRequest) {
@@ -65,20 +71,24 @@ public class ApplicationService {
                 }}
         );
 
-        DownloadManager ytManager = new DownloadManager() {
-            @Override
-            public void onProgress(ProgressStatus progressStatus) {
-                filesStatus.get(uuid.toString()).setStatus(progressStatus);
-            }
+        Thread t = new Thread(() -> {
+            DownloadManager ytManager = new DownloadManager() {
+                @Override
+                public void onProgress(ProgressStatus progressStatus) {
+                    filesStatus.get(uuid.toString()).setStatus(progressStatus);
+                }
 
-            @Override
-            public void onDownloadCompleted(String fileName) {
-                FileStatus fs = filesStatus.get(uuid.toString());
-                fs.setStatus(ProgressStatus.COMPLETED);
-                fs.setName(fileName);
-            }
-        };
-        ytManager.download(convertRequest.getUrl(), convertRequest.getAudioOnly());
+                @Override
+                public void onDownloadCompleted(String fileName) {
+                    FileStatus fs = filesStatus.get(uuid.toString());
+                    fs.setStatus(ProgressStatus.COMPLETED);
+                    fs.setName(fileName);
+                }
+            };
+            ytManager.download(convertRequest.getUrl(), convertRequest.getAudioOnly());
+        });
+        t.setUncaughtExceptionHandler((t1, e) -> filesStatus.get(uuid.toString()).setStatus(ProgressStatus.ERROR));
+        t.start();
 
         return uuid.toString();
     }
@@ -95,7 +105,7 @@ public class ApplicationService {
         return this.filesStatus.values();
     }
 
-    public void downloadFile(String uuid, HttpServletResponse response) throws FileNotFoundException {
+    public void downloadFile(String uuid, HttpServletResponse response) throws FileNotFoundException, UncompletedDownloadException {
         // UUID not found
         if (!filesStatus.containsKey(uuid)) {
             throw new FileNotFoundException("Unable to find file with uuid « " + uuid + " »");
@@ -105,7 +115,7 @@ public class ApplicationService {
 
         // File not downloaded yet
         if (fileStatus.getStatus() != ProgressStatus.COMPLETED) {
-            throw new FileNotFoundException("File not downloaded yet. Current status: " + fileStatus.getStatus());
+            throw new UncompletedDownloadException("File not downloaded yet. Current status: " + fileStatus.getStatus());
         }
 
         try {

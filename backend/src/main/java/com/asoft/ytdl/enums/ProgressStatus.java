@@ -5,7 +5,8 @@ public enum ProgressStatus {
     DOWNLOADING_WEBPAGE("Downloading webpage"),
     DOWNLOADING_VIDEO("Downloading"),
     CONVERTING_TO_AUDIO("Converting"),
-    COMPLETED("Completed");
+    COMPLETED("Completed"),
+    ERROR("Error");
 
     final String value;
 

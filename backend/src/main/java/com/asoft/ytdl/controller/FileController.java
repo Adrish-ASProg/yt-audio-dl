@@ -1,5 +1,6 @@
 package com.asoft.ytdl.controller;
 
+import com.asoft.ytdl.exception.UncompletedDownloadException;
 import com.asoft.ytdl.model.ConvertRequest;
 import com.asoft.ytdl.model.FileStatus;
 import com.asoft.ytdl.service.ApplicationService;
@@ -34,7 +35,7 @@ public class FileController {
     @RequestMapping(value = "/download", method = RequestMethod.GET, produces = "audio/mpeg")
     public @ResponseBody
     void download(HttpServletResponse response, @RequestParam(value = "uuid") String uuid)
-            throws FileNotFoundException {
+            throws FileNotFoundException, UncompletedDownloadException {
         applicationService.downloadFile(uuid, response);
     }
 
