@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileNotFoundException;
 import java.util.Collection;
-import java.util.Collections;
 
 @RestController
 public class FileController {
@@ -26,9 +25,9 @@ public class FileController {
     ApplicationService applicationService;
 
     @RequestMapping(value = "/convert", method = RequestMethod.POST)
-    public ResponseEntity<Object> convert(@RequestBody ConvertRequest convertRequest) {
-        String uuid = applicationService.convertFile(convertRequest);
-        return new ResponseEntity<>(Collections.singletonMap("uuid", uuid), HttpStatus.ACCEPTED);
+    public ResponseEntity<Void> convert(@RequestBody ConvertRequest convertRequest) {
+        applicationService.convertFile(convertRequest);
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
 

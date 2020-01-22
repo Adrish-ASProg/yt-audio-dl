@@ -5,16 +5,18 @@ import com.asoft.ytdl.service.ApplicationService;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public abstract class DownloadManager {
 
-    public abstract void onDownloadCompleted(String fileName);
-
-    public abstract void onProgress(ProgressStatus progressStatus);
-
-
-    public DownloadManager() {
+    protected DownloadManager() {
     }
+
+    public abstract void onDownloadCompleted(String uuid, String fileName);
+
+    public abstract void onProgress(String uuid, ProgressStatus progressStatus);
 
     /**
      * Téléchargement d'une vidéo YouTube
@@ -24,16 +26,17 @@ public abstract class DownloadManager {
         String format = audioOnly ? "mp3" : "best";
 
         StringBuilder error = new StringBuilder();
-        // Retrieve filename
-        final StringBuilder fileName = new StringBuilder();
 
-        System.out.println("youtube-dl -e " + url);
+        //Retrieve file(s) name(s)
+        final List<String> fileNames = new ArrayList<>();
+        String getNameCommand = "youtube-dl -e --no-playlist --flat-playlist " + url;
+        System.out.println(getNameCommand);
         new CmdManager() {
             @Override
             void handleOutput(String text) {
                 if (!text.startsWith("Process terminated")) {
-                    fileName.append(text);
-                    System.out.println("File name: " + fileName);
+                    fileNames.add(text);
+                    System.out.println("File name: " + text);
                 }
             }
 
@@ -42,49 +45,57 @@ public abstract class DownloadManager {
                 System.err.println(text);
                 error.append(text);
             }
-        }.ExecuteCommand("youtube-dl -e --no-playlist " + url);
+        }.ExecuteCommand(getNameCommand);
 
         if (!StringUtils.isEmpty(error.toString())) {
             throw new RuntimeException(error.toString());
         }
 
-        // Prepare download
-        String command = audioOnly
-                ? String.format("youtube-dl -o \"%s\" --no-playlist --extract-audio --audio-format %s %s", destination, format, url)
-                : String.format("youtube-dl -o \"%s\" --no-playlist -f %s %s", destination, format, url);
 
-        System.out.println(command);
+        for (int i = 0; i < fileNames.size(); i++) {
+            String uuid = UUID.randomUUID().toString();
+            String fileName = fileNames.get(i);
 
-        // Handle progress
-        final String downloadPagePrefix = "[youtube]";
-        final String downloadPrefix = "[download]";
-        final String convertPrefix = "[ffmpeg]";
-        new CmdManager() {
-            @Override
-            void handleOutput(String text) {
-                if (text.startsWith(downloadPagePrefix)) {
-                    onProgress(ProgressStatus.DOWNLOADING_WEBPAGE);
-                } else if (text.startsWith(downloadPrefix)) {
-                    onProgress(ProgressStatus.DOWNLOADING_VIDEO);
-                } else if (text.startsWith(convertPrefix)) {
-                    onProgress(ProgressStatus.CONVERTING_TO_AUDIO);
+            // Prepare download
+            String dlCommand = audioOnly
+                    ? String.format("youtube-dl -o \"%s\" --no-playlist --extract-audio --audio-format %s --playlist-items %d %s", destination, format, i + 1, url)
+                    : String.format("youtube-dl -o \"%s\" --no-playlist -f %s %s", destination, format, url);
+
+            System.out.println(dlCommand);
+            onProgress(uuid, ProgressStatus.INITIALIZING);
+
+            // Handle progress
+            final String downloadPagePrefix = "[youtube]";
+            final String downloadPrefix = "[download]";
+            final String convertPrefix = "[ffmpeg]";
+
+            new CmdManager() {
+                @Override
+                void handleOutput(String text) {
+                    if (text.startsWith(downloadPagePrefix)) {
+                        onProgress(uuid, ProgressStatus.DOWNLOADING_WEBPAGE);
+                    } else if (text.startsWith(downloadPrefix)) {
+                        onProgress(uuid, ProgressStatus.DOWNLOADING_VIDEO);
+                    } else if (text.startsWith(convertPrefix)) {
+                        onProgress(uuid, ProgressStatus.CONVERTING_TO_AUDIO);
+                    }
+
+                    System.out.println(text);
                 }
 
-                System.out.println(text);
+                @Override
+                void handleError(String text) {
+                    System.err.println(text);
+                    error.append(text);
+                }
+            }.ExecuteCommand(dlCommand);
+
+            if (!StringUtils.isEmpty(error.toString())) {
+                throw new RuntimeException(uuid + "|" + error.toString());
             }
 
-            @Override
-            void handleError(String text) {
-                System.err.println(text);
-                error.append(text);
-            }
-        }.ExecuteCommand(command);
-
-        if (!StringUtils.isEmpty(error.toString())) {
-            throw new RuntimeException(error.toString());
+            System.out.println("Completed, file name: " + fileName);
+            onDownloadCompleted(uuid, fileName);
         }
-
-        System.out.println("Completed, file name: " + fileName);
-        onDownloadCompleted(fileName.toString());
     }
 }

@@ -23,7 +23,8 @@ export class AppComponent implements OnInit {
     intervalId: number;
 
     request: ConvertRequest = {
-        url: "https://www.youtube.com/watch?v=zhsfn9IyiLQ",
+        url: "https://www.youtube.com/playlist?list=PL0-adpj8Oy0lqSmQVOrj9q_Q5CR0jIuUE",
+        // url: "https://www.youtube.com/watch?v=zhsfn9IyiLQ",
         audioOnly: true
     };
 
@@ -48,7 +49,7 @@ export class AppComponent implements OnInit {
     sendConvertRequest() {
         this.apiService.requestConvert(this.request)
             .subscribe(
-                uuid => this.sendUpdateRequest(),
+                () => this.sendUpdateRequest(),
                 response => {
                     console.error(response.error);
                     alert(response.error.message);
@@ -120,7 +121,7 @@ export class AppComponent implements OnInit {
         const reader: FileReader = new FileReader();
 
         const obs = new Observable((observer: Observer<any>) => {
-            reader.onloadend = e => {
+            reader.onloadend = () => {
                 if (typeof reader.result === "string") {
                     observer.next(JSON.parse(reader.result));
                 }

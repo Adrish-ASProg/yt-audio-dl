@@ -56,41 +56,46 @@ public class ApplicationService {
                     );
                 });
 
-        System.err.println("Files in « " + DOWNLOAD_FOLDER + " » folder retrieved successfully");
+        System.out.println("Files in « " + DOWNLOAD_FOLDER + " » folder retrieved successfully");
     }
 
-    public String convertFile(ConvertRequest convertRequest) {
-        UUID uuid = UUID.randomUUID();
-
-        filesStatus.put(uuid.toString(),
-                new FileStatus() {{
-                    setUuid(uuid.toString());
-                    setName("N/A");
-                    setStatus(ProgressStatus.INITIALIZING);
-                    setStartDate(new Date().getTime());
-                }}
-        );
-
+    public void convertFile(ConvertRequest convertRequest) {
         Thread t = new Thread(() -> {
             DownloadManager ytManager = new DownloadManager() {
                 @Override
-                public void onProgress(ProgressStatus progressStatus) {
-                    filesStatus.get(uuid.toString()).setStatus(progressStatus);
+                public void onProgress(String uuid, ProgressStatus progressStatus) {
+                    if (!filesStatus.containsKey(uuid)) {
+                        filesStatus.put(uuid,
+                                new FileStatus() {{
+                                    setUuid(uuid);
+                                    setName("N/A");
+                                    setStatus(progressStatus);
+                                    setStartDate(new Date().getTime());
+                                }}
+                        );
+                    }
+                    filesStatus.get(uuid).setStatus(progressStatus);
                 }
 
                 @Override
-                public void onDownloadCompleted(String fileName) {
-                    FileStatus fs = filesStatus.get(uuid.toString());
+                public void onDownloadCompleted(String uuid, String fileName) {
+                    FileStatus fs = filesStatus.get(uuid);
                     fs.setStatus(ProgressStatus.COMPLETED);
                     fs.setName(fileName);
                 }
             };
             ytManager.download(convertRequest.getUrl(), convertRequest.getAudioOnly());
         });
-        t.setUncaughtExceptionHandler((t1, e) -> filesStatus.get(uuid.toString()).setStatus(ProgressStatus.ERROR));
-        t.start();
 
-        return uuid.toString();
+        t.setUncaughtExceptionHandler((t1, e) -> {
+            if (e.getMessage().contains("|")) {
+                String uuid = e.getMessage().substring(0, e.getMessage().indexOf("|"));
+                if (filesStatus.containsKey(uuid)) {
+                    filesStatus.get(uuid).setStatus(ProgressStatus.ERROR);
+                }
+            }
+        });
+        t.start();
     }
 
     public FileStatus getFileStatus(String uuid) throws FileNotFoundException {
