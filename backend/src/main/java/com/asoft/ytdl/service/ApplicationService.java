@@ -59,9 +59,12 @@ public class ApplicationService {
         System.out.println("Files in « " + DOWNLOAD_FOLDER + " » folder retrieved successfully");
     }
 
+    /**
+     * /convert
+     **/
     public void convertFile(ConvertRequest convertRequest) {
-        Thread t = new Thread(() -> {
-            DownloadManager ytManager = new DownloadManager() {
+        Thread downloadThread = new Thread(() -> {
+            DownloadManager dlManager = new DownloadManager() {
                 @Override
                 public void onProgress(String uuid, ProgressStatus progressStatus) {
                     if (!filesStatus.containsKey(uuid)) {
@@ -84,10 +87,10 @@ public class ApplicationService {
                     fs.setName(fileName);
                 }
             };
-            ytManager.download(convertRequest.getUrl(), convertRequest.getAudioOnly());
+            dlManager.download(convertRequest.getUrl(), convertRequest.getAudioOnly());
         });
 
-        t.setUncaughtExceptionHandler((t1, e) -> {
+        downloadThread.setUncaughtExceptionHandler((thread, e) -> {
             if (e.getMessage().contains("|")) {
                 String uuid = e.getMessage().substring(0, e.getMessage().indexOf("|"));
                 if (filesStatus.containsKey(uuid)) {
@@ -95,9 +98,12 @@ public class ApplicationService {
                 }
             }
         });
-        t.start();
+        downloadThread.start();
     }
 
+    /**
+     * /status/{uuid}
+     **/
     public FileStatus getFileStatus(String uuid) throws FileNotFoundException {
         if (!filesStatus.containsKey(uuid)) {
             throw new FileNotFoundException("Unable to find file with uuid « " + uuid + " »");
@@ -106,10 +112,16 @@ public class ApplicationService {
         return filesStatus.get(uuid);
     }
 
+    /**
+     * /status/all
+     **/
     public Collection<FileStatus> getAllFilesStatus() {
         return this.filesStatus.values();
     }
 
+    /**
+     * /download
+     **/
     public void downloadFile(String uuid, HttpServletResponse response) throws FileNotFoundException, UncompletedDownloadException {
         // UUID not found
         if (!filesStatus.containsKey(uuid)) {
@@ -124,6 +136,7 @@ public class ApplicationService {
         }
 
         try {
+            // FIXME extension
             File file = getFile(DOWNLOAD_FOLDER + File.separator + fileStatus.getName() + ".mp3");
             InputStream in = new FileInputStream(file);
             response.setContentType("audio/mpeg");
@@ -132,8 +145,8 @@ public class ApplicationService {
             response.setHeader("FileName", fileStatus.getName() + ".mp3");
             FileCopyUtils.copy(in, response.getOutputStream());
         } catch (IOException e) {
-            System.err.println("IOException, see logs below");
             e.printStackTrace();
+            System.err.println("IOException, see logs above");
         }
     }
 }

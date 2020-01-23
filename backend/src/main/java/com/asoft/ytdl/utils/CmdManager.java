@@ -10,7 +10,7 @@ abstract class CmdManager {
 
     abstract void handleError(String text);
 
-    void ExecuteCommand(String command) {
+    void executeCommand(String command) {
         long startTime = System.currentTimeMillis();
 
         try {

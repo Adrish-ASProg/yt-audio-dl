@@ -11,8 +11,7 @@ import java.util.UUID;
 
 public abstract class DownloadManager {
 
-    protected DownloadManager() {
-    }
+    protected DownloadManager() {}
 
     public abstract void onDownloadCompleted(String uuid, String fileName);
 
@@ -45,7 +44,7 @@ public abstract class DownloadManager {
                 System.err.println(text);
                 error.append(text);
             }
-        }.ExecuteCommand(getNameCommand);
+        }.executeCommand(getNameCommand);
 
         if (!StringUtils.isEmpty(error.toString())) {
             throw new RuntimeException(error.toString());
@@ -88,7 +87,7 @@ public abstract class DownloadManager {
                     System.err.println(text);
                     error.append(text);
                 }
-            }.ExecuteCommand(dlCommand);
+            }.executeCommand(dlCommand);
 
             if (!StringUtils.isEmpty(error.toString())) {
                 throw new RuntimeException(uuid + "|" + error.toString());
