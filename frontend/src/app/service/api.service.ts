@@ -21,9 +21,9 @@ const audioHttpOptions = {
 export class APIService {
 
     apiUrl: string = "http://localhost:8080";
-    convertUrl: string = "/convert";
+    convertUrl: string = "/ytdl";
     statusUrl: string = "/status/all";
-    downloadUrl: string = "/download";
+    downloadUrl: string = "/dl";
 
     constructor(private http: HttpClient) {}
 

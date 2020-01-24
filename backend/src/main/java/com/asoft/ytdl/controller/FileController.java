@@ -1,9 +1,9 @@
 package com.asoft.ytdl.controller;
 
 import com.asoft.ytdl.exception.UncompletedDownloadException;
-import com.asoft.ytdl.model.ConvertRequest;
 import com.asoft.ytdl.model.FileStatus;
 import com.asoft.ytdl.model.Tag;
+import com.asoft.ytdl.model.YTRequest;
 import com.asoft.ytdl.service.ApplicationService;
 import com.mpatric.mp3agic.NotSupportedException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,19 +28,20 @@ public class FileController {
     @Autowired
     ApplicationService applicationService;
 
-    @RequestMapping(value = "/convert", method = RequestMethod.POST)
-    public ResponseEntity<Void> convert(@RequestBody ConvertRequest convertRequest) {
-        applicationService.convertFile(convertRequest);
+    @RequestMapping(value = "/ytdl", method = RequestMethod.POST)
+    public ResponseEntity<Void> downloadFromYT(@RequestBody YTRequest ytRequest) {
+        applicationService.downloadFileFromYT(ytRequest);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
 
-    @RequestMapping(value = "/download", method = RequestMethod.GET, produces = "audio/mpeg")
+    @RequestMapping(value = "/dl", method = RequestMethod.GET, produces = "audio/mpeg")
     public @ResponseBody
     void download(HttpServletResponse response, @RequestParam(value = "uuid") String uuid)
             throws FileNotFoundException, UncompletedDownloadException {
         applicationService.downloadFile(uuid, response);
     }
+
 
     @RequestMapping(value = "/tag", method = RequestMethod.POST)
     public ResponseEntity<Void> setTag(@RequestParam(value = "uuid") String uuid,
@@ -49,19 +50,17 @@ public class FileController {
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
-    //#region Status Endpoints
 
     @RequestMapping(value = "/status", method = RequestMethod.GET)
     public ResponseEntity<FileStatus> status(@RequestParam(value = "uuid") String uuid) throws FileNotFoundException {
         return new ResponseEntity<>(applicationService.getFileStatus(uuid), HttpStatus.ACCEPTED);
     }
 
+
     @RequestMapping(value = "/status/all", method = RequestMethod.GET)
     public ResponseEntity<Collection<FileStatus>> statusAll() {
         return new ResponseEntity<>(applicationService.getAllFilesStatus(), HttpStatus.ACCEPTED);
     }
-
-    // #endregion
 
 
     @RequestMapping(value = "/test")

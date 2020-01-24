@@ -3,11 +3,11 @@ package com.asoft.ytdl.service;
 import com.asoft.ytdl.application.Mp3Tagger;
 import com.asoft.ytdl.enums.ProgressStatus;
 import com.asoft.ytdl.exception.UncompletedDownloadException;
-import com.asoft.ytdl.model.ConvertRequest;
 import com.asoft.ytdl.model.FileStatus;
 import com.asoft.ytdl.model.Tag;
-import com.asoft.ytdl.utils.DownloadManager;
+import com.asoft.ytdl.model.YTRequest;
 import com.asoft.ytdl.utils.FileUtils;
+import com.asoft.ytdl.utils.YTDownloadManager;
 import com.mpatric.mp3agic.NotSupportedException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
@@ -38,6 +38,105 @@ public class ApplicationService {
         retrieveFilesOnDisk();
     }
 
+    /**
+     * POST /ytdl
+     **/
+    public void downloadFileFromYT(YTRequest ytRequest) {
+        Thread downloadThread = new Thread(() -> {
+            YTDownloadManager dlManager = new YTDownloadManager();
+            dlManager.setProgressEvent((uuid, progressStatus) -> {
+                if (!filesStatus.containsKey(uuid)) {
+                    filesStatus.put(uuid,
+                            new FileStatus() {{
+                                setUuid(uuid);
+                                setName("N/A");
+                                setStatus(progressStatus);
+                                setStartDate(new Date().getTime());
+                            }}
+                    );
+                }
+                filesStatus.get(uuid).setStatus(progressStatus);
+            });
+            dlManager.setDownloadCompletedEvent((uuid, fileName) -> {
+                FileStatus fs = filesStatus.get(uuid);
+                fs.setStatus(ProgressStatus.COMPLETED);
+                fs.setName(fileName);
+            });
+            dlManager.download(ytRequest.getUrl(), ytRequest.getAudioOnly());
+        });
+
+        downloadThread.setUncaughtExceptionHandler((thread, e) -> {
+            System.err.println("\nUncaughtExceptionHandler\n");
+            if (e.getMessage().contains("|")) {
+                String uuid = e.getMessage().substring(0, e.getMessage().indexOf("|"));
+                if (filesStatus.containsKey(uuid)) {
+                    filesStatus.get(uuid).setStatus(ProgressStatus.ERROR);
+                }
+            }
+        });
+        downloadThread.start();
+    }
+
+    /**
+     * POST /dl
+     **/
+    public void downloadFile(String uuid, HttpServletResponse response) throws FileNotFoundException, UncompletedDownloadException {
+        checkFileIsPresent(uuid);
+
+        FileStatus fileStatus = filesStatus.get(uuid);
+
+        // File not downloaded yet
+        if (fileStatus.getStatus() != ProgressStatus.COMPLETED) {
+            throw new UncompletedDownloadException("File not downloaded yet. Current status: " + fileStatus.getStatus());
+        }
+
+        try {
+            // FIXME extension
+            File file = getFile(DOWNLOAD_FOLDER + File.separator + fileStatus.getName() + ".mp3");
+            InputStream in = new FileInputStream(file);
+            response.setContentType("audio/mpeg");
+            response.setHeader("Content-Disposition", "attachment; filename=" + file.getName());
+            response.setHeader("Content-Length", String.valueOf(file.length()));
+            response.setHeader("FileName", fileStatus.getName() + ".mp3");
+            FileCopyUtils.copy(in, response.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("IOException, see logs above");
+        }
+    }
+
+    /**
+     * POST /tag
+     **/
+    public void setTag(String uuid, Tag tag) throws IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, NotSupportedException {
+        checkFileIsPresent(uuid);
+
+        // String filePath = DOWNLOAD_FOLDER + File.separator + filesStatus.get(uuid).getName() + ".mp3";
+        String filePath = DOWNLOAD_FOLDER + File.separator + new ArrayList<>(filesStatus.values()).get(0).getName() + ".mp3";
+
+        Mp3Tagger mp3Tagger = new Mp3Tagger();
+        mp3Tagger.setTag(filePath, tag);
+    }
+
+
+    /**
+     * GET /status
+     **/
+    public FileStatus getFileStatus(String uuid) throws FileNotFoundException {
+        checkFileIsPresent(uuid);
+        return filesStatus.get(uuid);
+    }
+
+    /**
+     * GET /status/all
+     **/
+    public Collection<FileStatus> getAllFilesStatus() {
+        return this.filesStatus.values();
+    }
+
+
+    //#region Private methods
+
     private void retrieveFilesOnDisk() {
         File downloadFolder;
         try {
@@ -64,104 +163,13 @@ public class ApplicationService {
         System.out.println("Files in « " + DOWNLOAD_FOLDER + " » folder retrieved successfully");
     }
 
-    /**
-     * /convert
-     **/
-    public void convertFile(ConvertRequest convertRequest) {
-        Thread downloadThread = new Thread(() -> {
-            DownloadManager dlManager = new DownloadManager();
-            dlManager.setProgressEvent((uuid, progressStatus) -> {
-                if (!filesStatus.containsKey(uuid)) {
-                    filesStatus.put(uuid,
-                            new FileStatus() {{
-                                setUuid(uuid);
-                                setName("N/A");
-                                setStatus(progressStatus);
-                                setStartDate(new Date().getTime());
-                            }}
-                    );
-                }
-                filesStatus.get(uuid).setStatus(progressStatus);
-            });
-            dlManager.setDownloadCompletedEvent((uuid, fileName) -> {
-                FileStatus fs = filesStatus.get(uuid);
-                fs.setStatus(ProgressStatus.COMPLETED);
-                fs.setName(fileName);
-            });
-            dlManager.download(convertRequest.getUrl(), convertRequest.getAudioOnly());
-        });
-
-        downloadThread.setUncaughtExceptionHandler((thread, e) -> {
-            if (e.getMessage().contains("|")) {
-                String uuid = e.getMessage().substring(0, e.getMessage().indexOf("|"));
-                if (filesStatus.containsKey(uuid)) {
-                    filesStatus.get(uuid).setStatus(ProgressStatus.ERROR);
-                }
-            }
-        });
-        downloadThread.start();
-    }
-
-    /**
-     * /status/{uuid}
-     **/
-    public FileStatus getFileStatus(String uuid) throws FileNotFoundException {
-        if (!filesStatus.containsKey(uuid)) {
-            throw new FileNotFoundException("Unable to find file with uuid « " + uuid + " »");
-        }
-
-        return filesStatus.get(uuid);
-    }
-
-    /**
-     * /status/all
-     **/
-    public Collection<FileStatus> getAllFilesStatus() {
-        return this.filesStatus.values();
-    }
-
-    /**
-     * POST /tag
-     **/
-    public void setTag(String uuid, Tag tag) throws IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, NotSupportedException {
-        // UUID not found
-        // if (!filesStatus.containsKey(uuid)) {
-        //     throw new FileNotFoundException("Unable to find file with uuid « " + uuid + " »");
-        // }
-
-        // String filePath = DOWNLOAD_FOLDER + File.separator + filesStatus.get(uuid).getName() + ".mp3";
-        String filePath = DOWNLOAD_FOLDER + File.separator + new ArrayList<>(filesStatus.values()).get(0).getName() + ".mp3";
-
-        Mp3Tagger mp3Tagger = new Mp3Tagger();
-        mp3Tagger.setTag(filePath, tag);
-    }
-
-
-    public void downloadFile(String uuid, HttpServletResponse response) throws FileNotFoundException, UncompletedDownloadException {
+    private void checkFileIsPresent(String uuid) throws FileNotFoundException {
         // UUID not found
         if (!filesStatus.containsKey(uuid)) {
             throw new FileNotFoundException("Unable to find file with uuid « " + uuid + " »");
         }
-
-        FileStatus fileStatus = filesStatus.get(uuid);
-
-        // File not downloaded yet
-        if (fileStatus.getStatus() != ProgressStatus.COMPLETED) {
-            throw new UncompletedDownloadException("File not downloaded yet. Current status: " + fileStatus.getStatus());
-        }
-
-        try {
-            // FIXME extension
-            File file = getFile(DOWNLOAD_FOLDER + File.separator + fileStatus.getName() + ".mp3");
-            InputStream in = new FileInputStream(file);
-            response.setContentType("audio/mpeg");
-            response.setHeader("Content-Disposition", "attachment; filename=" + file.getName());
-            response.setHeader("Content-Length", String.valueOf(file.length()));
-            response.setHeader("FileName", fileStatus.getName() + ".mp3");
-            FileCopyUtils.copy(in, response.getOutputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("IOException, see logs above");
-        }
     }
+
+    // #endregion
+
 }

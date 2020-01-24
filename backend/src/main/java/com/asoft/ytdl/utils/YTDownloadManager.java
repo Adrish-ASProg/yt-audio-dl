@@ -15,12 +15,12 @@ import java.util.UUID;
 
 
 @Setter
-public class DownloadManager {
+public class YTDownloadManager {
 
     private DownloadCompletedEvent downloadCompletedEvent = (uuid, fileName) -> {};
     private ProgressEvent progressEvent = (uuid, progressStatus) -> {};
 
-    public DownloadManager() {}
+    public YTDownloadManager() {}
 
     /**
      * Téléchargement d'une vidéo YouTube

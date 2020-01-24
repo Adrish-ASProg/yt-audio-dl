@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ConvertRequest {
+public class YTRequest {
     private String url;
     private Boolean audioOnly;
 }
