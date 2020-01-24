@@ -1,11 +1,14 @@
 package com.asoft.ytdl.service;
 
+import com.asoft.ytdl.application.Mp3Tagger;
 import com.asoft.ytdl.enums.ProgressStatus;
 import com.asoft.ytdl.exception.UncompletedDownloadException;
 import com.asoft.ytdl.model.ConvertRequest;
 import com.asoft.ytdl.model.FileStatus;
+import com.asoft.ytdl.model.Tag;
 import com.asoft.ytdl.utils.DownloadManager;
 import com.asoft.ytdl.utils.FileUtils;
+import com.mpatric.mp3agic.NotSupportedException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 
@@ -15,6 +18,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -116,8 +121,22 @@ public class ApplicationService {
     }
 
     /**
-     * /download
+     * POST /tag
      **/
+    public void setTag(String uuid, Tag tag) throws IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, NotSupportedException {
+        // UUID not found
+        // if (!filesStatus.containsKey(uuid)) {
+        //     throw new FileNotFoundException("Unable to find file with uuid « " + uuid + " »");
+        // }
+
+        // String filePath = DOWNLOAD_FOLDER + File.separator + filesStatus.get(uuid).getName() + ".mp3";
+        String filePath = DOWNLOAD_FOLDER + File.separator + new ArrayList<>(filesStatus.values()).get(0).getName() + ".mp3";
+
+        Mp3Tagger mp3Tagger = new Mp3Tagger();
+        mp3Tagger.setTag(filePath, tag);
+    }
+
+
     public void downloadFile(String uuid, HttpServletResponse response) throws FileNotFoundException, UncompletedDownloadException {
         // UUID not found
         if (!filesStatus.containsKey(uuid)) {

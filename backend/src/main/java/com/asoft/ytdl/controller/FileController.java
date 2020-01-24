@@ -3,7 +3,9 @@ package com.asoft.ytdl.controller;
 import com.asoft.ytdl.exception.UncompletedDownloadException;
 import com.asoft.ytdl.model.ConvertRequest;
 import com.asoft.ytdl.model.FileStatus;
+import com.asoft.ytdl.model.Tag;
 import com.asoft.ytdl.service.ApplicationService;
+import com.mpatric.mp3agic.NotSupportedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 
 @RestController
@@ -38,6 +42,12 @@ public class FileController {
         applicationService.downloadFile(uuid, response);
     }
 
+    @RequestMapping(value = "/tag", method = RequestMethod.POST)
+    public ResponseEntity<Void> setTag(@RequestParam(value = "uuid") String uuid,
+                                       @RequestBody Tag tag) throws InvocationTargetException, IOException, IllegalAccessException, NoSuchMethodException, NotSupportedException {
+        applicationService.setTag(uuid, tag);
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
 
     //#region Status Endpoints
 
