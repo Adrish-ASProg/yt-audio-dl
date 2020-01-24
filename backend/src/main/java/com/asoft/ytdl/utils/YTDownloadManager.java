@@ -5,12 +5,13 @@ import com.asoft.ytdl.exception.YTDLException;
 import com.asoft.ytdl.interfaces.DownloadCompletedEvent;
 import com.asoft.ytdl.interfaces.ErrorEvent;
 import com.asoft.ytdl.interfaces.ProgressEvent;
+import com.asoft.ytdl.interfaces.TitleRetrievedEvent;
 import com.asoft.ytdl.service.ApplicationService;
 import lombok.Setter;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.UUID;
 
 
@@ -18,6 +19,7 @@ import java.util.UUID;
 public class YTDownloadManager {
 
     private DownloadCompletedEvent downloadCompletedEvent = (uuid, fileName) -> {};
+    private TitleRetrievedEvent titleRetrievedEvent = (uuid, title) -> {};
     private ProgressEvent progressEvent = (uuid, progressStatus) -> {};
     private ErrorEvent errorEvent = (uuid, exception) -> {};
 
@@ -31,15 +33,16 @@ public class YTDownloadManager {
         String format = audioOnly ? "mp3" : "best";
 
         // Retrieve file(s) name(s)
-        final List<String> fileNames = getVideoTitles(url);
+        final LinkedHashMap<String, String> fileNames = getVideoTitles(url);
+
 
         if (fileNames.size() == 0) {
             errorEvent.onError(null, new YTDLException("[download] Unable to download file: No file found"));
         }
 
-        for (int i = 0; i < fileNames.size(); i++) {
-            String uuid = UUID.randomUUID().toString();
-            String fileName = fileNames.get(i);
+        for (int i = 0; i < fileNames.keySet().size(); i++) {
+            String uuid = (new ArrayList<>(fileNames.keySet())).get(i);
+            String fileName = fileNames.get(uuid);
 
             // Prepare download
             String dlCommand = audioOnly
@@ -47,7 +50,7 @@ public class YTDownloadManager {
                     : String.format("youtube-dl -o \"%s\" --no-playlist -f %s %s", destination, format, url);
 
             System.out.println(dlCommand);
-            progressEvent.onProgress(uuid, ProgressStatus.INITIALIZING);
+            progressEvent.onProgress(uuid, ProgressStatus.STARTING_DOWNLOAD);
 
             // Handle progress
             final String downloadPagePrefix = "[youtube]";
@@ -77,18 +80,20 @@ public class YTDownloadManager {
     /**
      * Retrieve videos title
      **/
-    private List<String> getVideoTitles(String url) {
+    private LinkedHashMap<String, String> getVideoTitles(String url) {
         String getNameCommand = "youtube-dl -e --no-playlist --flat-playlist " + url;
         System.out.println(getNameCommand);
 
-        final List<String> fileNames = new ArrayList<>();
+        final LinkedHashMap<String, String> fileNames = new LinkedHashMap<>();
         CmdManager cmdManager = new CmdManager();
         cmdManager.setErrorEvent((text) ->
                 errorEvent.onError(null, new YTDLException("Unable to retrieve video title\n" + text))
         );
         cmdManager.setOutputEvent((text) -> {
             if (!text.startsWith("Process terminated")) {
-                fileNames.add(text);
+                String uuid = UUID.randomUUID().toString();
+                fileNames.put(uuid, text);
+                titleRetrievedEvent.onTitleRetrievedEvent(uuid, text);
                 System.out.println("File name: " + text);
             }
         });

@@ -45,22 +45,27 @@ public class ApplicationService {
         Thread downloadThread = new Thread(() -> {
             YTDownloadManager dlManager = new YTDownloadManager();
             dlManager.setProgressEvent((uuid, progressStatus) -> {
-                if (!filesStatus.containsKey(uuid)) {
-                    filesStatus.put(uuid,
-                            new FileStatus() {{
-                                setUuid(uuid);
-                                setName("N/A");
-                                setStatus(progressStatus);
-                                setStartDate(new Date().getTime());
-                            }}
-                    );
+                if (filesStatus.containsKey(uuid)) {
+                    filesStatus.get(uuid).setStatus(progressStatus);
                 }
-                filesStatus.get(uuid).setStatus(progressStatus);
             });
             dlManager.setDownloadCompletedEvent((uuid, fileName) -> {
                 FileStatus fs = filesStatus.get(uuid);
                 fs.setStatus(ProgressStatus.COMPLETED);
                 fs.setName(fileName);
+            });
+            dlManager.setTitleRetrievedEvent((uuid, title) -> {
+                if (!filesStatus.containsKey(uuid)) {
+                    filesStatus.put(uuid,
+                            new FileStatus() {{
+                                setUuid(uuid);
+                                setName(title);
+                                setStatus(ProgressStatus.INITIALIZING);
+                                setStartDate(new Date().getTime());
+                            }}
+                    );
+                    System.out.println("setTitleRetrievedEvent: " + filesStatus.get(uuid));
+                }
             });
             dlManager.setErrorEvent((uuid, error) -> {
                 System.err.println("[downloadFileFromYT] " + error.getMessage());
