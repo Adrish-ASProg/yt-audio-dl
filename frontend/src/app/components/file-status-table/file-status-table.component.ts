@@ -30,4 +30,9 @@ export class FileStatusTableComponent {
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
     }
+
+    public getFileStatusClass(progressStatus: string): string {
+        return (progressStatus === "COMPLETED") ? "completed" :
+        (progressStatus === "ERROR") ? "error" : "loading";
+    }
 }

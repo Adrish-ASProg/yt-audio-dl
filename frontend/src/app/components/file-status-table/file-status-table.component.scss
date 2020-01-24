@@ -8,4 +8,25 @@ table {
     .refresh_button {
         color: $grey;
     }
+
+    .mat-cell {
+        padding-left: 10px;
+        padding-right: 10px;
+
+        .span-file-status {
+            font-family: "Roboto Black", sans-serif;
+            font-size: 12px;
+            padding: 0 5px;
+
+            &.completed {
+                color: $success;
+            }
+            &.loading {
+                color: $primary;
+            }
+            &.error {
+                color: $danger;
+            }
+        }
+    }
 }
