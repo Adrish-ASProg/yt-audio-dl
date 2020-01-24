@@ -1,7 +1,10 @@
 package com.asoft.ytdl.utils;
 
 import com.asoft.ytdl.enums.ProgressStatus;
+import com.asoft.ytdl.interfaces.DownloadCompletedEvent;
+import com.asoft.ytdl.interfaces.ProgressEvent;
 import com.asoft.ytdl.service.ApplicationService;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -9,13 +12,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public abstract class DownloadManager {
 
-    protected DownloadManager() {}
 
-    public abstract void onDownloadCompleted(String uuid, String fileName);
+@Setter
+public class DownloadManager {
 
-    public abstract void onProgress(String uuid, ProgressStatus progressStatus);
+    private DownloadCompletedEvent downloadCompletedEvent = (uuid, fileName) -> {};
+    private ProgressEvent progressEvent = (uuid, progressStatus) -> {};
+
+    public DownloadManager() {}
 
     /**
      * Téléchargement d'une vidéo YouTube
@@ -26,25 +31,22 @@ public abstract class DownloadManager {
 
         StringBuilder error = new StringBuilder();
 
-        //Retrieve file(s) name(s)
+        // Retrieve file(s) name(s)
         final List<String> fileNames = new ArrayList<>();
         String getNameCommand = "youtube-dl -e --no-playlist --flat-playlist " + url;
         System.out.println(getNameCommand);
-        new CmdManager() {
-            @Override
-            void handleOutput(String text) {
-                if (!text.startsWith("Process terminated")) {
-                    fileNames.add(text);
-                    System.out.println("File name: " + text);
-                }
+        CmdManager cmdManager = new CmdManager();
+        cmdManager.setErrorEvent((text) -> {
+            System.err.println(text);
+            error.append(text);
+        });
+        cmdManager.setOutputEvent((text) -> {
+            if (!text.startsWith("Process terminated")) {
+                fileNames.add(text);
+                System.out.println("File name: " + text);
             }
-
-            @Override
-            void handleError(String text) {
-                System.err.println(text);
-                error.append(text);
-            }
-        }.executeCommand(getNameCommand);
+        });
+        cmdManager.executeCommand(getNameCommand);
 
         if (!StringUtils.isEmpty(error.toString())) {
             throw new RuntimeException(error.toString());
@@ -61,40 +63,33 @@ public abstract class DownloadManager {
                     : String.format("youtube-dl -o \"%s\" --no-playlist -f %s %s", destination, format, url);
 
             System.out.println(dlCommand);
-            onProgress(uuid, ProgressStatus.INITIALIZING);
+            progressEvent.onProgress(uuid, ProgressStatus.INITIALIZING);
 
             // Handle progress
             final String downloadPagePrefix = "[youtube]";
             final String downloadPrefix = "[download]";
             final String convertPrefix = "[ffmpeg]";
 
-            new CmdManager() {
-                @Override
-                void handleOutput(String text) {
-                    if (text.startsWith(downloadPagePrefix)) {
-                        onProgress(uuid, ProgressStatus.DOWNLOADING_WEBPAGE);
-                    } else if (text.startsWith(downloadPrefix)) {
-                        onProgress(uuid, ProgressStatus.DOWNLOADING_VIDEO);
-                    } else if (text.startsWith(convertPrefix)) {
-                        onProgress(uuid, ProgressStatus.CONVERTING_TO_AUDIO);
-                    }
-
-                    System.out.println(text);
+            cmdManager.setOutputEvent((text) -> {
+                if (text.startsWith(downloadPagePrefix)) {
+                    progressEvent.onProgress(uuid, ProgressStatus.DOWNLOADING_WEBPAGE);
+                } else if (text.startsWith(downloadPrefix)) {
+                    progressEvent.onProgress(uuid, ProgressStatus.DOWNLOADING_VIDEO);
+                } else if (text.startsWith(convertPrefix)) {
+                    progressEvent.onProgress(uuid, ProgressStatus.CONVERTING_TO_AUDIO);
                 }
 
-                @Override
-                void handleError(String text) {
-                    System.err.println(text);
-                    error.append(text);
-                }
-            }.executeCommand(dlCommand);
+                System.out.println(text);
+            });
+
+            cmdManager.executeCommand(dlCommand);
 
             if (!StringUtils.isEmpty(error.toString())) {
                 throw new RuntimeException(uuid + "|" + error.toString());
             }
 
             System.out.println("Completed, file name: " + fileName);
-            onDownloadCompleted(uuid, fileName);
+            downloadCompletedEvent.onDownloadCompleted(uuid, fileName);
         }
     }
 }

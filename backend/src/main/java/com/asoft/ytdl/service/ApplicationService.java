@@ -34,7 +34,7 @@ public class ApplicationService {
     }
 
     private void retrieveFilesOnDisk() {
-        File downloadFolder = null;
+        File downloadFolder;
         try {
             downloadFolder = getFile(DOWNLOAD_FOLDER);
         } catch (FileNotFoundException e) {
@@ -64,29 +64,25 @@ public class ApplicationService {
      **/
     public void convertFile(ConvertRequest convertRequest) {
         Thread downloadThread = new Thread(() -> {
-            DownloadManager dlManager = new DownloadManager() {
-                @Override
-                public void onProgress(String uuid, ProgressStatus progressStatus) {
-                    if (!filesStatus.containsKey(uuid)) {
-                        filesStatus.put(uuid,
-                                new FileStatus() {{
-                                    setUuid(uuid);
-                                    setName("N/A");
-                                    setStatus(progressStatus);
-                                    setStartDate(new Date().getTime());
-                                }}
-                        );
-                    }
-                    filesStatus.get(uuid).setStatus(progressStatus);
+            DownloadManager dlManager = new DownloadManager();
+            dlManager.setProgressEvent((uuid, progressStatus) -> {
+                if (!filesStatus.containsKey(uuid)) {
+                    filesStatus.put(uuid,
+                            new FileStatus() {{
+                                setUuid(uuid);
+                                setName("N/A");
+                                setStatus(progressStatus);
+                                setStartDate(new Date().getTime());
+                            }}
+                    );
                 }
-
-                @Override
-                public void onDownloadCompleted(String uuid, String fileName) {
-                    FileStatus fs = filesStatus.get(uuid);
-                    fs.setStatus(ProgressStatus.COMPLETED);
-                    fs.setName(fileName);
-                }
-            };
+                filesStatus.get(uuid).setStatus(progressStatus);
+            });
+            dlManager.setDownloadCompletedEvent((uuid, fileName) -> {
+                FileStatus fs = filesStatus.get(uuid);
+                fs.setStatus(ProgressStatus.COMPLETED);
+                fs.setName(fileName);
+            });
             dlManager.download(convertRequest.getUrl(), convertRequest.getAudioOnly());
         });
 

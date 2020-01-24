@@ -1,16 +1,26 @@
 package com.asoft.ytdl.utils;
 
+import lombok.Setter;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-abstract class CmdManager {
+interface CmdOutputEvent {
+    void onOutput(String text);
+}
 
-    abstract void handleOutput(String text);
+interface CmdErrorEvent {
+    void onError(String text);
+}
 
-    abstract void handleError(String text);
+@Setter
+public class CmdManager {
 
-    void executeCommand(String command) {
+    private CmdOutputEvent outputEvent = (text) -> {};
+    private CmdErrorEvent errorEvent = (text) -> {};
+
+    public void executeCommand(String command) {
         long startTime = System.currentTimeMillis();
 
         try {
@@ -20,16 +30,16 @@ abstract class CmdManager {
             BufferedReader errReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
 
             String line, errLine;
-            while ((line = reader.readLine()) != null) { handleOutput(line); }
-            while ((errLine = errReader.readLine()) != null) { handleError(errLine); }
+            while ((line = reader.readLine()) != null) { outputEvent.onOutput(line); }
+            while ((errLine = errReader.readLine()) != null) { errorEvent.onError(errLine); }
             reader.close();
 
         } catch (IOException e) {
             e.printStackTrace();
-            handleError("Cannot execute command, file not found.");
+            errorEvent.onError("Cannot execute command, file not found.");
         } catch (Exception err) {
             err.printStackTrace();
         }
-        handleOutput("Process terminated in " + (System.currentTimeMillis() - startTime) + "ms");
+        outputEvent.onOutput("Process terminated in " + (System.currentTimeMillis() - startTime) + "ms");
     }
 }
