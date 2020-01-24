@@ -1,11 +1,12 @@
 package com.asoft.ytdl.utils;
 
 import com.asoft.ytdl.enums.ProgressStatus;
+import com.asoft.ytdl.exception.YTDLException;
 import com.asoft.ytdl.interfaces.DownloadCompletedEvent;
+import com.asoft.ytdl.interfaces.ErrorEvent;
 import com.asoft.ytdl.interfaces.ProgressEvent;
 import com.asoft.ytdl.service.ApplicationService;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -13,45 +14,28 @@ import java.util.List;
 import java.util.UUID;
 
 
-
 @Setter
 public class YTDownloadManager {
 
     private DownloadCompletedEvent downloadCompletedEvent = (uuid, fileName) -> {};
     private ProgressEvent progressEvent = (uuid, progressStatus) -> {};
+    private ErrorEvent errorEvent = (uuid, exception) -> {};
 
     public YTDownloadManager() {}
 
     /**
      * Téléchargement d'une vidéo YouTube
      */
-    public void download(String url, boolean audioOnly) throws RuntimeException {
+    public void download(String url, boolean audioOnly) {
         String destination = ApplicationService.DOWNLOAD_FOLDER + File.separator + "%(title)s.%(ext)s";
         String format = audioOnly ? "mp3" : "best";
 
-        StringBuilder error = new StringBuilder();
-
         // Retrieve file(s) name(s)
-        final List<String> fileNames = new ArrayList<>();
-        String getNameCommand = "youtube-dl -e --no-playlist --flat-playlist " + url;
-        System.out.println(getNameCommand);
-        CmdManager cmdManager = new CmdManager();
-        cmdManager.setErrorEvent((text) -> {
-            System.err.println(text);
-            error.append(text);
-        });
-        cmdManager.setOutputEvent((text) -> {
-            if (!text.startsWith("Process terminated")) {
-                fileNames.add(text);
-                System.out.println("File name: " + text);
-            }
-        });
-        cmdManager.executeCommand(getNameCommand);
+        final List<String> fileNames = getVideoTitles(url);
 
-        if (!StringUtils.isEmpty(error.toString())) {
-            throw new RuntimeException(error.toString());
+        if (fileNames.size() == 0) {
+            errorEvent.onError(null, new YTDLException("[download] Unable to download file: No file found"));
         }
-
 
         for (int i = 0; i < fileNames.size(); i++) {
             String uuid = UUID.randomUUID().toString();
@@ -70,6 +54,7 @@ public class YTDownloadManager {
             final String downloadPrefix = "[download]";
             final String convertPrefix = "[ffmpeg]";
 
+            CmdManager cmdManager = new CmdManager();
             cmdManager.setOutputEvent((text) -> {
                 if (text.startsWith(downloadPagePrefix)) {
                     progressEvent.onProgress(uuid, ProgressStatus.DOWNLOADING_WEBPAGE);
@@ -81,15 +66,34 @@ public class YTDownloadManager {
 
                 System.out.println(text);
             });
-
+            cmdManager.setErrorEvent((text) -> errorEvent.onError(uuid, new YTDLException(text)));
             cmdManager.executeCommand(dlCommand);
-
-            if (!StringUtils.isEmpty(error.toString())) {
-                throw new RuntimeException(uuid + "|" + error.toString());
-            }
 
             System.out.println("Completed, file name: " + fileName);
             downloadCompletedEvent.onDownloadCompleted(uuid, fileName);
         }
+    }
+
+    /**
+     * Retrieve videos title
+     **/
+    private List<String> getVideoTitles(String url) {
+        String getNameCommand = "youtube-dl -e --no-playlist --flat-playlist " + url;
+        System.out.println(getNameCommand);
+
+        final List<String> fileNames = new ArrayList<>();
+        CmdManager cmdManager = new CmdManager();
+        cmdManager.setErrorEvent((text) ->
+                errorEvent.onError(null, new YTDLException("Unable to retrieve video title\n" + text))
+        );
+        cmdManager.setOutputEvent((text) -> {
+            if (!text.startsWith("Process terminated")) {
+                fileNames.add(text);
+                System.out.println("File name: " + text);
+            }
+        });
+        cmdManager.executeCommand(getNameCommand);
+
+        return fileNames;
     }
 }

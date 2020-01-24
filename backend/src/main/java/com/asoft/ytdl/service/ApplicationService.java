@@ -62,17 +62,19 @@ public class ApplicationService {
                 fs.setStatus(ProgressStatus.COMPLETED);
                 fs.setName(fileName);
             });
+            dlManager.setErrorEvent((uuid, error) -> {
+                System.err.println("[downloadFileFromYT] " + error.getMessage());
+
+                if (filesStatus.containsKey(uuid)) {
+                    System.err.println("\n[downloadFileFromYT] " + filesStatus.get(uuid));
+                    filesStatus.get(uuid).setStatus(ProgressStatus.ERROR);
+                }
+            });
             dlManager.download(ytRequest.getUrl(), ytRequest.getAudioOnly());
         });
 
         downloadThread.setUncaughtExceptionHandler((thread, e) -> {
-            System.err.println("\nUncaughtExceptionHandler\n");
-            if (e.getMessage().contains("|")) {
-                String uuid = e.getMessage().substring(0, e.getMessage().indexOf("|"));
-                if (filesStatus.containsKey(uuid)) {
-                    filesStatus.get(uuid).setStatus(ProgressStatus.ERROR);
-                }
-            }
+            System.err.println("[downloadFileFromYT] UncaughtExceptionHandler: " + e.getMessage());
         });
         downloadThread.start();
     }
