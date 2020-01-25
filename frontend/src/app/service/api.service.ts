@@ -3,6 +3,7 @@ import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {ConvertRequest} from "../model/convertrequest.model";
 import {FileStatus} from "../model/filestatus.model";
+import {Mp3Metadata} from "../model/mp3metadata.model";
 
 
 const jsonHttpOptions = {
@@ -20,10 +21,11 @@ const audioHttpOptions = {
 })
 export class APIService {
 
-    apiUrl: string = "http://localhost:8080";
-    convertUrl: string = "/convert";
-    statusUrl: string = "/status/all";
-    downloadUrl: string = "/download";
+    private apiUrl: string = "http://localhost:8080";
+    private convertUrl: string = "/ytdl";
+    private statusUrl: string = "/status/all";
+    private downloadUrl: string = "/dl";
+    private setTagsUrl: string = "/tags";
 
     constructor(private http: HttpClient) {}
 
@@ -34,7 +36,16 @@ export class APIService {
 
     /** POST: download file */
     downloadFile(uuid: string): Observable<any> {
-        return this.http.get<any>(`${this.apiUrl}${this.downloadUrl}?uuid=` + uuid, audioHttpOptions);
+        return this.http.get<any>(`${this.apiUrl}${this.downloadUrl}?uuid=${uuid}`, audioHttpOptions);
+    }
+
+    /** POST: set tags */
+    setTags(uuid: string, metadata: Mp3Metadata): Observable<Mp3Metadata> {
+        return this.http.post<Mp3Metadata>(
+            `${this.apiUrl}${this.setTagsUrl}`,
+            {uuid: uuid, metadata: metadata},
+            jsonHttpOptions
+        );
     }
 
     /** GET: get all files status */

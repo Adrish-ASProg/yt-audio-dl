@@ -1,8 +1,13 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {APIService} from "./service/api.service";
 import {ConvertRequest} from "./model/convertrequest.model";
 import {FileStatus} from "./model/filestatus.model";
-import {MatPaginator, MatSort, MatTableDataSource} from "@angular/material";
+import {Observable, Observer} from "rxjs";
+import {HttpErrorResponse} from "@angular/common/http";
+import {ActivatedRoute} from "@angular/router";
+import {TagEditorDialog} from "./components/tag-editor-dialog/tag-editor-dialog.component";
+import {MatDialog} from "@angular/material/dialog";
+import {Mp3Metadata} from "./model/mp3metadata.model";
 
 @Component({
     selector: 'app-root',
@@ -14,43 +19,93 @@ export class AppComponent implements OnInit {
     // Toolbar
     projectTitle: string = 'yt-audio-dl';
 
-    // Table File Status
-    @ViewChild(MatPaginator, {static: true}) paginator: MatPaginator;
-    @ViewChild(MatSort, {static: true}) sort: MatSort;
-
-    displayedColumns: string[] = ['uuid', 'name', 'status', 'startDate', 'download'];
-    fileStatus: FileStatus[] = [];
-    dataSource = new MatTableDataSource<FileStatus>(this.fileStatus);
+    displayedColumns: string[] = ['name', 'status', 'startDate', 'download', 'refresh'];
+    filesStatus: FileStatus[] = [];
 
     refreshRate: number = 3000;
     intervalId: number;
 
-
     request: ConvertRequest = {
-        url: "https://www.youtube.com/watch?v=zhsfn9IyiLQ",
+        url: "https://www.youtube.com/playlist?list=PL0-adpj8Oy0lqSmQVOrj9q_Q5CR0jIuUE",
+        // url: "https://www.youtube.com/watch?v=zhsfn9IyiLQ",
         audioOnly: true
     };
 
 
-    constructor(public apiService: APIService) {}
+    constructor(private route: ActivatedRoute,
+                private apiService: APIService,
+                private dialog: MatDialog) {
+    }
 
     ngOnInit() {
-        this.getFileStatus();
-        this.intervalId = setInterval(() => { this.getFileStatus() }, this.refreshRate);
+        this.route.queryParams.subscribe(params => {
+            const videoId = params["videoId"];
+            if (videoId == void 0) return;
+
+            if (videoId.length === 11) {
+                this.request.url = `https://www.youtube.com/watch?v=${videoId}`;
+                this.sendConvertRequest();
+            }
+        });
+        this.sendUpdateRequest();
     }
+
 
     sendConvertRequest() {
         this.apiService.requestConvert(this.request)
-            .subscribe(uuid => { this.getFileStatus(); });
+            .subscribe(
+                () => this.sendUpdateRequest(),
+                response => {
+                    console.error(response.error);
+                    alert(response.error.message);
+                }
+            );
+    }
+
+    sendUpdateRequest() {
+        this.updateRefreshLoop();
+
+        this.apiService.getAllFileStatus()
+            .subscribe(
+                filesStatus => this.filesStatus = [...filesStatus],
+                response => {
+                    console.error(response.error);
+                    if (response.error != void 0 && response.error.message != void 0)
+                        alert(response.error.message);
+                }
+            );
     }
 
     sendDownloadRequest(uuid: string) {
         this.apiService.downloadFile(uuid)
-            .subscribe(response => this.saveFile(response));
+            .subscribe(
+                response => this.saveFile(response),
+                response => {
+                    this.parseErrorBlob(response)
+                        .subscribe(e => alert(e.message));
+                }
+            );
     }
 
+    sendTagRequest(uuid: string, metadata: Mp3Metadata) {
+        this.apiService.setTags(uuid, metadata).subscribe();
+    }
+
+    updateRefreshLoop() {
+        if (this.intervalId != void 0) clearInterval(this.intervalId);
+        this.intervalId = setInterval(() => this.sendUpdateRequest(), this.refreshRate);
+    }
+
+
+    openTagEditorDialog(event): void {
+        const dialogRef = this.dialog.open(TagEditorDialog, {data: event});
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) this.sendTagRequest(result.uuid, result.metadata)
+        });
+    }
+
+
     saveFile(response) {
-        console.log(response);
         // It is necessary to create a new blob object with mime-type explicitly set
         // otherwise only Chrome works like it should
         const newBlob = new Blob([response.body], {type: "audio/mpeg"});
@@ -78,21 +133,18 @@ export class AppComponent implements OnInit {
         }, 100);
     }
 
-    getFileStatus() {
-        this.updateRefreshLoop();
+    parseErrorBlob(err: HttpErrorResponse): Observable<any> {
+        const reader: FileReader = new FileReader();
 
-        this.apiService.getAllFileStatus()
-            .subscribe(filesStatus => {
-                this.fileStatus = [...filesStatus];
-
-                this.dataSource = new MatTableDataSource(this.fileStatus);
-                this.dataSource.paginator = this.paginator;
-                this.dataSource.sort = this.sort;
-            });
-    }
-
-    updateRefreshLoop() {
-        clearInterval(this.intervalId);
-        this.intervalId = setInterval(() => { this.getFileStatus() }, this.refreshRate);
+        const obs = new Observable((observer: Observer<any>) => {
+            reader.onloadend = () => {
+                if (typeof reader.result === "string") {
+                    observer.next(JSON.parse(reader.result));
+                }
+                observer.complete();
+            }
+        });
+        reader.readAsText(err.error);
+        return obs;
     }
 }

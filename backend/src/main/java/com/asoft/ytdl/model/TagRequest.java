@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ConvertRequest {
-    private String url;
-    private Boolean audioOnly;
+public class TagRequest {
+    String uuid;
+    Mp3Metadata metadata;
 }

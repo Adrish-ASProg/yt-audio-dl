@@ -1,0 +1,22 @@
+<h1 class="ellipsis" mat-dialog-title>{{data.name}}</h1>
+<div mat-dialog-content>
+    <div class="input-container">
+        <mat-form-field>
+            <input [(ngModel)]="data.metadata.title" matInput placeholder="Title">
+        </mat-form-field>
+        <mat-form-field>
+            <input [(ngModel)]="data.metadata.album" matInput placeholder="Album">
+        </mat-form-field>
+        <mat-form-field>
+            <input [(ngModel)]="data.metadata.artist" matInput placeholder="Artist">
+        </mat-form-field>
+        <mat-form-field>
+            <input [(ngModel)]="data.metadata.genre" matInput placeholder="Genre">
+        </mat-form-field>
+    </div>
+
+</div>
+<div mat-dialog-actions>
+    <button (click)="onValidButtonClicked()" cdkFocusInitial mat-button>Ok</button>
+    <button (click)="onCancelButtonClicked()" mat-button>Cancel</button>
+</div>

@@ -14,10 +14,19 @@ import {MatSortModule} from "@angular/material/sort";
 import {MatPaginatorModule} from "@angular/material/paginator";
 import {MatIconModule} from "@angular/material/icon";
 import {FormsModule} from "@angular/forms";
+import {MatToolbarModule} from "@angular/material/toolbar";
+import {FileStatusTableComponent} from './components/file-status-table/file-status-table.component';
+import {TagEditorDialog} from './components/tag-editor-dialog/tag-editor-dialog.component';
+import {MatDialogModule} from "@angular/material/dialog";
 
 @NgModule({
+    entryComponents: [
+        TagEditorDialog
+    ],
     declarations: [
-        AppComponent
+        AppComponent,
+        FileStatusTableComponent,
+        TagEditorDialog
     ],
     imports: [
         BrowserModule,
@@ -35,7 +44,9 @@ import {FormsModule} from "@angular/forms";
         MatSortModule,
         MatPaginatorModule,
         MatIconModule,
-        FormsModule
+        FormsModule,
+        MatToolbarModule,
+        MatDialogModule
     ],
     providers: [],
     bootstrap: [AppComponent]
