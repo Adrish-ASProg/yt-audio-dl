@@ -5,6 +5,7 @@ table {
     width: 100%;
     margin-top: 15px;
 
+
     .refresh_button {
         color: $grey;
     }
@@ -12,6 +13,14 @@ table {
     .mat-cell {
         padding-left: 10px;
         padding-right: 10px;
+
+        .clickable {
+            cursor: pointer;
+        }
+
+        .clickable:hover {
+            text-decoration: underline;
+        }
 
         .span-file-status {
             font-family: "Roboto Black", sans-serif;

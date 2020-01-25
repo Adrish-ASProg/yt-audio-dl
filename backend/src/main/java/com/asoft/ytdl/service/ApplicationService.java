@@ -4,7 +4,8 @@ import com.asoft.ytdl.application.Mp3Tagger;
 import com.asoft.ytdl.enums.ProgressStatus;
 import com.asoft.ytdl.exception.UncompletedDownloadException;
 import com.asoft.ytdl.model.FileStatus;
-import com.asoft.ytdl.model.Tag;
+import com.asoft.ytdl.model.Mp3Metadata;
+import com.asoft.ytdl.model.TagRequest;
 import com.asoft.ytdl.model.YTRequest;
 import com.asoft.ytdl.utils.FileUtils;
 import com.asoft.ytdl.utils.YTDownloadManager;
@@ -18,8 +19,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -52,7 +51,7 @@ public class ApplicationService {
             dlManager.setDownloadCompletedEvent((uuid, fileName) -> {
                 FileStatus fs = filesStatus.get(uuid);
                 fs.setStatus(ProgressStatus.COMPLETED);
-                fs.setName(fileName);
+                fs.setMetadata(Mp3Tagger.getTags(DOWNLOAD_FOLDER + File.separator + fs.getFileName()));
             });
             dlManager.setTitleRetrievedEvent((uuid, title) -> {
                 if (!filesStatus.containsKey(uuid)) {
@@ -60,18 +59,19 @@ public class ApplicationService {
                             new FileStatus() {{
                                 setUuid(uuid);
                                 setName(title);
+                                // FIXME extension
+                                setFileName(title + ".mp3");
                                 setStatus(ProgressStatus.INITIALIZING);
                                 setStartDate(new Date().getTime());
                             }}
                     );
-                    System.out.println("setTitleRetrievedEvent: " + filesStatus.get(uuid));
                 }
             });
             dlManager.setErrorEvent((uuid, error) -> {
-                System.err.println("[downloadFileFromYT] " + error.getMessage());
+                System.err.println("[AppService.downloadFileFromYT] " + error.getMessage());
 
                 if (filesStatus.containsKey(uuid)) {
-                    System.err.println("\n[downloadFileFromYT] " + filesStatus.get(uuid));
+                    System.err.println("\n[AppService.downloadFileFromYT] " + filesStatus.get(uuid));
                     filesStatus.get(uuid).setStatus(ProgressStatus.ERROR);
                 }
             });
@@ -79,7 +79,7 @@ public class ApplicationService {
         });
 
         downloadThread.setUncaughtExceptionHandler((thread, e) -> {
-            System.err.println("[downloadFileFromYT] UncaughtExceptionHandler: " + e.getMessage());
+            System.err.println("[AppService.downloadFileFromYT] UncaughtExceptionHandler: " + e.getMessage());
         });
         downloadThread.start();
     }
@@ -108,21 +108,25 @@ public class ApplicationService {
             FileCopyUtils.copy(in, response.getOutputStream());
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("IOException, see logs above");
+            System.err.println("[AppService.downloadFile] IOException, see logs above");
         }
     }
 
     /**
-     * POST /tag
+     * POST /tags
      **/
-    public void setTag(String uuid, Tag tag) throws IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, NotSupportedException {
-        checkFileIsPresent(uuid);
+    public Mp3Metadata setTags(TagRequest tag) throws IOException, NotSupportedException {
+        checkFileIsPresent(tag.getUuid());
 
-        // String filePath = DOWNLOAD_FOLDER + File.separator + filesStatus.get(uuid).getName() + ".mp3";
-        String filePath = DOWNLOAD_FOLDER + File.separator + new ArrayList<>(filesStatus.values()).get(0).getName() + ".mp3";
+        String filePath = DOWNLOAD_FOLDER + File.separator + filesStatus.get(tag.getUuid()).getName() + ".mp3";
 
-        Mp3Tagger mp3Tagger = new Mp3Tagger();
-        mp3Tagger.setTag(filePath, tag);
+        // Set tags in file
+        Mp3Tagger.setTags(filePath, tag.getMetadata());
+
+        // Update stored file info
+        filesStatus.get(tag.getUuid()).setMetadata(Mp3Tagger.getTags(filePath));
+
+        return filesStatus.get(tag.getUuid()).getMetadata();
     }
 
 
@@ -150,24 +154,26 @@ public class ApplicationService {
             downloadFolder = getFile(DOWNLOAD_FOLDER);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            System.err.println("Unable to retrieve files in « " + DOWNLOAD_FOLDER + " » folder");
+            System.err.println("[AppService.retrieveFilesOnDisk] Unable to retrieve files in « " + DOWNLOAD_FOLDER + " » folder");
             return;
         }
 
         FileUtils.getAllFilesInDirectory(downloadFolder)
+                .stream()
+                .filter(file -> file.getName().endsWith(".mp3"))
                 .forEach(file -> {
                     UUID uuid = UUID.randomUUID();
                     filesStatus.put(uuid.toString(),
                             new FileStatus() {{
                                 setUuid(uuid.toString());
+                                setFileName(file.getName());
                                 setName(file.getName().replace(".mp3", ""));
                                 setStatus(ProgressStatus.COMPLETED);
                                 setStartDate(FileUtils.getCreationDate(file));
+                                setMetadata(Mp3Tagger.getTags(DOWNLOAD_FOLDER + File.separator + file.getName()));
                             }}
                     );
                 });
-
-        System.out.println("Files in « " + DOWNLOAD_FOLDER + " » folder retrieved successfully");
     }
 
     private void checkFileIsPresent(String uuid) throws FileNotFoundException {

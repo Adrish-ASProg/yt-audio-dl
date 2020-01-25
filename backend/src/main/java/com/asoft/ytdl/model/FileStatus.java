@@ -12,4 +12,5 @@ public class FileStatus {
     private String fileName;
     private ProgressStatus status;
     private Long startDate;
+    private Mp3Metadata metadata;
 }

@@ -16,11 +16,17 @@ import {MatIconModule} from "@angular/material/icon";
 import {FormsModule} from "@angular/forms";
 import {MatToolbarModule} from "@angular/material/toolbar";
 import {FileStatusTableComponent} from './components/file-status-table/file-status-table.component';
+import {TagEditorDialog} from './components/tag-editor-dialog/tag-editor-dialog.component';
+import {MatDialogModule} from "@angular/material/dialog";
 
 @NgModule({
+    entryComponents: [
+        TagEditorDialog
+    ],
     declarations: [
         AppComponent,
-        FileStatusTableComponent
+        FileStatusTableComponent,
+        TagEditorDialog
     ],
     imports: [
         BrowserModule,
@@ -39,7 +45,8 @@ import {FileStatusTableComponent} from './components/file-status-table/file-stat
         MatPaginatorModule,
         MatIconModule,
         FormsModule,
-        MatToolbarModule
+        MatToolbarModule,
+        MatDialogModule
     ],
     providers: [],
     bootstrap: [AppComponent]

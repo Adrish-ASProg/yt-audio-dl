@@ -1,7 +1,8 @@
 package com.asoft.ytdl.application;
 
-import com.asoft.ytdl.model.Tag;
+import com.asoft.ytdl.model.Mp3Metadata;
 import com.mpatric.mp3agic.ID3v1;
+import com.mpatric.mp3agic.ID3v1Genres;
 import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
@@ -11,47 +12,88 @@ import com.mpatric.mp3agic.UnsupportedTagException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 public class Mp3Tagger {
 
     private static final String RETAG_EXTENSION = ".retag";
     private static final String BACKUP_EXTENSION = ".bak";
 
-    public void setTag(String filePath, Tag tag) throws IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, NotSupportedException {
-        // UUID not found
+    public static void setTags(String filePath, Mp3Metadata tags) throws IOException, NotSupportedException {
+        // File not found
         if (!new File(filePath).exists()) {
-            throw new FileNotFoundException("Unable to find file " + filePath);
+            throw new FileNotFoundException("[Mp3Tagger.setTags] Unable to find file " + filePath);
         }
 
+        Mp3File mp3File = getMp3File(filePath);
+        if (mp3File == null) return;
+
+        if (mp3File.hasId3v1Tag() || mp3File.hasId3v2Tag()) {
+
+            ID3v1 mp3TagsV1 = mp3File.getId3v1Tag();
+            ID3v2 mp3Tags = mp3File.getId3v2Tag();
+
+            if (mp3File.hasId3v1Tag()) {
+                mp3TagsV1.setAlbum(tags.getAlbum());
+                mp3TagsV1.setArtist(tags.getArtist());
+                mp3TagsV1.setGenre(ID3v1Genres.matchGenreDescription(tags.getGenre()));
+                mp3TagsV1.setTitle(tags.getTitle());
+            }
+
+            if (mp3File.hasId3v2Tag()) {
+                mp3Tags.setAlbum(tags.getAlbum());
+                mp3Tags.setArtist(tags.getArtist());
+                mp3Tags.setGenre(ID3v1Genres.matchGenreDescription(tags.getGenre()));
+                mp3Tags.setTitle(tags.getTitle());
+            }
+
+            mp3File.setId3v2Tag(mp3Tags);
+            mp3File.save(mp3File.getFilename() + RETAG_EXTENSION);
+            renameFiles(mp3File.getFilename());
+
+            System.out.println("Successfully set tags: " + tags + " in file " + filePath);
+        }
+    }
+
+    public static Mp3Metadata getTags(String filePath) {
+        Mp3Metadata metadata = new Mp3Metadata();
+
+        // File not found
+        if (!new File(filePath).exists()) {
+            // throw new FileNotFoundException("Unable to find file " + filePath);
+            System.err.println("[Mp3Tagger.getTags] Unable to find file " + filePath);
+        }
+
+        Mp3File mp3File = getMp3File(filePath);
+        if (mp3File == null) return metadata;
+
+        if (mp3File.hasId3v2Tag()) {
+            ID3v2 tags = mp3File.getId3v2Tag();
+            metadata.setAlbum(tags.getAlbum());
+            metadata.setArtist(tags.getArtist());
+            metadata.setTitle(tags.getTitle());
+
+            int genreIdx = tags.getGenre();
+            if (genreIdx != -1 && genreIdx < ID3v1Genres.GENRES.length)
+                metadata.setGenre(ID3v1Genres.GENRES[genreIdx]);
+        }
+
+        return metadata;
+    }
+
+    private static Mp3File getMp3File(String filePath) {
         Mp3File mp3File = null;
         try {
             mp3File = new Mp3File(filePath);
         } catch (IOException | UnsupportedTagException | InvalidDataException e) {
             e.printStackTrace();
-            System.err.println("Unable to get file " + filePath + " as Mp3File");
-            return;
+            System.err.println("[Mp3Tagger.getMp3File] Unable to get file " + filePath + " as Mp3File");
         }
 
-        if (mp3File.hasId3v2Tag()) {
-            ID3v2 mp3Tags = mp3File.getId3v2Tag();
-
-            // FIXME property rather than method ?
-            String methodName = "set" + tag.getName().substring(0, 1).toUpperCase() + tag.getName().substring(1);
-            Method setMethod = ID3v1.class.getMethod(methodName, String.class);
-            setMethod.invoke(mp3Tags, tag.getValue());
-
-            mp3File.setId3v2Tag(mp3Tags);
-            System.out.println("Title successfully set to « " + mp3Tags.getTitle() + " »");
-
-            mp3File.save(mp3File.getFilename() + RETAG_EXTENSION);
-            renameFiles(mp3File.getFilename());
-        }
+        return mp3File;
     }
 
-
-    private void renameFiles(String filename) {
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private static void renameFiles(String filename) {
         File originalFile = new File(filename);
         File backupFile = new File(filename + BACKUP_EXTENSION);
         File retaggedFile = new File(filename + RETAG_EXTENSION);

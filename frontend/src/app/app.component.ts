@@ -5,6 +5,9 @@ import {FileStatus} from "./model/filestatus.model";
 import {Observable, Observer} from "rxjs";
 import {HttpErrorResponse} from "@angular/common/http";
 import {ActivatedRoute} from "@angular/router";
+import {TagEditorDialog} from "./components/tag-editor-dialog/tag-editor-dialog.component";
+import {MatDialog} from "@angular/material/dialog";
+import {Mp3Metadata} from "./model/mp3metadata.model";
 
 @Component({
     selector: 'app-root',
@@ -29,7 +32,9 @@ export class AppComponent implements OnInit {
     };
 
 
-    constructor(private route: ActivatedRoute, private apiService: APIService) {
+    constructor(private route: ActivatedRoute,
+                private apiService: APIService,
+                private dialog: MatDialog) {
     }
 
     ngOnInit() {
@@ -82,6 +87,23 @@ export class AppComponent implements OnInit {
             );
     }
 
+    sendTagRequest(uuid: string, metadata: Mp3Metadata) {
+        this.apiService.setTags(uuid, metadata).subscribe();
+    }
+
+    updateRefreshLoop() {
+        if (this.intervalId != void 0) clearInterval(this.intervalId);
+        this.intervalId = setInterval(() => this.sendUpdateRequest(), this.refreshRate);
+    }
+
+
+    openTagEditorDialog(event): void {
+        const dialogRef = this.dialog.open(TagEditorDialog, {data: event});
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) this.sendTagRequest(result.uuid, result.metadata)
+        });
+    }
+
 
     saveFile(response) {
         // It is necessary to create a new blob object with mime-type explicitly set
@@ -110,12 +132,6 @@ export class AppComponent implements OnInit {
             link.remove();
         }, 100);
     }
-
-    updateRefreshLoop() {
-        if (this.intervalId != void 0) clearInterval(this.intervalId);
-        this.intervalId = setInterval(() => this.sendUpdateRequest(), this.refreshRate);
-    }
-
 
     parseErrorBlob(err: HttpErrorResponse): Observable<any> {
         const reader: FileReader = new FileReader();

@@ -42,7 +42,6 @@ public class YTDownloadManager {
 
         for (int i = 0; i < fileNames.keySet().size(); i++) {
             String uuid = (new ArrayList<>(fileNames.keySet())).get(i);
-            String fileName = fileNames.get(uuid);
 
             // Prepare download
             String dlCommand = audioOnly
@@ -72,6 +71,7 @@ public class YTDownloadManager {
             cmdManager.setErrorEvent((text) -> errorEvent.onError(uuid, new YTDLException(text)));
             cmdManager.executeCommand(dlCommand);
 
+            String fileName = fileNames.get(uuid);
             System.out.println("Completed, file name: " + fileName);
             downloadCompletedEvent.onDownloadCompleted(uuid, fileName);
         }
@@ -92,13 +92,18 @@ public class YTDownloadManager {
         cmdManager.setOutputEvent((text) -> {
             if (!text.startsWith("Process terminated")) {
                 String uuid = UUID.randomUUID().toString();
-                fileNames.put(uuid, text);
-                titleRetrievedEvent.onTitleRetrievedEvent(uuid, text);
-                System.out.println("File name: " + text);
+                String fileName = this.sanitizeFileName(text);
+                fileNames.put(uuid, fileName);
+                titleRetrievedEvent.onTitleRetrievedEvent(uuid, fileName);
+                System.out.println("File name: " + fileName);
             }
         });
         cmdManager.executeCommand(getNameCommand);
 
         return fileNames;
+    }
+
+    private String sanitizeFileName(String filename) {
+        return filename.replace("\"", "'");
     }
 }

@@ -2,7 +2,8 @@ package com.asoft.ytdl.controller;
 
 import com.asoft.ytdl.exception.UncompletedDownloadException;
 import com.asoft.ytdl.model.FileStatus;
-import com.asoft.ytdl.model.Tag;
+import com.asoft.ytdl.model.Mp3Metadata;
+import com.asoft.ytdl.model.TagRequest;
 import com.asoft.ytdl.model.YTRequest;
 import com.asoft.ytdl.service.ApplicationService;
 import com.mpatric.mp3agic.NotSupportedException;
@@ -19,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 
 @RestController
@@ -43,23 +43,21 @@ public class FileController {
     }
 
 
-    @RequestMapping(value = "/tag", method = RequestMethod.POST)
-    public ResponseEntity<Void> setTag(@RequestParam(value = "uuid") String uuid,
-                                       @RequestBody Tag tag) throws InvocationTargetException, IOException, IllegalAccessException, NoSuchMethodException, NotSupportedException {
-        applicationService.setTag(uuid, tag);
-        return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    @RequestMapping(value = "/tags", method = RequestMethod.POST)
+    public ResponseEntity<Mp3Metadata> setTags(@RequestBody TagRequest tags) throws IOException, NotSupportedException {
+        return new ResponseEntity<>(applicationService.setTags(tags), HttpStatus.OK);
     }
 
 
     @RequestMapping(value = "/status", method = RequestMethod.GET)
     public ResponseEntity<FileStatus> status(@RequestParam(value = "uuid") String uuid) throws FileNotFoundException {
-        return new ResponseEntity<>(applicationService.getFileStatus(uuid), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(applicationService.getFileStatus(uuid), HttpStatus.OK);
     }
 
 
     @RequestMapping(value = "/status/all", method = RequestMethod.GET)
     public ResponseEntity<Collection<FileStatus>> statusAll() {
-        return new ResponseEntity<>(applicationService.getAllFilesStatus(), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(applicationService.getAllFilesStatus(), HttpStatus.OK);
     }
 
 

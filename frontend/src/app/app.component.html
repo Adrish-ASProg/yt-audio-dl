@@ -23,6 +23,7 @@
     <!--  Table files status -->
     <app-file-status-table
         (downloadButtonClicked)="sendDownloadRequest($event)" (refreshButtonClicked)="sendUpdateRequest()"
+        (fileNameClicked)="openTagEditorDialog($event)"
         [displayedColumns]="displayedColumns" [filesStatus]="filesStatus">
     </app-file-status-table>
 </div>

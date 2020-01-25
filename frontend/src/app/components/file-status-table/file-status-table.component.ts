@@ -11,9 +11,12 @@ import {MatSort} from "@angular/material/sort";
 })
 export class FileStatusTableComponent {
 
+    @Output("fileNameClicked") fileNameClicked = new EventEmitter();
     @Output("refreshButtonClicked") refreshButtonClicked = new EventEmitter();
     @Output("downloadButtonClicked") downloadButtonClicked = new EventEmitter<string>();
+
     @Input() displayedColumns: string[] = [];
+
     @ViewChild(MatPaginator, {static: true}) paginator: MatPaginator;
     @ViewChild(MatSort, {static: true}) sort: MatSort;
     dataSource = new MatTableDataSource<FileStatus>(this.filesStatus);
@@ -33,6 +36,6 @@ export class FileStatusTableComponent {
 
     public getFileStatusClass(progressStatus: string): string {
         return (progressStatus === "COMPLETED") ? "completed" :
-        (progressStatus === "ERROR") ? "error" : "loading";
+            (progressStatus === "ERROR") ? "error" : "loading";
     }
 }
