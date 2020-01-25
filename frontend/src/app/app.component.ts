@@ -16,7 +16,7 @@ export class AppComponent implements OnInit {
     // Toolbar
     projectTitle: string = 'yt-audio-dl';
 
-    displayedColumns: string[] = ['uuid', 'name', 'status', 'startDate', 'download', 'refresh'];
+    displayedColumns: string[] = ['name', 'status', 'startDate', 'download', 'refresh'];
     filesStatus: FileStatus[] = [];
 
     refreshRate: number = 3000;

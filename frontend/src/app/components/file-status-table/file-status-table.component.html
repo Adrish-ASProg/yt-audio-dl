@@ -1,12 +1,6 @@
 <div class="status-container">
     <table [dataSource]="dataSource" class="mat-elevation-z8" mat-table matSort matSortActive="startDate" matSortDirection="desc">
 
-        <!-- UUID Column -->
-        <ng-container matColumnDef="uuid">
-            <th *matHeaderCellDef mat-header-cell mat-sort-header> UUID</th>
-            <td *matCellDef="let element" mat-cell> {{element.uuid}} </td>
-        </ng-container>
-
         <!-- Name Column -->
         <ng-container matColumnDef="name">
             <th *matHeaderCellDef mat-header-cell mat-sort-header> Name</th>
