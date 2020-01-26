@@ -12,7 +12,6 @@ import {MatSort} from "@angular/material/sort";
 export class FileStatusTableComponent {
 
     @Output("fileNameClicked") fileNameClicked = new EventEmitter();
-    @Output("refreshButtonClicked") refreshButtonClicked = new EventEmitter();
     @Output("downloadButtonClicked") downloadButtonClicked = new EventEmitter<string>();
 
     @Input() displayedColumns: string[] = [];

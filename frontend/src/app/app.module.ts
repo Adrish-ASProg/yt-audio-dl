@@ -18,6 +18,7 @@ import {MatToolbarModule} from "@angular/material/toolbar";
 import {FileStatusTableComponent} from './components/file-status-table/file-status-table.component';
 import {TagEditorDialog} from './components/tag-editor-dialog/tag-editor-dialog.component';
 import {MatDialogModule} from "@angular/material/dialog";
+import {MatMenuModule} from "@angular/material/menu";
 
 @NgModule({
     entryComponents: [
@@ -46,7 +47,8 @@ import {MatDialogModule} from "@angular/material/dialog";
         MatIconModule,
         FormsModule,
         MatToolbarModule,
-        MatDialogModule
+        MatDialogModule,
+        MatMenuModule
     ],
     providers: [],
     bootstrap: [AppComponent]
