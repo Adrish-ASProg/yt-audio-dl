@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 public class FileController {
@@ -58,6 +59,13 @@ public class FileController {
     @RequestMapping(value = "/status/all", method = RequestMethod.GET)
     public ResponseEntity<Collection<FileStatus>> statusAll() {
         return new ResponseEntity<>(applicationService.getAllFilesStatus(), HttpStatus.OK);
+    }
+
+
+    @RequestMapping(value = "/delete", method = RequestMethod.POST)
+    public ResponseEntity<Void> delete(@RequestBody List<String> uuids) throws FileNotFoundException {
+        applicationService.deleteFiles(uuids);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 

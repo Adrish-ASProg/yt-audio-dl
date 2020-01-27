@@ -22,6 +22,7 @@ public class FileUtils {
     }
 
     public static Long getCreationDate(File file) {
+        if (file == null) return null;
         try {
             FileTime creationTime = (FileTime) Files.getAttribute(file.toPath(), "creationTime");
             return creationTime.to(TimeUnit.MILLISECONDS);
@@ -32,6 +33,7 @@ public class FileUtils {
     }
 
     public static List<File> getAllFilesInDirectory(File file) {
+        if (file == null) return new ArrayList<>();
         try (Stream<Path> walk = Files.walk(file.toPath())) {
 
             List<File> result = walk.filter(Files::isRegularFile)
@@ -45,5 +47,11 @@ public class FileUtils {
             e.printStackTrace();
             return new ArrayList<>();
         }
+    }
+
+    public static boolean deleteFile(File file) {
+        if (file == null) return false;
+        System.out.println("deleting file " + file.getAbsolutePath());
+        return file.delete();
     }
 }

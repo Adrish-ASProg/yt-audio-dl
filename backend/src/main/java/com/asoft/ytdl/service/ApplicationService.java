@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -143,6 +144,17 @@ public class ApplicationService {
      **/
     public Collection<FileStatus> getAllFilesStatus() {
         return this.filesStatus.values();
+    }
+
+    /** DELETE /delete **/
+    public void deleteFiles(List<String> uuids) throws FileNotFoundException {
+        for (String uuid : uuids) {
+            checkFileIsPresent(uuid);
+
+            File f = FileUtils.getFile(DOWNLOAD_FOLDER + File.separator + filesStatus.get(uuid).getFileName());
+            FileUtils.deleteFile(f);
+            filesStatus.remove(uuid);
+        }
     }
 
 
