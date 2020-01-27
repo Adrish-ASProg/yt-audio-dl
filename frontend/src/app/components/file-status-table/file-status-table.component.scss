@@ -4,11 +4,23 @@
 table {
     width: 100%;
     margin-top: 15px;
+    padding: 0 10px;
+
+    ::ng-deep th.mat-header-cell:first-of-type,
+    ::ng-deep td.mat-cell:first-of-type {
+        padding: 0;
+        min-width: 32px;
+    }
+    .mat-column-select {
+        overflow: initial;
+    }
+
+    .checkbox-container {
+        text-align: center;
+    }
 
 
     .mat-cell {
-        padding-left: 10px;
-        padding-right: 10px;
 
         .clickable {
             cursor: pointer;

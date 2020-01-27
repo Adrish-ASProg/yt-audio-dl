@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {APIService} from "./service/api.service";
 import {ConvertRequest} from "./model/convertrequest.model";
 import {FileStatus} from "./model/filestatus.model";
@@ -8,6 +8,7 @@ import {ActivatedRoute} from "@angular/router";
 import {TagEditorDialog} from "./components/tag-editor-dialog/tag-editor-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
 import {Mp3Metadata} from "./model/mp3metadata.model";
+import {FileStatusTableComponent} from "./components/file-status-table/file-status-table.component";
 
 @Component({
     selector: 'app-root',
@@ -16,10 +17,13 @@ import {Mp3Metadata} from "./model/mp3metadata.model";
 })
 export class AppComponent implements OnInit {
 
+    @ViewChild(FileStatusTableComponent, {static: false})
+    fileStatusTable: FileStatusTableComponent;
+
     // Toolbar
     projectTitle: string = 'yt-audio-dl';
 
-    displayedColumns: string[] = ['name', 'status', 'startDate', 'download'];
+    displayedColumns: string[] = ['select', 'name', 'status', 'startDate', 'download'];
     filesStatus: FileStatus[] = [];
 
     refreshRate: number = 3000;
@@ -67,7 +71,24 @@ export class AppComponent implements OnInit {
 
         this.apiService.getAllFileStatus()
             .subscribe(
-                filesStatus => this.filesStatus = [...filesStatus],
+                filesStatus => {
+                    // Remove old file status
+                    this.filesStatus = this.filesStatus.filter(fs => filesStatus.find(f => f.uuid === fs.uuid));
+
+                    // Add / Edit
+                    filesStatus.forEach(fs => {
+                        const oldFileStatus = this.filesStatus.find(f => f.uuid === fs.uuid);
+                        if (oldFileStatus) {
+                            oldFileStatus.name = fs.name;
+                            oldFileStatus.metadata = fs.metadata;
+                            oldFileStatus.startDate = fs.startDate;
+                            oldFileStatus.status = fs.status;
+                        }
+                        else this.filesStatus.push(fs);
+                    });
+
+                    this.fileStatusTable.refreshDataTable(this.filesStatus);
+                },
                 response => {
                     console.error(response.error);
                     if (response.error != void 0 && response.error.message != void 0)
@@ -103,6 +124,34 @@ export class AppComponent implements OnInit {
             if (result) this.sendTagRequest(result.uuid, result.metadata)
         });
     }
+
+    //#region Menu
+
+    public refreshButtonClicked() {
+        this.sendUpdateRequest();
+    }
+
+    public deleteButtonClicked() {
+        const selectedItems = this.fileStatusTable.getSelected();
+
+        if (selectedItems.length < 1) {
+            alert("No files selected");
+            return;
+        }
+
+        const confirmMsg: string = selectedItems.length > 1
+            ? `Do you really want to delete these ${selectedItems.length} files ?`
+            : `Do you really want to delete « ${selectedItems[0].name} » ?`;
+
+        if (!confirm(confirmMsg)) return;
+
+        this.apiService.deleteFiles(
+            this.fileStatusTable.getSelected().map(fileStatus => fileStatus.uuid)
+        ).subscribe()
+    }
+
+
+    // #endregion
 
 
     saveFile(response) {

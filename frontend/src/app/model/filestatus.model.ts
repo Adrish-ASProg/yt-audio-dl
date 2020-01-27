@@ -5,5 +5,5 @@ export interface FileStatus {
     name: string;
     status: string;
     startDate: number;
-    metadata: Mp3Metadata;
+    metadata?: Mp3Metadata;
 }

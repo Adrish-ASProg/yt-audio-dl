@@ -26,6 +26,7 @@ export class APIService {
     private statusUrl: string = "/status/all";
     private downloadUrl: string = "/dl";
     private setTagsUrl: string = "/tags";
+    private deleteUrl: string = "/delete";
 
     constructor(private http: HttpClient) {}
 
@@ -51,5 +52,14 @@ export class APIService {
     /** GET: get all files status */
     getAllFileStatus(): Observable<FileStatus[]> {
         return this.http.get<FileStatus[]>(`${this.apiUrl}${this.statusUrl}`, jsonHttpOptions);
+    }
+
+    /** DELETE: delete files */
+    deleteFiles(uuids: string[]): Observable<void> {
+        return this.http.post<void>(
+            `${this.apiUrl}${this.deleteUrl}`,
+            uuids,
+            jsonHttpOptions
+        );
     }
 }

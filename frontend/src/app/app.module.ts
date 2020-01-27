@@ -19,6 +19,7 @@ import {FileStatusTableComponent} from './components/file-status-table/file-stat
 import {TagEditorDialog} from './components/tag-editor-dialog/tag-editor-dialog.component';
 import {MatDialogModule} from "@angular/material/dialog";
 import {MatMenuModule} from "@angular/material/menu";
+import {MatCheckboxModule} from "@angular/material/checkbox";
 
 @NgModule({
     entryComponents: [
@@ -48,6 +49,7 @@ import {MatMenuModule} from "@angular/material/menu";
         FormsModule,
         MatToolbarModule,
         MatDialogModule,
+        MatCheckboxModule,
         MatMenuModule
     ],
     providers: [],

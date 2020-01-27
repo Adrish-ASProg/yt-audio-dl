@@ -1,6 +1,7 @@
 <!-- Menu -->
 <mat-menu #mainMenu="matMenu">
-    <button (click)="sendUpdateRequest()" mat-menu-item>Refresh</button>
+    <button (click)="refreshButtonClicked()" mat-menu-item>Refresh</button>
+    <button (click)="deleteButtonClicked()" mat-menu-item>Delete</button>
 </mat-menu>
 
 <!-- Toolbar -->
@@ -29,7 +30,7 @@
     <br/>
 
     <!--  Table files status -->
-    <app-file-status-table
+    <app-file-status-table #fileStatusTable
         (downloadButtonClicked)="sendDownloadRequest($event)"
         (fileNameClicked)="openTagEditorDialog($event)"
         [displayedColumns]="displayedColumns" [filesStatus]="filesStatus">
