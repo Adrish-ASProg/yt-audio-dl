@@ -29,7 +29,6 @@ public class YTDownloadManager {
      * Téléchargement d'une vidéo YouTube
      */
     public void download(String url, boolean audioOnly) {
-        String destination = ApplicationService.DOWNLOAD_FOLDER + File.separator + "%(title)s.%(ext)s";
         String format = audioOnly ? "mp3" : "best";
 
         // Retrieve file(s) name(s)
@@ -42,6 +41,8 @@ public class YTDownloadManager {
 
         for (int i = 0; i < fileNames.keySet().size(); i++) {
             String uuid = (new ArrayList<>(fileNames.keySet())).get(i);
+            String fileName = fileNames.get(uuid);
+            String destination = ApplicationService.DOWNLOAD_FOLDER + File.separator + fileName + ".%(ext)s";
 
             // Prepare download
             String dlCommand = audioOnly
@@ -81,7 +82,7 @@ public class YTDownloadManager {
      * Retrieve videos title
      **/
     private LinkedHashMap<String, String> getVideoTitles(String url) {
-        String getNameCommand = "youtube-dl -e --no-playlist --flat-playlist " + url;
+        String getNameCommand = "youtube-dl --get-filename --no-playlist --flat-playlist --restrict-filenames -o %(title)s " + url;
         System.out.println(getNameCommand);
 
         final LinkedHashMap<String, String> fileNames = new LinkedHashMap<>();
@@ -92,18 +93,13 @@ public class YTDownloadManager {
         cmdManager.setOutputEvent((text) -> {
             if (!text.startsWith("Process terminated")) {
                 String uuid = UUID.randomUUID().toString();
-                String fileName = this.sanitizeFileName(text);
-                fileNames.put(uuid, fileName);
-                titleRetrievedEvent.onTitleRetrievedEvent(uuid, fileName);
-                System.out.println("File name: " + fileName);
+                fileNames.put(uuid, text);
+                titleRetrievedEvent.onTitleRetrievedEvent(uuid, text);
+                System.out.println(String.format("File name: « %s »", text));
             }
         });
         cmdManager.executeCommand(getNameCommand);
 
         return fileNames;
-    }
-
-    private String sanitizeFileName(String filename) {
-        return filename.replace("\"", "'");
     }
 }
