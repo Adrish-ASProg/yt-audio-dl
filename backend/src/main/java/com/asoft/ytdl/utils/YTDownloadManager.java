@@ -34,15 +34,17 @@ public class YTDownloadManager {
         // Retrieve file(s) name(s)
         final LinkedHashMap<String, String> fileNames = getVideoTitles(url);
 
-
         if (fileNames.size() == 0) {
             errorEvent.onError(null, new YTDLException("[download] Unable to download file: No file found"));
         }
 
+        System.out.println(String.format("Starting download of %d files..", fileNames.size()));
         for (int i = 0; i < fileNames.keySet().size(); i++) {
             String uuid = (new ArrayList<>(fileNames.keySet())).get(i);
             String fileName = fileNames.get(uuid);
             String destination = ApplicationService.DOWNLOAD_FOLDER + File.separator + fileName + ".%(ext)s";
+
+            System.out.println(String.format("\n########## Downloading « %s » ##########", fileName));
 
             // Prepare download
             String dlCommand = audioOnly
@@ -58,7 +60,7 @@ public class YTDownloadManager {
             final String convertPrefix = "[ffmpeg]";
 
             CmdManager cmdManager = new CmdManager();
-            cmdManager.setOutputEvent((text) -> {
+            cmdManager.setOutputEvent(text -> {
                 if (text.startsWith(downloadPagePrefix)) {
                     progressEvent.onProgress(uuid, ProgressStatus.DOWNLOADING_WEBPAGE);
                 } else if (text.startsWith(downloadPrefix)) {
@@ -69,13 +71,14 @@ public class YTDownloadManager {
 
                 System.out.println(text);
             });
-            cmdManager.setErrorEvent((text) -> errorEvent.onError(uuid, new YTDLException(text)));
+            cmdManager.setErrorEvent(text -> errorEvent.onError(uuid, new YTDLException(text)));
             cmdManager.executeCommand(dlCommand);
 
-            String fileName = fileNames.get(uuid);
-            System.out.println("Completed, file name: " + fileName);
+            System.out.println("########## File downloaded: " + fileName + " ##########\n");
             downloadCompletedEvent.onDownloadCompleted(uuid, fileName);
         }
+
+        System.out.println("########## All files downloaded successfully ##########");
     }
 
     /**
@@ -90,7 +93,7 @@ public class YTDownloadManager {
         cmdManager.setErrorEvent((text) ->
                 errorEvent.onError(null, new YTDLException("Unable to retrieve video title\n" + text))
         );
-        cmdManager.setOutputEvent((text) -> {
+        cmdManager.setOutputEvent(text -> {
             if (!text.startsWith("Process terminated")) {
                 String uuid = UUID.randomUUID().toString();
                 fileNames.put(uuid, text);

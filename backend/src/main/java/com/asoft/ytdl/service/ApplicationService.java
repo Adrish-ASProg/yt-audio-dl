@@ -72,7 +72,7 @@ public class ApplicationService {
                 System.err.println("[AppService.downloadFileFromYT] " + error.getMessage());
 
                 if (filesStatus.containsKey(uuid)) {
-                    System.err.println("\n[AppService.downloadFileFromYT] " + filesStatus.get(uuid));
+                    System.err.println("[AppService.downloadFileFromYT] " + filesStatus.get(uuid));
                     filesStatus.get(uuid).setStatus(ProgressStatus.ERROR);
                 }
             });

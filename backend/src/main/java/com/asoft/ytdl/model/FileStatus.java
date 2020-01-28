@@ -15,4 +15,16 @@ public class FileStatus {
     private ProgressStatus status;
     private Long startDate;
     private Mp3Metadata metadata;
+
+    @Override
+    public String toString() {
+        return "FileStatus{" +
+                "uuid='" + uuid + '\'' +
+                ", name='" + name + '\'' +
+                ", fileName='" + fileName + '\'' +
+                ", status=" + status +
+                ", startDate=" + startDate +
+                ", metadata=" + metadata +
+                '}';
+    }
 }

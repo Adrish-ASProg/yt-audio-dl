@@ -36,13 +36,10 @@ public class FileUtils {
         if (file == null) return new ArrayList<>();
         try (Stream<Path> walk = Files.walk(file.toPath())) {
 
-            List<File> result = walk.filter(Files::isRegularFile)
+            return walk.filter(Files::isRegularFile)
                     .map(Path::toString)
                     .map(File::new)
                     .collect(Collectors.toList());
-
-            result.forEach(f -> System.out.println(f.getName()));
-            return result;
         } catch (IOException e) {
             e.printStackTrace();
             return new ArrayList<>();
