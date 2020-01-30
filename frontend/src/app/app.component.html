@@ -17,9 +17,17 @@
 
     <!--  Input / Button to make request -->
     <div class="request-container">
-        <mat-form-field class="url-container">
-            <input [(ngModel)]="request.url" matInput placeholder="Video URL">
-        </mat-form-field>
+        <div class="url-button-container">
+            <mat-form-field class="url-container">
+                <input [(ngModel)]="request.url" matInput placeholder="Video URL">
+            </mat-form-field>
+
+            <mat-button-toggle-group (change)="setUrl($event)" name="fontStyle">
+                <mat-button-toggle value="bg">Playlist BG</mat-button-toggle>
+                <mat-button-toggle [checked]="true" value="test">Playlist Test</mat-button-toggle>
+                <mat-button-toggle value="video">Video</mat-button-toggle>
+            </mat-button-toggle-group>
+        </div>
         <div class="request-controls">
             <mat-slide-toggle [checked]="request.audioOnly" disabled>Audio only</mat-slide-toggle>
             <button (click)="sendConvertRequest()" color="primary" mat-raised-button>Request convert</button>

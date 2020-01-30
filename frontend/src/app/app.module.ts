@@ -20,6 +20,7 @@ import {TagEditorDialog} from './components/tag-editor-dialog/tag-editor-dialog.
 import {MatDialogModule} from "@angular/material/dialog";
 import {MatMenuModule} from "@angular/material/menu";
 import {MatCheckboxModule} from "@angular/material/checkbox";
+import {MatButtonToggleModule} from "@angular/material/button-toggle";
 
 @NgModule({
     entryComponents: [
@@ -50,7 +51,8 @@ import {MatCheckboxModule} from "@angular/material/checkbox";
         MatToolbarModule,
         MatDialogModule,
         MatCheckboxModule,
-        MatMenuModule
+        MatMenuModule,
+        MatButtonToggleModule
     ],
     providers: [],
     bootstrap: [AppComponent]

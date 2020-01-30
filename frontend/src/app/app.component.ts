@@ -154,6 +154,23 @@ export class AppComponent implements OnInit {
 
     // #endregion
 
+    setUrl(event) {
+        console.log(event);
+        switch (event.value) {
+            case "bg":
+                this.request.url = "https://www.youtube.com/playlist?list=PL0-adpj8Oy0mdpClLbg-tIFMxWBVtifXc";
+                break;
+
+            case "test":
+                this.request.url = "https://www.youtube.com/playlist?list=PL0-adpj8Oy0lqSmQVOrj9q_Q5CR0jIuUE";
+                break;
+
+            case "video":
+            default:
+                this.request.url = "https://www.youtube.com/watch?v=zhsfn9IyiLQ";
+                break;
+        }
+    }
 
     saveFile(response) {
         // It is necessary to create a new blob object with mime-type explicitly set
