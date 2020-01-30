@@ -1,5 +1,6 @@
 package com.asoft.ytdl.utils;
 
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.BufferedReader;
@@ -15,12 +16,19 @@ interface CmdErrorEvent {
 }
 
 @Setter
+@NoArgsConstructor
 public class CmdManager {
 
     private CmdOutputEvent outputEvent = (text) -> {};
     private CmdErrorEvent errorEvent = (text) -> {};
+    private boolean verboseMode = false;
+
+    public CmdManager(boolean verboseMode) { this.verboseMode = verboseMode; }
+
 
     public void executeCommand(String command) {
+        if (verboseMode) System.out.println(command);
+
         long startTime = System.currentTimeMillis();
 
         try {

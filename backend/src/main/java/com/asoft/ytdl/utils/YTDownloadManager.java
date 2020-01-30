@@ -51,7 +51,6 @@ public class YTDownloadManager {
                     ? String.format("youtube-dl -o \"%s\" --no-playlist --extract-audio --audio-format %s --playlist-items %d %s", destination, format, i + 1, url)
                     : String.format("youtube-dl -o \"%s\" --no-playlist -f %s %s", destination, format, url);
 
-            System.out.println(dlCommand);
             progressEvent.onProgress(uuid, ProgressStatus.STARTING_DOWNLOAD);
 
             // Handle progress
@@ -59,7 +58,7 @@ public class YTDownloadManager {
             final String downloadPrefix = "[download]";
             final String convertPrefix = "[ffmpeg]";
 
-            CmdManager cmdManager = new CmdManager();
+            CmdManager cmdManager = new CmdManager(true);
             cmdManager.setOutputEvent(text -> {
                 if (text.startsWith(downloadPagePrefix)) {
                     progressEvent.onProgress(uuid, ProgressStatus.DOWNLOADING_WEBPAGE);
@@ -86,10 +85,9 @@ public class YTDownloadManager {
      **/
     private LinkedHashMap<String, String> getVideoTitles(String url) {
         String getNameCommand = "youtube-dl --get-filename --no-playlist --flat-playlist --restrict-filenames -o %(title)s " + url;
-        System.out.println(getNameCommand);
 
         final LinkedHashMap<String, String> fileNames = new LinkedHashMap<>();
-        CmdManager cmdManager = new CmdManager();
+        CmdManager cmdManager = new CmdManager(true);
         cmdManager.setErrorEvent((text) ->
                 errorEvent.onError(null, new YTDLException("Unable to retrieve video title\n" + text))
         );
