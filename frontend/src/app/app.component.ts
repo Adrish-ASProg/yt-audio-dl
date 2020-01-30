@@ -9,6 +9,7 @@ import {TagEditorDialog} from "./components/tag-editor-dialog/tag-editor-dialog.
 import {MatDialog} from "@angular/material/dialog";
 import {Mp3Metadata} from "./model/mp3metadata.model";
 import {FileStatusTableComponent} from "./components/file-status-table/file-status-table.component";
+import {YTDLUtils} from "./utils/ytdl-utils";
 
 @Component({
     selector: 'app-root',
@@ -119,7 +120,7 @@ export class AppComponent implements OnInit {
 
 
     openTagEditorDialog(event): void {
-        const dialogRef = this.dialog.open(TagEditorDialog, {data: event});
+        const dialogRef = this.dialog.open(TagEditorDialog, {data: YTDLUtils.copyObject(event)});
         dialogRef.afterClosed().subscribe(result => {
             if (result) this.sendTagRequest(result.uuid, result.metadata)
         });
