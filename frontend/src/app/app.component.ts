@@ -29,6 +29,7 @@ export class AppComponent implements OnInit {
     filesStatus: FileStatus[] = [];
 
     refreshRate: number = 1500;
+    isAutoUpdateRunning: boolean = true;
 
     request: ConvertRequest = {
         url: YT_URLS.Playlist_Test,
@@ -58,7 +59,7 @@ export class AppComponent implements OnInit {
     sendConvertRequest() {
         this.apiService.requestConvert(this.request)
             .subscribe(
-                () => this.sendUpdateRequest(),
+                () => this.sendUpdateRequest(!this.isAutoUpdateRunning),
                 response => {
                     console.error(response.error);
                     alert(response.error.message);
@@ -66,7 +67,7 @@ export class AppComponent implements OnInit {
             );
     }
 
-    sendUpdateRequest() {
+    sendUpdateRequest(autoUpdate: boolean = true) {
         console.debug("sendUpdateRequest");
 
         this.apiService.getAllFileStatus()
@@ -87,9 +88,14 @@ export class AppComponent implements OnInit {
                     });
 
                     this.fileStatusTable.refreshDataTable(this.filesStatus);
-                    setTimeout(() => this.sendUpdateRequest(), this.refreshRate)
+
+                    if (autoUpdate) {
+                        this.isAutoUpdateRunning = true;
+                        setTimeout(() => this.sendUpdateRequest(), this.refreshRate)
+                    }
                 },
                 response => {
+                    this.isAutoUpdateRunning = false;
                     console.error("Unable to retrieve files status from server, stopping automatic requests.", response.error);
                     if (response.error != void 0 && response.error.message != void 0)
                         alert(response.error.message);
@@ -123,7 +129,7 @@ export class AppComponent implements OnInit {
     //#region Menu
 
     public refreshButtonClicked() {
-        this.sendUpdateRequest();
+        this.sendUpdateRequest(!this.isAutoUpdateRunning);
     }
 
     public deleteButtonClicked() {
@@ -144,7 +150,6 @@ export class AppComponent implements OnInit {
             this.fileStatusTable.getSelected().map(fileStatus => fileStatus.uuid)
         ).subscribe()
     }
-
 
     // #endregion
 
