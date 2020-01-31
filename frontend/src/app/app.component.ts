@@ -10,6 +10,7 @@ import {MatDialog} from "@angular/material/dialog";
 import {Mp3Metadata} from "./model/mp3metadata.model";
 import {FileStatusTableComponent} from "./components/file-status-table/file-status-table.component";
 import {YTDLUtils} from "./utils/ytdl-utils";
+import {YT_URLS} from "./utils/ytdl-constants";
 
 @Component({
     selector: 'app-root',
@@ -30,8 +31,7 @@ export class AppComponent implements OnInit {
     refreshRate: number = 1500;
 
     request: ConvertRequest = {
-        url: "https://www.youtube.com/playlist?list=PL0-adpj8Oy0lqSmQVOrj9q_Q5CR0jIuUE",
-        // url: "https://www.youtube.com/watch?v=zhsfn9IyiLQ",
+        url: YT_URLS.Playlist_Test,
         audioOnly: true
     };
 
@@ -149,19 +149,18 @@ export class AppComponent implements OnInit {
     // #endregion
 
     setUrl(event) {
-        console.log(event);
         switch (event.value) {
             case "bg":
-                this.request.url = "https://www.youtube.com/playlist?list=PL0-adpj8Oy0mdpClLbg-tIFMxWBVtifXc";
+                this.request.url = YT_URLS.Playlist_Background;
                 break;
 
             case "test":
-                this.request.url = "https://www.youtube.com/playlist?list=PL0-adpj8Oy0lqSmQVOrj9q_Q5CR0jIuUE";
+                this.request.url = YT_URLS.Playlist_Test;
                 break;
 
             case "video":
             default:
-                this.request.url = "https://www.youtube.com/watch?v=zhsfn9IyiLQ";
+                this.request.url = YT_URLS.Video_Test;
                 break;
         }
     }
