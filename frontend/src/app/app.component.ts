@@ -27,8 +27,7 @@ export class AppComponent implements OnInit {
     displayedColumns: string[] = ['select', 'name', 'status', 'startDate', 'download'];
     filesStatus: FileStatus[] = [];
 
-    refreshRate: number = 3000;
-    intervalId: number;
+    refreshRate: number = 1500;
 
     request: ConvertRequest = {
         url: "https://www.youtube.com/playlist?list=PL0-adpj8Oy0lqSmQVOrj9q_Q5CR0jIuUE",
@@ -43,6 +42,7 @@ export class AppComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.sendUpdateRequest();
         this.route.queryParams.subscribe(params => {
             const videoId = params["videoId"];
             if (videoId == void 0) return;
@@ -52,7 +52,6 @@ export class AppComponent implements OnInit {
                 this.sendConvertRequest();
             }
         });
-        this.sendUpdateRequest();
     }
 
 
@@ -68,7 +67,7 @@ export class AppComponent implements OnInit {
     }
 
     sendUpdateRequest() {
-        this.updateRefreshLoop();
+        console.debug("sendUpdateRequest");
 
         this.apiService.getAllFileStatus()
             .subscribe(
@@ -84,14 +83,14 @@ export class AppComponent implements OnInit {
                             oldFileStatus.metadata = fs.metadata;
                             oldFileStatus.startDate = fs.startDate;
                             oldFileStatus.status = fs.status;
-                        }
-                        else this.filesStatus.push(fs);
+                        } else this.filesStatus.push(fs);
                     });
 
                     this.fileStatusTable.refreshDataTable(this.filesStatus);
+                    setTimeout(() => this.sendUpdateRequest(), this.refreshRate)
                 },
                 response => {
-                    console.error(response.error);
+                    console.error("Unable to retrieve files status from server, stopping automatic requests.", response.error);
                     if (response.error != void 0 && response.error.message != void 0)
                         alert(response.error.message);
                 }
@@ -111,11 +110,6 @@ export class AppComponent implements OnInit {
 
     sendTagRequest(uuid: string, metadata: Mp3Metadata) {
         this.apiService.setTags(uuid, metadata).subscribe();
-    }
-
-    updateRefreshLoop() {
-        if (this.intervalId != void 0) clearInterval(this.intervalId);
-        this.intervalId = setInterval(() => this.sendUpdateRequest(), this.refreshRate);
     }
 
 
