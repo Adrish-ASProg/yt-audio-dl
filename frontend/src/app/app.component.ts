@@ -153,7 +153,14 @@ export class AppComponent implements OnInit {
 
         this.apiService.deleteFiles(
             this.fileStatusTable.getSelected().map(fileStatus => fileStatus.uuid)
-        ).subscribe()
+        ).subscribe(
+            (result: boolean) => {
+                if (!result) alert("An error occurred while trying to delete files, some files may not have been deleted");
+            },
+            error => {
+                alert("An error occurred while trying to delete files");
+                console.error(error);
+            })
     }
 
     // #endregion

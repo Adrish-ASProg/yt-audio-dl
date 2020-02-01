@@ -67,9 +67,8 @@ public class FileController {
 
 
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
-    public ResponseEntity<Void> delete(@RequestBody List<String> uuids) throws FileNotFoundException {
-        applicationService.deleteFiles(uuids);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<Boolean> delete(@RequestBody List<String> uuids) throws FileNotFoundException {
+        return new ResponseEntity<>(applicationService.deleteFiles(uuids), HttpStatus.OK);
     }
 
 

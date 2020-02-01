@@ -55,8 +55,8 @@ export class APIService {
     }
 
     /** DELETE: delete files */
-    deleteFiles(uuids: string[]): Observable<void> {
-        return this.http.post<void>(
+    deleteFiles(uuids: string[]): Observable<boolean> {
+        return this.http.post<boolean>(
             `${this.apiUrl}${this.deleteUrl}`,
             uuids,
             jsonHttpOptions

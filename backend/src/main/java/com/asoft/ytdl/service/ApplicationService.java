@@ -157,14 +157,23 @@ public class ApplicationService {
     /**
      * DELETE /delete
      **/
-    public void deleteFiles(List<String> uuids) throws FileNotFoundException {
+    public boolean deleteFiles(List<String> uuids) throws FileNotFoundException {
+        boolean allFilesDeleted = true;
+
         for (String uuid : uuids) {
             checkFileIsPresent(uuid);
 
+            // Retrieve filename
             File f = FileUtils.getFile(DOWNLOAD_FOLDER + File.separator + filesStatus.get(uuid).getFileName());
-            FileUtils.deleteFile(f);
-            filesStatus.remove(uuid);
+
+            // Delete file
+            boolean result = FileUtils.deleteFile(f);
+            if (result) filesStatus.remove(uuid);
+
+            allFilesDeleted = allFilesDeleted && result;
         }
+
+        return allFilesDeleted;
     }
 
 
