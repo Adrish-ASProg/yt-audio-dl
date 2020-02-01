@@ -90,8 +90,7 @@ export class AppComponent implements OnInit {
                             oldFileStatus.metadata = fs.metadata;
                             oldFileStatus.startDate = fs.startDate;
                             oldFileStatus.status = fs.status;
-                        }
-                        else this.filesStatus.push(fs);
+                        } else this.filesStatus.push(fs);
                     });
 
                     this.fileStatusTable.refreshDataTable(this.filesStatus);
@@ -115,8 +114,8 @@ export class AppComponent implements OnInit {
             );
     }
 
-    sendTagRequest(uuid: string, metadata: Mp3Metadata) {
-        this.apiService.setTags(uuid, metadata).subscribe();
+    sendTagRequest(uuid: string, name: string, metadata: Mp3Metadata) {
+        this.apiService.setTags(uuid, name, metadata).subscribe();
     }
 
     updateRefreshLoop() {
@@ -128,7 +127,7 @@ export class AppComponent implements OnInit {
     openTagEditorDialog(event): void {
         const dialogRef = this.dialog.open(TagEditorDialog, {data: event});
         dialogRef.afterClosed().subscribe(result => {
-            if (result) this.sendTagRequest(result.uuid, result.metadata)
+            if (result) this.sendTagRequest(result.uuid, result.name, result.metadata);
         });
     }
 
@@ -156,7 +155,6 @@ export class AppComponent implements OnInit {
             this.fileStatusTable.getSelected().map(fileStatus => fileStatus.uuid)
         ).subscribe()
     }
-
 
     // #endregion
 

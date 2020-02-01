@@ -41,10 +41,10 @@ export class APIService {
     }
 
     /** POST: set tags */
-    setTags(uuid: string, metadata: Mp3Metadata): Observable<Mp3Metadata> {
+    setTags(uuid: string, name: string, metadata: Mp3Metadata): Observable<Mp3Metadata> {
         return this.http.post<Mp3Metadata>(
             `${this.apiUrl}${this.setTagsUrl}`,
-            {uuid: uuid, metadata: metadata},
+            {uuid: uuid, name: name, metadata: metadata},
             jsonHttpOptions
         );
     }
