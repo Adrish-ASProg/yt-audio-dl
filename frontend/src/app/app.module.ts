@@ -13,7 +13,7 @@ import {MatTableModule} from "@angular/material/table";
 import {MatSortModule} from "@angular/material/sort";
 import {MatPaginatorModule} from "@angular/material/paginator";
 import {MatIconModule} from "@angular/material/icon";
-import {FormsModule} from "@angular/forms";
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MatToolbarModule} from "@angular/material/toolbar";
 import {FileStatusTableComponent} from './components/file-status-table/file-status-table.component';
 import {TagEditorDialog} from './components/tag-editor-dialog/tag-editor-dialog.component';
@@ -50,7 +50,8 @@ import {MatCheckboxModule} from "@angular/material/checkbox";
         MatToolbarModule,
         MatDialogModule,
         MatCheckboxModule,
-        MatMenuModule
+        MatMenuModule,
+        ReactiveFormsModule
     ],
     providers: [],
     bootstrap: [AppComponent]

@@ -9,6 +9,7 @@ import {TagEditorDialog} from "./components/tag-editor-dialog/tag-editor-dialog.
 import {MatDialog} from "@angular/material/dialog";
 import {Mp3Metadata} from "./model/mp3metadata.model";
 import {FileStatusTableComponent} from "./components/file-status-table/file-status-table.component";
+import {FormControl, Validators} from "@angular/forms";
 
 @Component({
     selector: 'app-root',
@@ -34,7 +35,11 @@ export class AppComponent implements OnInit {
         // url: "https://www.youtube.com/watch?v=zhsfn9IyiLQ",
         audioOnly: true
     };
-
+    // requestForm: FormGroup;
+    urlFormControl = new FormControl('', [
+        Validators.required,
+        Validators.pattern("^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$")
+    ]);
 
     constructor(private route: ActivatedRoute,
                 private apiService: APIService,
@@ -56,6 +61,8 @@ export class AppComponent implements OnInit {
 
 
     sendConvertRequest() {
+        if (this.urlFormControl.invalid) return;
+
         this.apiService.requestConvert(this.request)
             .subscribe(
                 () => this.sendUpdateRequest(),

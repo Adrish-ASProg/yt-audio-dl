@@ -18,7 +18,11 @@
     <!--  Input / Button to make request -->
     <div class="request-container">
         <mat-form-field class="url-container">
-            <input [(ngModel)]="request.url" matInput placeholder="Video URL">
+            <!-- TODO remove ngModel -->
+            <input [(ngModel)]="request.url" [formControl]="urlFormControl" matInput placeholder="Video URL">
+            <mat-error *ngIf="urlFormControl.invalid">
+                Please enter a valid url address
+            </mat-error>
         </mat-form-field>
         <div class="request-controls">
             <mat-slide-toggle [checked]="request.audioOnly" disabled>Audio only</mat-slide-toggle>
