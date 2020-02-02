@@ -21,7 +21,8 @@ export class HomeComponent implements OnInit {
 
     menu: any = [
         {label: "Refresh", action: () => this.refreshButtonClicked()},
-        {label: "Delete", action: () => this.deleteButtonClicked()}
+        {label: "Delete", action: () => this.deleteButtonClicked()},
+        {label: "Settings", action: () => this.openSettingsDialog()}
     ];
 
     @ViewChild(FileStatusTableComponent, {static: false})
@@ -46,19 +47,29 @@ export class HomeComponent implements OnInit {
 
     constructor(private route: ActivatedRoute,
                 private apiService: APIService,
+                private settingsService: SettingsService,
                 private dialog: MatDialog) { }
 
     ngOnInit() {
-        this.route.queryParams.subscribe(params => {
-            const videoId = params["videoId"];
-            if (videoId == void 0) return;
+        this.getSettings();
 
-            if (videoId.length === 11) {
-                this.request.url = `https://www.youtube.com/watch?v=${videoId}`;
-                this.sendConvertRequest();
-            }
-        });
+        if (this.route.queryParams) {
+            this.route.queryParams.subscribe(params => {
+                const videoId = params["videoId"];
+                if (videoId == void 0) return;
+
+                if (videoId.length === 11) {
+                    this.request.url = `https://www.youtube.com/watch?v=${videoId}`;
+                    this.sendConvertRequest();
+                }
+            });
+        }
+
         this.sendUpdateRequest();
+    }
+
+    getSettings() {
+        this.refreshRate = this.settingsService.getRefreshRate();
     }
 
     //#region Menu
@@ -166,6 +177,13 @@ export class HomeComponent implements OnInit {
         const dialogRef = this.dialog.open(TagEditorDialog, {data: event});
         dialogRef.afterClosed().subscribe(result => {
             if (result) this.sendTagRequest(result.uuid, result.name, result.metadata);
+        });
+    }
+
+    openSettingsDialog(): void {
+        const dialogRef = this.dialog.open(SettingsDialog, {width: "300px"});
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) this.getSettings();
         });
     }
 

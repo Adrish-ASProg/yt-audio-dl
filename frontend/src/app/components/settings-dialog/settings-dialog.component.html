@@ -1,0 +1,14 @@
+<!--<div class="title-container"></div>-->
+
+<div class="content" mat-dialog-content>
+    <div class="refresh-rate-container">
+        <span>Refresh frequency</span>
+        <mat-slider [(ngModel)]="refreshRate" [max]="5 * 60 * 1000 - 1" [step]="getSliderStep()" min="500"></mat-slider>
+        <span>{{ formatRefreshRate() }}</span>
+    </div>
+</div>
+
+<div mat-dialog-actions>
+    <button (click)="onValidButtonClicked()" cdkFocusInitial mat-button>Ok</button>
+    <button (click)="onCancelButtonClicked()" mat-button>Cancel</button>
+</div>

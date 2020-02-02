@@ -13,6 +13,7 @@ import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 import {MatButtonModule} from "@angular/material/button";
 import {MatMenuModule} from "@angular/material/menu";
 import {ActivatedRoute} from "@angular/router";
+import {SettingsServiceModule} from "../../services/settings/settings-service.module";
 
 describe('HomeComponent', () => {
     let component: HomeComponent;
@@ -30,6 +31,7 @@ describe('HomeComponent', () => {
                 BrowserAnimationsModule,
 
                 APIModule,
+                SettingsServiceModule,
                 FileStatusTableModule,
                 TagEditorDialogModule,
 
