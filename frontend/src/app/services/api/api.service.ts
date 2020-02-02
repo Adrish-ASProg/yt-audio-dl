@@ -4,6 +4,7 @@ import {Observable} from "rxjs";
 import {ConvertRequest} from "../../model/convertrequest.model";
 import {FileStatus} from "../../model/filestatus.model";
 import {Mp3Metadata} from "../../model/mp3metadata.model";
+import {APIModule} from "./api.module";
 
 
 const jsonHttpOptions = {
@@ -16,9 +17,7 @@ const audioHttpOptions = {
     observe: 'response' as 'body'
 };
 
-@Injectable({
-    providedIn: 'root'
-})
+@Injectable({providedIn: APIModule})
 export class APIService {
 
     private apiUrl: string = "http://localhost:8080";
