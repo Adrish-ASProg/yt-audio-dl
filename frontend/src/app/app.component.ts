@@ -2,14 +2,13 @@ import {Component, OnInit, ViewChild} from '@angular/core';
 import {APIService} from "./service/api.service";
 import {ConvertRequest} from "./model/convertrequest.model";
 import {FileStatus} from "./model/filestatus.model";
-import {Observable, Observer} from "rxjs";
-import {HttpErrorResponse} from "@angular/common/http";
 import {ActivatedRoute} from "@angular/router";
 import {TagEditorDialog} from "./components/tag-editor-dialog/tag-editor-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
 import {Mp3Metadata} from "./model/mp3metadata.model";
 import {FileStatusTableComponent} from "./components/file-status-table/file-status-table.component";
 import {FormControl, Validators} from "@angular/forms";
+import {Utils} from "./utils/utils";
 
 @Component({
     selector: 'app-root',
@@ -60,6 +59,8 @@ export class AppComponent implements OnInit {
     }
 
 
+    //#region Send_xxx_Requests methods
+
     sendConvertRequest() {
         if (this.urlFormControl.invalid) return;
 
@@ -106,30 +107,32 @@ export class AppComponent implements OnInit {
     sendDownloadRequest(uuid: string) {
         this.apiService.downloadFile(uuid)
             .subscribe(
-                response => this.saveFile(response),
+                response => Utils.saveFileFromServerResponse(response),
                 response => {
-                    this.parseErrorBlob(response)
+                    Utils.parseErrorBlob(response)
                         .subscribe(e => alert(e.message));
                 }
             );
+    }
+
+    sendDeleteRequest(uuids: string[]) {
+        this.apiService.deleteFiles(uuids)
+            .subscribe(
+                (result: boolean) => {
+                    if (!result) alert("An error occurred while trying to delete files, some files may not have been deleted");
+                },
+                error => {
+                    alert("An error occurred while trying to delete files");
+                    console.error(error);
+                })
     }
 
     sendTagRequest(uuid: string, name: string, metadata: Mp3Metadata) {
         this.apiService.setTags(uuid, name, metadata).subscribe();
     }
 
-    updateRefreshLoop() {
-        if (this.intervalId != void 0) clearInterval(this.intervalId);
-        this.intervalId = setInterval(() => this.sendUpdateRequest(), this.refreshRate);
-    }
+    // #endregion
 
-
-    openTagEditorDialog(event): void {
-        const dialogRef = this.dialog.open(TagEditorDialog, {data: event});
-        dialogRef.afterClosed().subscribe(result => {
-            if (result) this.sendTagRequest(result.uuid, result.name, result.metadata);
-        });
-    }
 
     //#region Menu
 
@@ -151,61 +154,20 @@ export class AppComponent implements OnInit {
 
         if (!confirm(confirmMsg)) return;
 
-        this.apiService.deleteFiles(
-            this.fileStatusTable.getSelected().map(fileStatus => fileStatus.uuid)
-        ).subscribe(
-            (result: boolean) => {
-                if (!result) alert("An error occurred while trying to delete files, some files may not have been deleted");
-            },
-            error => {
-                alert("An error occurred while trying to delete files");
-                console.error(error);
-            })
+        this.sendDeleteRequest(this.fileStatusTable.getSelected().map(fileStatus => fileStatus.uuid));
     }
 
     // #endregion
 
-
-    saveFile(response) {
-        // It is necessary to create a new blob object with mime-type explicitly set
-        // otherwise only Chrome works like it should
-        const newBlob = new Blob([response.body], {type: "audio/mpeg"});
-
-        // IE doesn't allow using a blob object directly as link href
-        // instead it is necessary to use msSaveOrOpenBlob
-        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-            window.navigator.msSaveOrOpenBlob(newBlob);
-            return;
-        }
-
-        // For other browsers:
-        // Create a link pointing to the ObjectURL containing the blob.
-        const data = window.URL.createObjectURL(newBlob);
-        const link = document.createElement('a');
-        link.href = data;
-        link.download = response.headers.get('FileName');
-        // this is necessary as link.click() does not work on the latest firefox
-        link.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true, view: window}));
-
-        setTimeout(function () {
-            // For Firefox it is necessary to delay revoking the ObjectURL
-            window.URL.revokeObjectURL(data);
-            link.remove();
-        }, 100);
+    updateRefreshLoop() {
+        if (this.intervalId != void 0) clearInterval(this.intervalId);
+        this.intervalId = setInterval(() => this.sendUpdateRequest(), this.refreshRate);
     }
 
-    parseErrorBlob(err: HttpErrorResponse): Observable<any> {
-        const reader: FileReader = new FileReader();
-
-        const obs = new Observable((observer: Observer<any>) => {
-            reader.onloadend = () => {
-                if (typeof reader.result === "string") {
-                    observer.next(JSON.parse(reader.result));
-                }
-                observer.complete();
-            }
+    openTagEditorDialog(event): void {
+        const dialogRef = this.dialog.open(TagEditorDialog, {data: event});
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) this.sendTagRequest(result.uuid, result.name, result.metadata);
         });
-        reader.readAsText(err.error);
-        return obs;
     }
 }
