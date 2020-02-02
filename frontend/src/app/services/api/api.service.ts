@@ -1,9 +1,9 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {Observable} from "rxjs";
-import {ConvertRequest} from "../model/convertrequest.model";
-import {FileStatus} from "../model/filestatus.model";
-import {Mp3Metadata} from "../model/mp3metadata.model";
+import {ConvertRequest} from "../../model/convertrequest.model";
+import {FileStatus} from "../../model/filestatus.model";
+import {Mp3Metadata} from "../../model/mp3metadata.model";
 
 
 const jsonHttpOptions = {

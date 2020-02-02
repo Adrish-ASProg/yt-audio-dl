@@ -3,12 +3,14 @@ import {TagEditorDialog} from "../../components/tag-editor-dialog/tag-editor-dia
 import {Utils} from "../../utils/utils";
 import {Mp3Metadata} from "../../model/mp3metadata.model";
 import {ActivatedRoute} from "@angular/router";
-import {APIService} from "../../service/api.service";
+import {APIService} from "../../services/api/api.service";
 import {MatDialog} from "@angular/material/dialog";
 import {FileStatusTableComponent} from "../../components/file-status-table/file-status-table.component";
 import {FileStatus} from "../../model/filestatus.model";
 import {ConvertRequest} from "../../model/convertrequest.model";
 import {FormControl, Validators} from "@angular/forms";
+import {SettingsDialog} from "../../components/settings-dialog/settings-dialog.component";
+import {SettingsService} from "../../services/settings/settings.service";
 
 @Component({
     selector: 'app-home',
