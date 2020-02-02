@@ -1,0 +1,27 @@
+<div class="content" role="main">
+
+    <!--  Input / Button to make request -->
+    <div class="request-container">
+        <mat-form-field class="url-container">
+            <!-- TODO remove ngModel -->
+            <input [(ngModel)]="request.url" [formControl]="urlFormControl" matInput placeholder="Video URL">
+            <mat-error *ngIf="urlFormControl.invalid">
+                Please enter a valid url address
+            </mat-error>
+        </mat-form-field>
+        <div class="request-controls">
+            <mat-slide-toggle [checked]="request.audioOnly" disabled>Audio only</mat-slide-toggle>
+            <button (click)="sendConvertRequest()" color="primary" mat-raised-button>Request convert</button>
+        </div>
+    </div>
+
+
+    <br/>
+
+    <!--  Table files status -->
+    <app-file-status-table #fileStatusTable
+                           (downloadButtonClicked)="sendDownloadRequest($event)"
+                           (fileNameClicked)="openTagEditorDialog($event)"
+                           [displayedColumns]="displayedColumns" [filesStatus]="filesStatus">
+    </app-file-status-table>
+</div>

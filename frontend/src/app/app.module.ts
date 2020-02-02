@@ -20,6 +20,7 @@ import {TagEditorDialog} from './components/tag-editor-dialog/tag-editor-dialog.
 import {MatDialogModule} from "@angular/material/dialog";
 import {MatMenuModule} from "@angular/material/menu";
 import {MatCheckboxModule} from "@angular/material/checkbox";
+import {HomeComponent} from './pages/home/home.component';
 
 @NgModule({
     entryComponents: [
@@ -28,7 +29,8 @@ import {MatCheckboxModule} from "@angular/material/checkbox";
     declarations: [
         AppComponent,
         FileStatusTableComponent,
-        TagEditorDialog
+        TagEditorDialog,
+        HomeComponent
     ],
     imports: [
         BrowserModule,
