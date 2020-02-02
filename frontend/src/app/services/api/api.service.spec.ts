@@ -1,11 +1,14 @@
 import {TestBed} from '@angular/core/testing';
 
 import {APIService} from './api.service';
+import {HttpClientModule} from "@angular/common/http";
 
 describe('APIService', () => {
 
-
-    beforeEach(() => TestBed.configureTestingModule({}));
+    beforeEach(() => TestBed.configureTestingModule({
+        imports: [HttpClientModule],
+        providers: [APIService]
+    }));
 
     it('should be created', () => {
         const service: APIService = TestBed.get(APIService);
@@ -16,7 +19,7 @@ describe('APIService', () => {
 
     it('all url should match', () => {
         const urlRegex: string = "^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$";
-        // const urlRegex: string = "http";
+
         const urls = ["https://www.example.com", "http://www.example.com", "www.example.com",
             "example.com", "http://blog.example.com", "http://www.example.com/product",
             "http://www.example.com/products?id=1&page=2",

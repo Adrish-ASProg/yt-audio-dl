@@ -31,7 +31,7 @@ export class HomeComponent implements OnInit {
     filesStatus: FileStatus[] = [];
 
     refreshRate: number = 3000;
-    intervalId: number;
+    intervalId: any;
 
     request: ConvertRequest = {
         url: "https://www.youtube.com/playlist?list=PL0-adpj8Oy0lqSmQVOrj9q_Q5CR0jIuUE",
