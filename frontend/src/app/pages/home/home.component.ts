@@ -22,6 +22,7 @@ export class HomeComponent implements OnInit {
 
     menu: any = [
         {label: "Refresh", action: () => this.refreshButtonClicked()},
+        {label: "Download", action: () => this.downloadButtonClicked()},
         {label: "Delete", action: () => this.deleteButtonClicked()},
         {label: "Settings", action: () => this.openSettingsDialog()}
     ];
@@ -29,7 +30,7 @@ export class HomeComponent implements OnInit {
     @ViewChild(FileStatusTableComponent, {static: false})
     fileStatusTable: FileStatusTableComponent;
 
-    displayedColumns: string[] = ['select', 'name', 'status', 'startDate', 'download'];
+    displayedColumns: string[] = ['select', 'name', 'status', 'startDate'];
     filesStatus: FileStatus[] = [];
 
     refreshRate: number = 3000;
@@ -83,6 +84,20 @@ export class HomeComponent implements OnInit {
     public refreshButtonClicked() {
         this.fileStatusTable.resetSelection();
         this.sendUpdateRequest(!this.isAutoUpdateRunning);
+    }
+
+    public downloadButtonClicked() {
+        const selectedItems: FileStatus[] = this.fileStatusTable.getSelected();
+
+        if (selectedItems.length < 1) {
+            alert("No files selected");
+            return;
+        }
+
+        selectedItems.forEach(fileStatus => {
+            if (fileStatus.status == "COMPLETED")
+                this.sendDownloadRequest(fileStatus.uuid)
+        });
     }
 
     public deleteButtonClicked() {

@@ -43,16 +43,6 @@
             <td *matCellDef="let element" mat-cell> {{element.startDate | date:"dd/MM/yyyy HH:mm"}} </td>
         </ng-container>
 
-        <!-- Download Column -->
-        <ng-container matColumnDef="download">
-            <th *matHeaderCellDef mat-header-cell> Download</th>
-            <td *matCellDef="let element" mat-cell>
-                <button (click)="downloadButtonClicked.emit(element.uuid)" color="primary" mat-icon-button>
-                    <mat-icon>cloud_download</mat-icon>
-                </button>
-            </td>
-        </ng-container>
-
         <tr *matHeaderRowDef="displayedColumns" mat-header-row></tr>
         <tr *matRowDef="let row; columns: displayedColumns;" mat-row></tr>
     </table>
