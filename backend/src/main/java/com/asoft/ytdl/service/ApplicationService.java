@@ -14,18 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.io.*;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.asoft.ytdl.utils.FileUtils.getFile;
 
@@ -160,17 +151,32 @@ public class ApplicationService {
     public boolean deleteFiles(List<String> uuids) throws FileNotFoundException {
         boolean allFilesDeleted = true;
 
+        // Keep only ERRORED or COMPLETED fileStatus
+        uuids = uuids.stream()
+                .filter(filesStatus::containsKey)
+                .map(filesStatus::get)
+                .filter(fileStatus -> ProgressStatus.ERROR.equals(fileStatus.getStatus())
+                        || ProgressStatus.COMPLETED.equals(fileStatus.getStatus()))
+                .map(FileStatus::getUuid)
+                .collect(Collectors.toList());
+
         for (String uuid : uuids) {
-            checkFileIsPresent(uuid);
+            FileStatus fs = filesStatus.get(uuid);
 
             // Retrieve filename
-            File f = FileUtils.getFile(DOWNLOAD_FOLDER + File.separator + filesStatus.get(uuid).getFileName());
+            File f = FileUtils.getFile(DOWNLOAD_FOLDER + File.separator + fs.getFileName());
 
-            // Delete file
-            boolean result = FileUtils.deleteFile(f);
-            if (result) filesStatus.remove(uuid);
+            // Status completed -> Rm from memory / rm from disk
+            if (ProgressStatus.COMPLETED.equals(fs.getStatus())) {
+                boolean result = FileUtils.deleteFile(f);
+                if (result) filesStatus.remove(uuid);
+                allFilesDeleted = allFilesDeleted && result;
+            }
 
-            allFilesDeleted = allFilesDeleted && result;
+            // Status error -> Rm from memory only
+            else if (ProgressStatus.ERROR.equals(fs.getStatus())) {
+                filesStatus.remove(uuid);
+            }
         }
 
         return allFilesDeleted;
