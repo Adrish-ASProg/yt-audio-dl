@@ -81,6 +81,7 @@ export class HomeComponent implements OnInit {
     }
 
     public refreshButtonClicked() {
+        this.fileStatusTable.resetSelection();
         this.sendUpdateRequest(!this.isAutoUpdateRunning);
     }
 
@@ -98,7 +99,8 @@ export class HomeComponent implements OnInit {
 
         if (!confirm(confirmMsg)) return;
 
-        this.sendDeleteRequest(this.fileStatusTable.getSelected().map(fileStatus => fileStatus.uuid));
+        this.sendDeleteRequest(selectedItems.map(fileStatus => fileStatus.uuid));
+        this.fileStatusTable.resetSelection();
     }
 
     // #endregion

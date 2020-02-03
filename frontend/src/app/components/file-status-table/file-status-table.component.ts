@@ -58,6 +58,10 @@ export class FileStatusTableComponent implements OnInit {
         return this.selection.selected;
     }
 
+    resetSelection(): void {
+        this.selection.clear();
+    }
+
     /** Whether the number of selected elements matches the total number of rows. */
     isAllSelected() {
         const numSelected = this.selection.selected.length;
