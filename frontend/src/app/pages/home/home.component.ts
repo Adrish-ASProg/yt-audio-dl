@@ -1,6 +1,6 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {TagEditorDialog} from "../../components/tag-editor-dialog/tag-editor-dialog.component";
-import {Utils} from "../../utils/utils";
+import {YTDLUtils} from "../../utils/ytdl-utils";
 import {Mp3Metadata} from "../../model/mp3metadata.model";
 import {ActivatedRoute} from "@angular/router";
 import {APIService} from "../../services/api/api.service";
@@ -156,9 +156,9 @@ export class HomeComponent implements OnInit {
     sendDownloadRequest(uuid: string) {
         this.apiService.downloadFile(uuid)
             .subscribe(
-                response => Utils.saveFileFromServerResponse(response),
+                response => YTDLUtils.saveFileFromServerResponse(response),
                 response => {
-                    Utils.parseErrorBlob(response)
+                    YTDLUtils.parseErrorBlob(response)
                         .subscribe(e => alert(e.message));
                 }
             );
@@ -183,7 +183,7 @@ export class HomeComponent implements OnInit {
     // #endregion
 
     openTagEditorDialog(event): void {
-        const dialogRef = this.dialog.open(TagEditorDialog, {data: event});
+        const dialogRef = this.dialog.open(TagEditorDialog, {data: YTDLUtils.copyObject(event)});
         dialogRef.afterClosed().subscribe(result => {
             if (result) this.sendTagRequest(result.uuid, result.name, result.metadata);
         });
