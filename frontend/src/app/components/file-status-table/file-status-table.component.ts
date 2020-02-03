@@ -22,7 +22,7 @@ export class FileStatusTableComponent implements OnInit {
     dataSource = new MatTableDataSource<FileStatus>(this.filesStatus);
 
     private _filesStatus: FileStatus[] = [];
-    private selection: any;
+    private selection: SelectionModel<FileStatus>;
 
     get filesStatus(): FileStatus[] {
         return this._filesStatus;

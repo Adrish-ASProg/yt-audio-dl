@@ -1,9 +1,10 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {Observable} from "rxjs";
-import {ConvertRequest} from "../model/convertrequest.model";
-import {FileStatus} from "../model/filestatus.model";
-import {Mp3Metadata} from "../model/mp3metadata.model";
+import {ConvertRequest} from "../../model/convertrequest.model";
+import {FileStatus} from "../../model/filestatus.model";
+import {Mp3Metadata} from "../../model/mp3metadata.model";
+import {APIModule} from "./api.module";
 
 
 const jsonHttpOptions = {
@@ -16,9 +17,7 @@ const audioHttpOptions = {
     observe: 'response' as 'body'
 };
 
-@Injectable({
-    providedIn: 'root'
-})
+@Injectable({providedIn: APIModule})
 export class APIService {
 
     private apiUrl: string = "http://localhost:8080";
@@ -41,10 +40,10 @@ export class APIService {
     }
 
     /** POST: set tags */
-    setTags(uuid: string, metadata: Mp3Metadata): Observable<Mp3Metadata> {
+    setTags(uuid: string, name: string, metadata: Mp3Metadata): Observable<Mp3Metadata> {
         return this.http.post<Mp3Metadata>(
             `${this.apiUrl}${this.setTagsUrl}`,
-            {uuid: uuid, metadata: metadata},
+            {uuid: uuid, name: name, metadata: metadata},
             jsonHttpOptions
         );
     }
@@ -55,8 +54,8 @@ export class APIService {
     }
 
     /** DELETE: delete files */
-    deleteFiles(uuids: string[]): Observable<void> {
-        return this.http.post<void>(
+    deleteFiles(uuids: string[]): Observable<boolean> {
+        return this.http.post<boolean>(
             `${this.apiUrl}${this.deleteUrl}`,
             uuids,
             jsonHttpOptions

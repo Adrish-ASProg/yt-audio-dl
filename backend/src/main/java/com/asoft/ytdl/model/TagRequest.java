@@ -7,5 +7,6 @@ import lombok.Setter;
 @Setter
 public class TagRequest {
     String uuid;
+    String name;
     Mp3Metadata metadata;
 }

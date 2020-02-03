@@ -46,6 +46,18 @@ public class FileUtils {
         }
     }
 
+    public static boolean renameFile(File oldFile, String newName) throws IOException {
+        if (oldFile == null || !oldFile.exists()) return false;
+
+        File newFile = new File(newName);
+
+        if (newFile.exists()) throw new IOException("File exists");
+
+        System.out.println("renaming file " + oldFile.getAbsolutePath() + " into " + newFile.getAbsolutePath());
+
+        return oldFile.renameTo(newFile);
+    }
+
     public static boolean deleteFile(File file) {
         if (file == null) return false;
         System.out.println("deleting file " + file.getAbsolutePath());

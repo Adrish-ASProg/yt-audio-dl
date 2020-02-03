@@ -1,12 +1,14 @@
 package com.asoft.ytdl.controller;
 
 import com.asoft.ytdl.exception.UncompletedDownloadException;
+import com.asoft.ytdl.exception.YTDLException;
 import com.asoft.ytdl.model.FileStatus;
 import com.asoft.ytdl.model.Mp3Metadata;
 import com.asoft.ytdl.model.TagRequest;
 import com.asoft.ytdl.model.YTRequest;
 import com.asoft.ytdl.service.ApplicationService;
 import com.mpatric.mp3agic.NotSupportedException;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +32,9 @@ public class FileController {
     ApplicationService applicationService;
 
     @RequestMapping(value = "/ytdl", method = RequestMethod.POST)
-    public ResponseEntity<Void> downloadFromYT(@RequestBody YTRequest ytRequest) {
+    public ResponseEntity<Void> downloadFromYT(@RequestBody YTRequest ytRequest) throws YTDLException {
+        if (ytRequest.getUrl() == null || !new UrlValidator(new String[]{"http", "https"}).isValid(ytRequest.getUrl()))
+            throw new YTDLException("Invalid URL");
         applicationService.downloadFileFromYT(ytRequest);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
@@ -63,9 +67,8 @@ public class FileController {
 
 
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
-    public ResponseEntity<Void> delete(@RequestBody List<String> uuids) throws FileNotFoundException {
-        applicationService.deleteFiles(uuids);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<Boolean> delete(@RequestBody List<String> uuids) throws FileNotFoundException {
+        return new ResponseEntity<>(applicationService.deleteFiles(uuids), HttpStatus.OK);
     }
 
 

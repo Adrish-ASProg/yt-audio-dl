@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import static com.asoft.ytdl.utils.FileUtils.getFile;
@@ -118,16 +119,23 @@ public class ApplicationService {
      **/
     public Mp3Metadata setTags(TagRequest tag) throws IOException, NotSupportedException {
         checkFileIsPresent(tag.getUuid());
+        FileStatus fs = filesStatus.get(tag.getUuid());
 
-        String filePath = DOWNLOAD_FOLDER + File.separator + filesStatus.get(tag.getUuid()).getName() + ".mp3";
+        String directory = DOWNLOAD_FOLDER + File.separator;
+        String fileName = directory + fs.getName() + ".mp3";
+        String newFileName = directory + tag.getName() + ".mp3";
 
         // Set tags in file
-        Mp3Tagger.setTags(filePath, tag.getMetadata());
+        Mp3Tagger.setTags(fileName, tag.getMetadata());
+        fs.setMetadata(Mp3Tagger.getTags(fileName));
 
-        // Update stored file info
-        filesStatus.get(tag.getUuid()).setMetadata(Mp3Tagger.getTags(filePath));
+        // Rename file if needed
+        if (!Objects.equals(fileName, newFileName)
+                && FileUtils.renameFile(new File(fileName), newFileName))
+            fs.setName(tag.getName());
 
-        return filesStatus.get(tag.getUuid()).getMetadata();
+
+        return fs.getMetadata();
     }
 
 
@@ -146,15 +154,26 @@ public class ApplicationService {
         return this.filesStatus.values();
     }
 
-    /** DELETE /delete **/
-    public void deleteFiles(List<String> uuids) throws FileNotFoundException {
+    /**
+     * DELETE /delete
+     **/
+    public boolean deleteFiles(List<String> uuids) throws FileNotFoundException {
+        boolean allFilesDeleted = true;
+
         for (String uuid : uuids) {
             checkFileIsPresent(uuid);
 
+            // Retrieve filename
             File f = FileUtils.getFile(DOWNLOAD_FOLDER + File.separator + filesStatus.get(uuid).getFileName());
-            FileUtils.deleteFile(f);
-            filesStatus.remove(uuid);
+
+            // Delete file
+            boolean result = FileUtils.deleteFile(f);
+            if (result) filesStatus.remove(uuid);
+
+            allFilesDeleted = allFilesDeleted && result;
         }
+
+        return allFilesDeleted;
     }
 
 
