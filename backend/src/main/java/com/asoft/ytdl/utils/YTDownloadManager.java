@@ -93,6 +93,7 @@ public class YTDownloadManager {
         );
         cmdManager.setOutputEvent(text -> {
             if (!text.startsWith("Process terminated")) {
+                text = text.replace("_", " ");
                 String uuid = UUID.randomUUID().toString();
                 fileNames.put(uuid, text);
                 titleRetrievedEvent.onTitleRetrievedEvent(uuid, text);
