@@ -17,6 +17,11 @@ const audioHttpOptions = {
     observe: 'response' as 'body'
 };
 
+const zipHttpOptions = {
+    responseType: 'arraybuffer' as 'json',
+    observe: 'response' as 'body'
+};
+
 @Injectable({providedIn: APIModule})
 export class APIService {
 
@@ -24,6 +29,7 @@ export class APIService {
     private convertUrl: string = "/ytdl";
     private statusUrl: string = "/status/all";
     private downloadUrl: string = "/dl";
+    private downloadAsZipUrl: string = "/dl-zip";
     private setTagsUrl: string = "/tags";
     private deleteUrl: string = "/delete";
 
@@ -37,6 +43,14 @@ export class APIService {
     /** POST: download file */
     downloadFile(uuid: string): Observable<any> {
         return this.http.get<any>(`${this.apiUrl}${this.downloadUrl}?uuid=${uuid}`, audioHttpOptions);
+    }
+
+    /** POST: download files as zip */
+    downloadFilesAsZip(uuids: string[]): Observable<any> {
+        return this.http.post<any>(
+            `${this.apiUrl}${this.downloadAsZipUrl}`,
+            uuids, zipHttpOptions
+        );
     }
 
     /** POST: set tags */

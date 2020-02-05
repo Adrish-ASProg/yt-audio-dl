@@ -12,12 +12,7 @@ import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileNotFoundException;
@@ -30,6 +25,11 @@ public class FileController {
 
     @Autowired
     ApplicationService applicationService;
+
+    @RequestMapping(value = "/dl-zip", method = RequestMethod.POST, produces = "application/zip")
+    public void downloadAsZip(HttpServletResponse response, @RequestBody List<String> uuids) {
+        applicationService.downloadFiles(uuids, response);
+    }
 
     @RequestMapping(value = "/ytdl", method = RequestMethod.POST)
     public ResponseEntity<Void> downloadFromYT(@RequestBody YTRequest ytRequest) throws YTDLException {

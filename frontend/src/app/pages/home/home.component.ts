@@ -94,10 +94,7 @@ export class HomeComponent implements OnInit {
             return;
         }
 
-        selectedItems.forEach(fileStatus => {
-            if (fileStatus.status == "COMPLETED")
-                this.sendDownloadRequest(fileStatus.uuid)
-        });
+        this.sendDownloadAsZipRequest(selectedItems.filter(fs => fs.status == "COMPLETED").map(fs => fs.uuid))
     }
 
     public deleteButtonClicked() {
@@ -174,10 +171,19 @@ export class HomeComponent implements OnInit {
         this.apiService.downloadFile(uuid)
             .subscribe(
                 response => YTDLUtils.saveFileFromServerResponse(response),
+                response => YTDLUtils.parseErrorBlob(response).subscribe(e => alert(e.message))
+            );
+    }
+
+    sendDownloadAsZipRequest(uuids: string[]) {
+        this.apiService.downloadFilesAsZip(uuids)
+            .subscribe(
                 response => {
-                    YTDLUtils.parseErrorBlob(response)
-                        .subscribe(e => alert(e.message));
-                }
+                    const blob = new Blob([response.body], {type: 'application/zip'});
+                    YTDLUtils.downloadBlobWithName(blob, 'yt-audio-dl.zip');
+                },
+                response => YTDLUtils.parseErrorBlob(response)
+                    .subscribe(e => alert(e.message))
             );
     }
 

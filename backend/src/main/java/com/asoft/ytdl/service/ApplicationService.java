@@ -10,6 +10,7 @@ import com.asoft.ytdl.model.YTRequest;
 import com.asoft.ytdl.utils.FileUtils;
 import com.asoft.ytdl.utils.YTDownloadManager;
 import com.mpatric.mp3agic.NotSupportedException;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 
@@ -17,6 +18,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static com.asoft.ytdl.utils.FileUtils.getFile;
 
@@ -98,11 +101,59 @@ public class ApplicationService {
             response.setHeader("Content-Disposition", "attachment; filename=" + file.getName());
             response.setHeader("Content-Length", String.valueOf(file.length()));
             response.setHeader("FileName", fileStatus.getName() + ".mp3");
+            response.setStatus(HttpServletResponse.SC_OK);
             FileCopyUtils.copy(in, response.getOutputStream());
         } catch (IOException e) {
             e.printStackTrace();
             System.err.println("[AppService.downloadFile] IOException, see logs above");
         }
+    }
+
+    /**
+     * POST /dl-zip
+     **/
+    public void downloadFiles(List<String> uuids, HttpServletResponse response) {
+        ArrayList<File> filesToBeZipped = new ArrayList<>();
+
+        /*
+        Filter uuids, keep only:
+         - file's uuid present in "fileStatus"
+         - fileStatus with COMPLETED status
+         - Existing files on disk
+        */
+        uuids.stream()
+                .filter(filesStatus::containsKey)
+                .map(filesStatus::get)
+                .filter(fs -> ProgressStatus.COMPLETED.equals(fs.getStatus()))
+                // FIXME extension
+                .map(fileStatus -> new File(DOWNLOAD_FOLDER + File.separator + fileStatus.getName() + ".mp3"))
+                .filter(File::exists)
+                .forEach(filesToBeZipped::add);
+
+        filesToBeZipped.clear();
+
+
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
+
+            // Package files into zip
+            for (File file : filesToBeZipped) {
+                zipOutputStream.putNextEntry(new ZipEntry(file.getName()));
+                FileInputStream fileInputStream = new FileInputStream(file);
+
+                IOUtils.copy(fileInputStream, zipOutputStream);
+
+                fileInputStream.close();
+                zipOutputStream.closeEntry();
+            }
+
+            //setting headers
+            response.addHeader("Content-Disposition", "attachment; filename=\"yt-audio-dl.zip\"");
+            response.setStatus(HttpServletResponse.SC_OK);
+        } catch (IOException e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+
     }
 
     /**
