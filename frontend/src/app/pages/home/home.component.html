@@ -22,10 +22,17 @@
         </div>
     </div>
 
-    <!--  Table files status -->
-    <app-file-status-table #fileStatusTable
-                           (downloadButtonClicked)="sendDownloadRequest($event)"
-                           (fileNameClicked)="openTagEditorDialog($event)"
-                           [displayedColumns]="displayedColumns" [filesStatus]="filesStatus">
-    </app-file-status-table>
+    <div class="table-container">
+        <div class="control-buttons">
+            <button (click)="downloadButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length" class="download-button" mat-raised-button>Download</button>
+            <button (click)="deleteButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length" class="delete-button" mat-raised-button>Delete</button>
+        </div>
+
+        <!--  Table files status -->
+        <app-file-status-table #fileStatusTable
+                               (downloadButtonClicked)="sendDownloadRequest($event)"
+                               (fileNameClicked)="openTagEditorDialog($event)"
+                               [displayedColumns]="displayedColumns" [filesStatus]="filesStatus">
+        </app-file-status-table>
+    </div>
 </div>

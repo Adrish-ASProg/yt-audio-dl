@@ -1,3 +1,5 @@
+@import "src/variables";
+
 .content {
     display: flex;
     flex-direction: column;
@@ -43,6 +45,33 @@
             button {
                 margin-left: 15px;
                 margin-right: 15px;
+            }
+        }
+    }
+
+    .table-container {
+        margin-top: 50px;
+
+        .control-buttons {
+            display: flex;
+            justify-content: space-evenly;
+
+            .download-button {
+                background-color: $success;
+                color: white;
+
+                &:disabled {
+                    background-color: grey;
+                }
+            }
+
+            .delete-button {
+                background-color: $danger;
+                color: white;
+
+                &:disabled {
+                    background-color: grey;
+                }
             }
         }
     }

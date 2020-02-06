@@ -22,8 +22,6 @@ export class HomeComponent implements OnInit {
 
     menu: any = [
         {label: "Refresh", action: () => this.refreshButtonClicked()},
-        {label: "Download", action: () => this.downloadButtonClicked()},
-        {label: "Delete", action: () => this.deleteButtonClicked()},
         {label: "Settings", action: () => this.openSettingsDialog()}
     ];
 
@@ -34,7 +32,6 @@ export class HomeComponent implements OnInit {
     filesStatus: FileStatus[] = [];
 
     refreshRate: number = 3000;
-    intervalId: any;
 
     isAutoUpdateRunning: boolean = true;
 

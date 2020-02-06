@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {FileStatus} from "../../model/filestatus.model";
 import {MatTableDataSource} from "@angular/material/table";
 import {MatPaginator} from "@angular/material/paginator";
@@ -10,7 +10,7 @@ import {SelectionModel} from "@angular/cdk/collections";
     templateUrl: './file-status-table.component.html',
     styleUrls: ['./file-status-table.component.scss']
 })
-export class FileStatusTableComponent implements OnInit {
+export class FileStatusTableComponent {
 
     @Output("fileNameClicked") fileNameClicked = new EventEmitter();
     @Output("downloadButtonClicked") downloadButtonClicked = new EventEmitter<string>();
@@ -22,7 +22,7 @@ export class FileStatusTableComponent implements OnInit {
     dataSource = new MatTableDataSource<FileStatus>(this.filesStatus);
 
     private _filesStatus: FileStatus[] = [];
-    private selection: SelectionModel<FileStatus>;
+    private selection: SelectionModel<FileStatus> = new SelectionModel<FileStatus>(true, []);
 
     get filesStatus(): FileStatus[] {
         return this._filesStatus;
@@ -35,12 +35,6 @@ export class FileStatusTableComponent implements OnInit {
         this.dataSource = new MatTableDataSource(this.filesStatus);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
-    }
-
-    public ngOnInit() {
-        const initialSelection = [];
-        const allowMultiSelect = true;
-        this.selection = new SelectionModel<FileStatus>(allowMultiSelect, initialSelection);
     }
 
     public getFileStatusClass(progressStatus: string): string {
