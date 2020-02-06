@@ -130,9 +130,6 @@ public class ApplicationService {
                 .filter(File::exists)
                 .forEach(filesToBeZipped::add);
 
-        filesToBeZipped.clear();
-
-
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
 
             // Package files into zip
