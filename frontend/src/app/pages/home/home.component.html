@@ -1,4 +1,9 @@
 <div class="content" role="main">
+    <!-- Server status -->
+    <div class="server-status-container">
+        <span [ngClass]="{'connected': isServerOn, 'disconnected': !isServerOn}" class="server-status-label">Server status: {{ isServerOn ? "Connected" : "Disconnected" }}</span>
+    </div>
+
     <!--  Input / Button to make request -->
     <div class="request-container">
         <div class="url-button-container">
@@ -24,8 +29,17 @@
 
     <div class="table-container">
         <div class="control-buttons">
-            <button (click)="downloadButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length" class="download-button" mat-raised-button>Download</button>
-            <button (click)="deleteButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length" class="delete-button" mat-raised-button>Delete</button>
+            <!-- Download button -->
+            <button (click)="downloadButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
+                    class="download-button"
+                    mat-raised-button>Download
+            </button>
+
+            <!-- Delete button -->
+            <button (click)="deleteButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
+                    class="delete-button"
+                    mat-raised-button>Delete
+            </button>
         </div>
 
         <!--  Table files status -->

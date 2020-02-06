@@ -33,6 +33,7 @@ export class HomeComponent implements OnInit {
 
     refreshRate: number = 3000;
 
+    isServerOn: boolean = false;
     isAutoUpdateRunning: boolean = true;
 
     request: ConvertRequest = {
@@ -134,6 +135,8 @@ export class HomeComponent implements OnInit {
         this.apiService.getAllFileStatus()
             .subscribe(
                 filesStatus => {
+                    this.isServerOn = true;
+
                     // Remove old file status
                     this.filesStatus = this.filesStatus.filter(fs => filesStatus.find(f => f.uuid === fs.uuid));
 
@@ -156,6 +159,7 @@ export class HomeComponent implements OnInit {
                     }
                 },
                 response => {
+                    this.isServerOn = false;
                     this.isAutoUpdateRunning = false;
                     console.error("Unable to retrieve files status from server, stopping automatic requests.", response.error);
                     if (response.error != void 0 && response.error.message != void 0)
