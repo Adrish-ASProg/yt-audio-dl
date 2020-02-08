@@ -13,7 +13,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.csrf().disable().cors();
+        httpSecurity.csrf().disable();
     }
 
     @Bean

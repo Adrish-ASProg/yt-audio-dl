@@ -22,6 +22,43 @@
         <java.version>11</java.version>
     </properties>
 
+
+    <distributionManagement>
+        <repository>
+            <id>ftp-repo</id>
+            <url>ftp://192.168.1.4/media/pi/berryboot/download</url>
+        </repository>
+    </distributionManagement>
+
+
+    <build>
+        <extensions>
+            <!-- FTP -->
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ftp</artifactId>
+                <version>3.3.4</version>
+            </extension>
+        </extensions>
+
+        <plugins>
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-deploy</id>
+                        <goals>
+                            <goal>deploy</goal>
+                        </goals>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
     <modules>
         <module>backend</module>
         <module>frontend</module>
