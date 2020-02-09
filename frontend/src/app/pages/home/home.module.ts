@@ -4,7 +4,6 @@ import {TagEditorDialog} from "../../components/tag-editor-dialog/tag-editor-dia
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatInputModule} from "@angular/material/input";
-import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 import {MatButtonModule} from "@angular/material/button";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MatMenuModule} from "@angular/material/menu";
@@ -15,6 +14,8 @@ import {SettingsServiceModule} from "../../services/settings/settings-service.mo
 import {SettingsDialog} from "../../components/settings-dialog/settings-dialog.component";
 import {SettingsDialogModule} from "../../components/settings-dialog/settings-dialog.module";
 import {MatButtonToggleModule} from "@angular/material/button-toggle";
+import {PostProcessorDialog} from "../../components/post-processor-dialog/post-processor-dialog.component";
+import {PostProcessorDialogModule} from "../../components/post-processor-dialog/post-processor-dialog.module";
 
 @NgModule({
     entryComponents: [TagEditorDialog, SettingsDialog],
@@ -33,7 +34,6 @@ import {MatButtonToggleModule} from "@angular/material/button-toggle";
 
         MatFormFieldModule,
         MatInputModule,
-        MatSlideToggleModule,
         MatButtonModule,
         MatMenuModule,
         MatButtonToggleModule

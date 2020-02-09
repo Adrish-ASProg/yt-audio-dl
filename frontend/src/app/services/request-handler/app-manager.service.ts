@@ -2,7 +2,6 @@ import {Injectable} from '@angular/core';
 import {YTDLUtils} from "../../utils/ytdl-utils";
 import {Mp3Metadata} from "../../model/mp3metadata.model";
 import {APIService} from "../api/api.service";
-import {ConvertRequest} from "../../model/convertrequest.model";
 import {interval, Observable, Subject, Subscription} from "rxjs";
 import {flatMap} from "rxjs/operators";
 import {FileStatus} from "../../model/filestatus.model";
@@ -74,7 +73,7 @@ export class AppManager {
 
     //#region Send_xxx_Request
 
-    sendConvertRequest(request: ConvertRequest): void {
+    sendConvertRequest(request: string): void {
         this.apiService.requestConvert(request)
             .subscribe(
                 () => this.sendUpdateRequest(),

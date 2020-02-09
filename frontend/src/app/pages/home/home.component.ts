@@ -5,12 +5,12 @@ import {ActivatedRoute} from "@angular/router";
 import {MatDialog} from "@angular/material/dialog";
 import {FileStatusTableComponent} from "../../components/file-status-table/file-status-table.component";
 import {FileStatus} from "../../model/filestatus.model";
-import {ConvertRequest} from "../../model/convertrequest.model";
 import {FormControl, Validators} from "@angular/forms";
 import {SettingsDialog} from "../../components/settings-dialog/settings-dialog.component";
 import {SettingsService} from "../../services/settings/settings.service";
 import {YT_URLS} from "../../utils/ytdl-constants";
 import {AppManager} from "../../services/request-handler/app-manager.service";
+import {PostProcessorDialog} from "../../components/post-processor-dialog/post-processor-dialog.component";
 
 @Component({
     selector: 'app-home',
@@ -29,7 +29,7 @@ export class HomeComponent implements OnInit {
 
     displayedColumns: string[] = ['select', 'name', 'status', 'startDate'];
 
-    request: ConvertRequest = {url: YT_URLS.Playlist_Test, audioOnly: true};
+    request: string = YT_URLS.Playlist_Test;
 
     urlFormControl = new FormControl('', [
         Validators.required,
@@ -52,7 +52,7 @@ export class HomeComponent implements OnInit {
                 if (videoId == void 0) return;
 
                 if (videoId.length === 11) {
-                    this.request.url = `https://www.youtube.com/watch?v=${videoId}`;
+                    this.request = `https://www.youtube.com/watch?v=${videoId}`;
                     this.appManager.sendConvertRequest(this.request);
                 }
             });
@@ -137,16 +137,16 @@ export class HomeComponent implements OnInit {
     setUrl(event) {
         switch (event.value) {
             case "bg":
-                this.request.url = YT_URLS.Playlist_Background;
+                this.request = YT_URLS.Playlist_Background;
                 break;
 
             case "test":
-                this.request.url = YT_URLS.Playlist_Test;
+                this.request = YT_URLS.Playlist_Test;
                 break;
 
             case "video":
             default:
-                this.request.url = YT_URLS.Video_Test;
+                this.request = YT_URLS.Video_Test;
                 break;
         }
     }

@@ -1,7 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {Observable} from "rxjs";
-import {ConvertRequest} from "../../model/convertrequest.model";
 import {FileStatus} from "../../model/filestatus.model";
 import {Mp3Metadata} from "../../model/mp3metadata.model";
 import {APIModule} from "./api.module";
@@ -36,8 +35,8 @@ export class APIService {
     constructor(private http: HttpClient) {}
 
     /** POST: process new file */
-    requestConvert(convertRequest: ConvertRequest): Observable<{ uuid: string }> {
-        return this.http.post<{ uuid: string }>(`${this.apiUrl}${this.convertUrl}`, convertRequest, jsonHttpOptions);
+    requestConvert(url: string): Observable<{ uuid: string }> {
+        return this.http.post<{ uuid: string }>(`${this.apiUrl}${this.convertUrl}`, {url: url, audioOnly: true}, jsonHttpOptions);
     }
 
     /** POST: download file */
