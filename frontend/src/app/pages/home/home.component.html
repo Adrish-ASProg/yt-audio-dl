@@ -32,6 +32,12 @@
                     mat-raised-button>Download
             </button>
 
+            <!-- Post-Processor button -->
+            <button (click)="postProcessorButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
+                    class="processor-button"
+                    mat-raised-button>Post-Processor
+            </button>
+
             <!-- Delete button -->
             <button (click)="deleteButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
                     class="delete-button"

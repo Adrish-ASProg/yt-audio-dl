@@ -18,7 +18,7 @@ import {PostProcessorDialog} from "../../components/post-processor-dialog/post-p
 import {PostProcessorDialogModule} from "../../components/post-processor-dialog/post-processor-dialog.module";
 
 @NgModule({
-    entryComponents: [TagEditorDialog, SettingsDialog],
+    entryComponents: [TagEditorDialog, PostProcessorDialog, SettingsDialog],
     declarations: [HomeComponent],
     imports: [
         BrowserModule,
@@ -27,6 +27,7 @@ import {PostProcessorDialogModule} from "../../components/post-processor-dialog/
         SettingsServiceModule,
         FileStatusTableModule,
         TagEditorDialogModule,
+        PostProcessorDialogModule,
         SettingsDialogModule,
 
         FormsModule,

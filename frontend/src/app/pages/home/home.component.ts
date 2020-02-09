@@ -98,6 +98,17 @@ export class HomeComponent implements OnInit {
         else this.appManager.sendDownloadAsZipRequest(uuids);
     }
 
+    public postProcessorButtonClicked() {
+        const selectedItems: FileStatus[] = this.fileStatusTable.getSelected();
+
+        if (selectedItems.length < 1) {
+            alert("No files selected");
+            return;
+        }
+
+        this.openPostProcessorDialog(selectedItems);
+    }
+
     public deleteButtonClicked() {
         const selectedItems = this.fileStatusTable.getSelected();
 
@@ -124,6 +135,16 @@ export class HomeComponent implements OnInit {
         dialogRef.afterClosed().subscribe(result => {
             if (!result) return;
             this.appManager.sendTagRequest(result.uuid, result.name, result.metadata);
+        });
+    }
+
+    openPostProcessorDialog(selectedItems: FileStatus[]): void {
+        const dialogRef = this.dialog.open(PostProcessorDialog, {data: {fileStatus: selectedItems}});
+        dialogRef.afterClosed().subscribe((result: FileStatus[]) => {
+            if (!result) return;
+
+            result.forEach(fs => this.appManager.sendTagRequest(fs.uuid, fs.name, fs.metadata));
+            this.appManager.sendUpdateRequest().subscribe(fs => this.fileStatusTable.refreshDataTable(fs));
         });
     }
 

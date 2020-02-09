@@ -80,6 +80,17 @@
 
                 &:disabled {
                     background-color: grey;
+                    color: #a8a8a8;
+                }
+            }
+
+            .processor-button {
+                background-color: $orange;
+                color: white;
+
+                &:disabled {
+                    background-color: grey;
+                    color: #a8a8a8;
                 }
             }
 
@@ -89,6 +100,7 @@
 
                 &:disabled {
                     background-color: grey;
+                    color: #a8a8a8;
                 }
             }
         }
