@@ -29,8 +29,6 @@ export class HomeComponent implements OnInit {
 
     displayedColumns: string[] = ['select', 'name', 'status', 'startDate'];
 
-    request: string = YT_URLS.Playlist_Test;
-
     urlFormControl = new FormControl('', [
         Validators.required,
         Validators.pattern("^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$")
@@ -43,6 +41,8 @@ export class HomeComponent implements OnInit {
 
 
     ngOnInit() {
+        this.urlFormControl.setValue(YT_URLS.Playlist_Test);
+
         this.appManager.onFilesStatusUpdated
             .subscribe((fs: FileStatus[]) => { this.fileStatusTable.refreshDataTable(fs); });
 
@@ -52,8 +52,8 @@ export class HomeComponent implements OnInit {
                 if (videoId == void 0) return;
 
                 if (videoId.length === 11) {
-                    this.request = `https://www.youtube.com/watch?v=${videoId}`;
-                    this.appManager.sendConvertRequest(this.request);
+                    this.urlFormControl.setValue(`https://www.youtube.com/watch?v=${videoId}`);
+                    this.appManager.sendConvertRequest(this.urlFormControl.value);
                 }
             });
         }
@@ -82,7 +82,7 @@ export class HomeComponent implements OnInit {
 
     public convertButtonClicked() {
         if (this.urlFormControl.invalid) return;
-        this.appManager.sendConvertRequest(this.request);
+        this.appManager.sendConvertRequest(this.urlFormControl.value);
     }
 
     public downloadButtonClicked() {
@@ -158,16 +158,16 @@ export class HomeComponent implements OnInit {
     setUrl(event) {
         switch (event.value) {
             case "bg":
-                this.request = YT_URLS.Playlist_Background;
+                this.urlFormControl.setValue(YT_URLS.Playlist_Background);
                 break;
 
             case "test":
-                this.request = YT_URLS.Playlist_Test;
+                this.urlFormControl.setValue(YT_URLS.Playlist_Test);
                 break;
 
             case "video":
             default:
-                this.request = YT_URLS.Video_Test;
+                this.urlFormControl.setValue( YT_URLS.Video_Test);
                 break;
         }
     }

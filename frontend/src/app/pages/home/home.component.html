@@ -8,8 +8,7 @@
     <div class="request-container">
         <div class="url-button-container">
             <mat-form-field class="url-container">
-                <!-- TODO remove ngModel -->
-                <input [(ngModel)]="request" [formControl]="urlFormControl" matInput placeholder="Video URL">
+                <input [formControl]="urlFormControl" matInput placeholder="Video URL">
                 <mat-error *ngIf="urlFormControl.invalid">
                     Please enter a valid url address
                 </mat-error>
