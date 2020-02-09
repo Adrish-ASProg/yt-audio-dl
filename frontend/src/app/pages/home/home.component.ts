@@ -93,7 +93,9 @@ export class HomeComponent implements OnInit {
             return;
         }
 
-        this.appManager.sendDownloadAsZipRequest(selectedItems.filter(fs => fs.status == "COMPLETED").map(fs => fs.uuid))
+        const uuids: string[] = selectedItems.filter(fs => fs.status == "COMPLETED").map(fs => fs.uuid);
+        if (uuids.length == 1) this.appManager.sendDownloadRequest(uuids[0]);
+        else this.appManager.sendDownloadAsZipRequest(uuids);
     }
 
     public deleteButtonClicked() {
