@@ -15,8 +15,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -47,7 +58,8 @@ public class ApplicationService {
             dlManager.setDownloadCompletedEvent((uuid, fileName) -> {
                 FileStatus fs = filesStatus.get(uuid);
                 fs.setStatus(ProgressStatus.COMPLETED);
-                fs.setMetadata(Mp3Tagger.getTags(DOWNLOAD_FOLDER + File.separator + fs.getFileName()));
+                // FIXME extension
+                fs.setMetadata(Mp3Tagger.getTags(DOWNLOAD_FOLDER + File.separator + fs.getName() + ".mp3"));
             });
             dlManager.setTitleRetrievedEvent((uuid, title) -> {
                 if (!filesStatus.containsKey(uuid)) {
@@ -55,8 +67,6 @@ public class ApplicationService {
                             new FileStatus() {{
                                 setUuid(uuid);
                                 setName(title);
-                                // FIXME extension
-                                setFileName(title + ".mp3");
                                 setStatus(ProgressStatus.INITIALIZING);
                                 setStartDate(new Date().getTime());
                             }}
@@ -212,7 +222,7 @@ public class ApplicationService {
             FileStatus fs = filesStatus.get(uuid);
 
             // Retrieve filename
-            File f = FileUtils.getFile(DOWNLOAD_FOLDER + File.separator + fs.getFileName());
+            File f = FileUtils.getFile(DOWNLOAD_FOLDER + File.separator + fs.getName() + ".mp3");
 
             // Status completed -> Rm from memory / rm from disk
             if (ProgressStatus.COMPLETED.equals(fs.getStatus())) {
@@ -251,7 +261,6 @@ public class ApplicationService {
                     filesStatus.put(uuid.toString(),
                             new FileStatus() {{
                                 setUuid(uuid.toString());
-                                setFileName(file.getName());
                                 setName(file.getName().replace(".mp3", ""));
                                 setStatus(ProgressStatus.COMPLETED);
                                 setStartDate(FileUtils.getCreationDate(file));

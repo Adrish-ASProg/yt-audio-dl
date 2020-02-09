@@ -1,7 +1,6 @@
 package com.asoft.ytdl.model;
 
 import com.asoft.ytdl.enums.ProgressStatus;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,8 +9,6 @@ import lombok.Setter;
 public class FileStatus {
     private String uuid;
     private String name;
-    @JsonIgnore
-    private String fileName;
     private ProgressStatus status;
     private Long startDate;
     private Mp3Metadata metadata;
@@ -21,7 +18,6 @@ public class FileStatus {
         return "FileStatus{" +
                 "uuid='" + uuid + '\'' +
                 ", name='" + name + '\'' +
-                ", fileName='" + fileName + '\'' +
                 ", status=" + status +
                 ", startDate=" + startDate +
                 ", metadata=" + metadata +
