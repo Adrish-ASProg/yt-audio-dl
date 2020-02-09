@@ -19,7 +19,6 @@ export class AppManager {
     isServerOn: boolean = false;
 
     isAutoUpdateRunning: boolean = false;
-
     autoUpdateObservable: Subscription;
 
     constructor(private apiService: APIService,
