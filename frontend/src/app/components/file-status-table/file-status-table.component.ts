@@ -13,7 +13,6 @@ import {SelectionModel} from "@angular/cdk/collections";
 export class FileStatusTableComponent {
 
     @Output("fileNameClicked") fileNameClicked = new EventEmitter();
-    @Output("downloadButtonClicked") downloadButtonClicked = new EventEmitter<string>();
 
     @Input() displayedColumns: string[] = [];
 

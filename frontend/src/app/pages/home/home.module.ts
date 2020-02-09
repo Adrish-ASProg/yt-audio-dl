@@ -10,7 +10,6 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MatMenuModule} from "@angular/material/menu";
 import {BrowserModule} from "@angular/platform-browser";
 import {FileStatusTableModule} from "../../components/file-status-table/file-status-table.module";
-import {APIModule} from "../../services/api/api.module";
 import {TagEditorDialogModule} from "../../components/tag-editor-dialog/tag-editor-dialog.module";
 import {SettingsServiceModule} from "../../services/settings/settings-service.module";
 import {SettingsDialog} from "../../components/settings-dialog/settings-dialog.component";
@@ -24,7 +23,6 @@ import {MatButtonToggleModule} from "@angular/material/button-toggle";
         BrowserModule,
         BrowserAnimationsModule,
 
-        APIModule,
         SettingsServiceModule,
         FileStatusTableModule,
         TagEditorDialogModule,

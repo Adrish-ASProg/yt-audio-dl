@@ -2,7 +2,7 @@ import {HttpErrorResponse} from "@angular/common/http";
 import {Observable, Observer} from "rxjs";
 
 export class YTDLUtils {
-    public static copyObject(object: Object): Object {
+    public static copyObject(object: Object): any {
         return JSON.parse(JSON.stringify(object));
     }
 

@@ -1,7 +1,7 @@
 <div class="content" role="main">
     <!-- Server status -->
     <div class="server-status-container">
-        <span [ngClass]="{'connected': isServerOn, 'disconnected': !isServerOn}" class="server-status-label">Server status: {{ isServerOn ? "Connected" : "Disconnected" }}</span>
+        <span [ngClass]="{'connected': appManager.isServerOn, 'disconnected': !appManager.isServerOn}" class="server-status-label">Server status: {{ appManager.isServerOn ? "Connected" : "Disconnected" }}</span>
     </div>
 
     <!--  Input / Button to make request -->
@@ -23,7 +23,7 @@
         </div>
         <div class="request-controls">
             <mat-slide-toggle [checked]="request.audioOnly" disabled>Audio only</mat-slide-toggle>
-            <button (click)="sendConvertRequest()" color="primary" mat-raised-button>Request convert</button>
+            <button (click)="convertButtonClicked()" [disabled]="this.urlFormControl.invalid" color="primary" mat-raised-button>Request convert</button>
         </div>
     </div>
 
@@ -44,9 +44,8 @@
 
         <!--  Table files status -->
         <app-file-status-table #fileStatusTable
-                               (downloadButtonClicked)="sendDownloadRequest($event)"
                                (fileNameClicked)="openTagEditorDialog($event)"
-                               [displayedColumns]="displayedColumns" [filesStatus]="filesStatus">
+                               [displayedColumns]="displayedColumns" [filesStatus]="appManager.filesStatus">
         </app-file-status-table>
     </div>
 </div>

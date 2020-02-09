@@ -9,6 +9,7 @@ import {MatMenuModule} from "@angular/material/menu";
 import {MatIconModule} from "@angular/material/icon";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {MatButtonModule} from "@angular/material/button";
+import {AppManagerModule} from "./services/request-handler/app-manager.module";
 
 @NgModule({
     declarations: [AppComponent],
@@ -17,6 +18,7 @@ import {MatButtonModule} from "@angular/material/button";
         AppRoutingModule,
         BrowserAnimationsModule,
 
+        AppManagerModule,
         HomeModule,
 
         MatToolbarModule,
