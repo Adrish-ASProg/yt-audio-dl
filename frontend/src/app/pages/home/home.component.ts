@@ -130,7 +130,7 @@ export class HomeComponent implements OnInit {
     // #endregion
 
 
-    openTagEditorDialog(event): void {
+    private openTagEditorDialog(event): void {
         const dialogRef = this.dialog.open(TagEditorDialog, {data: YTDLUtils.copyObject(event)});
         dialogRef.afterClosed().subscribe(result => {
             if (!result) return;
@@ -138,7 +138,7 @@ export class HomeComponent implements OnInit {
         });
     }
 
-    openPostProcessorDialog(selectedItems: FileStatus[]): void {
+    private openPostProcessorDialog(selectedItems: FileStatus[]): void {
         const dialogRef = this.dialog.open(PostProcessorDialog, {data: {fileStatus: selectedItems}});
         dialogRef.afterClosed().subscribe((result: FileStatus[]) => {
             if (!result) return;
@@ -148,7 +148,7 @@ export class HomeComponent implements OnInit {
         });
     }
 
-    openSettingsDialog(): void {
+    private openSettingsDialog(): void {
         const dialogRef = this.dialog.open(SettingsDialog, {width: "300px"});
         dialogRef.afterClosed().subscribe(result => {
             if (result) this.appManager.getSettings();
