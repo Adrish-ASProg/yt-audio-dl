@@ -16,9 +16,11 @@ import {SettingsDialogModule} from "../../components/settings-dialog/settings-di
 import {MatButtonToggleModule} from "@angular/material/button-toggle";
 import {PostProcessorDialog} from "../../components/post-processor-dialog/post-processor-dialog.component";
 import {PostProcessorDialogModule} from "../../components/post-processor-dialog/post-processor-dialog.module";
+import {PlaylistDialogModule} from "../../components/playlist-dialog/playlist-dialog.module";
+import {PlaylistDialog} from "../../components/playlist-dialog/playlist-dialog.component";
 
 @NgModule({
-    entryComponents: [TagEditorDialog, PostProcessorDialog, SettingsDialog],
+    entryComponents: [PlaylistDialog, TagEditorDialog, PostProcessorDialog, SettingsDialog],
     declarations: [HomeComponent],
     imports: [
         BrowserModule,
@@ -26,6 +28,7 @@ import {PostProcessorDialogModule} from "../../components/post-processor-dialog/
 
         SettingsServiceModule,
         FileStatusTableModule,
+        PlaylistDialogModule,
         TagEditorDialogModule,
         PostProcessorDialogModule,
         SettingsDialogModule,

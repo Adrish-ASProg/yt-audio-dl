@@ -2,7 +2,7 @@ import {Component, OnInit, ViewChild} from '@angular/core';
 import {TagEditorDialog} from "../../components/tag-editor-dialog/tag-editor-dialog.component";
 import {YTDLUtils} from "../../utils/ytdl-utils";
 import {ActivatedRoute} from "@angular/router";
-import {MatDialog} from "@angular/material/dialog";
+import {MatDialog, MatDialogRef} from "@angular/material/dialog";
 import {FileStatusTableComponent} from "../../components/file-status-table/file-status-table.component";
 import {FileStatus} from "../../model/filestatus.model";
 import {FormControl, Validators} from "@angular/forms";
@@ -11,6 +11,7 @@ import {SettingsService} from "../../services/settings/settings.service";
 import {YT_URLS} from "../../utils/ytdl-constants";
 import {AppManager} from "../../services/request-handler/app-manager.service";
 import {PostProcessorDialog} from "../../components/post-processor-dialog/post-processor-dialog.component";
+import {PlaylistDialog} from "../../components/playlist-dialog/playlist-dialog.component";
 
 @Component({
     selector: 'app-home',
@@ -94,8 +95,18 @@ export class HomeComponent implements OnInit {
         }
 
         const uuids: string[] = selectedItems.filter(fs => fs.status == "COMPLETED").map(fs => fs.uuid);
+
+        // Download only one file
         if (uuids.length == 1) this.appManager.sendDownloadRequest(uuids[0]);
-        else this.appManager.sendDownloadAsZipRequest(uuids);
+
+        // Download file as zip (+ eventually playlist)
+        else {
+            const dialogRef = this.openPlaylistDialog();
+            dialogRef.afterClosed().subscribe(result => {
+                if (!result) return;
+                this.appManager.sendDownloadAsZipRequest(uuids, result.createPlaylist, result.filePath);
+            });
+        }
     }
 
     public postProcessorButtonClicked() {
@@ -129,6 +140,22 @@ export class HomeComponent implements OnInit {
 
     // #endregion
 
+    setUrl(event) {
+        switch (event.value) {
+            case "bg":
+                this.urlFormControl.setValue(YT_URLS.Playlist_Background);
+                break;
+
+            case "test":
+                this.urlFormControl.setValue(YT_URLS.Playlist_Test);
+                break;
+
+            case "video":
+            default:
+                this.urlFormControl.setValue(YT_URLS.Video_Test);
+                break;
+        }
+    }
 
     private openTagEditorDialog(event): void {
         const dialogRef = this.dialog.open(TagEditorDialog, {data: YTDLUtils.copyObject(event)});
@@ -155,20 +182,7 @@ export class HomeComponent implements OnInit {
         });
     }
 
-    setUrl(event) {
-        switch (event.value) {
-            case "bg":
-                this.urlFormControl.setValue(YT_URLS.Playlist_Background);
-                break;
-
-            case "test":
-                this.urlFormControl.setValue(YT_URLS.Playlist_Test);
-                break;
-
-            case "video":
-            default:
-                this.urlFormControl.setValue( YT_URLS.Video_Test);
-                break;
-        }
+    private openPlaylistDialog(): MatDialogRef<PlaylistDialog, any> {
+        return this.dialog.open(PlaylistDialog, {width: "300px"});
     }
 }

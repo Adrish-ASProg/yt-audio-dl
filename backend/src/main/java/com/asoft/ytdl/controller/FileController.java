@@ -2,6 +2,7 @@ package com.asoft.ytdl.controller;
 
 import com.asoft.ytdl.exception.UncompletedDownloadException;
 import com.asoft.ytdl.exception.YTDLException;
+import com.asoft.ytdl.model.DLAsZipRequest;
 import com.asoft.ytdl.model.FileStatus;
 import com.asoft.ytdl.model.Mp3Metadata;
 import com.asoft.ytdl.model.TagRequest;
@@ -49,8 +50,8 @@ public class FileController {
     }
 
     @RequestMapping(value = "/dl-zip", method = RequestMethod.POST, produces = "application/zip")
-    public void downloadAsZip(HttpServletResponse response, @RequestBody List<String> uuids) {
-        applicationService.downloadFiles(uuids, response);
+    public void downloadAsZip(HttpServletResponse response, @RequestBody DLAsZipRequest request) {
+        applicationService.downloadFiles(request, response);
     }
 
 

@@ -45,10 +45,11 @@ export class APIService {
     }
 
     /** POST: download files as zip */
-    downloadFilesAsZip(uuids: string[]): Observable<any> {
+    downloadFilesAsZip(uuids: string[], createPlaylist: boolean, filePath: string): Observable<any> {
         return this.http.post<any>(
             `${this.apiUrl}${this.downloadAsZipUrl}`,
-            uuids, zipHttpOptions
+            {uuids: uuids, createPlaylist: createPlaylist, filePath: filePath},
+            zipHttpOptions
         );
     }
 

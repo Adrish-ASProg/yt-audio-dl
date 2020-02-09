@@ -1,0 +1,17 @@
+<div class="title" mat-dialog-title>Playlist creator</div>
+
+<div class="content" mat-dialog-content>
+
+    <div class="message">Do you want to add a m3u8 playlist with these files ?</div>
+
+    <mat-form-field>
+        <input [(ngModel)]="filePath" matInput placeholder="Mp3 path">
+    </mat-form-field>
+    <mat-error *ngIf="showError">Path is required</mat-error>
+</div>
+
+<div mat-dialog-actions>
+    <button (click)="onYesButtonClicked()" mat-button>Yes</button>
+    <button (click)="onNoButtonClicked()" cdkFocusInitial mat-button>No</button>
+    <button (click)="onCancelButtonClicked()" mat-button>Cancel</button>
+</div>

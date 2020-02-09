@@ -3,6 +3,7 @@ package com.asoft.ytdl.service;
 import com.asoft.ytdl.application.Mp3Tagger;
 import com.asoft.ytdl.enums.ProgressStatus;
 import com.asoft.ytdl.exception.UncompletedDownloadException;
+import com.asoft.ytdl.model.DLAsZipRequest;
 import com.asoft.ytdl.model.FileStatus;
 import com.asoft.ytdl.model.Mp3Metadata;
 import com.asoft.ytdl.model.TagRequest;
@@ -13,14 +14,16 @@ import com.mpatric.mp3agic.NotSupportedException;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -122,8 +125,8 @@ public class ApplicationService {
     /**
      * POST /dl-zip
      **/
-    public void downloadFiles(List<String> uuids, HttpServletResponse response) {
-        ArrayList<File> filesToBeZipped = new ArrayList<>();
+    public void downloadFiles(DLAsZipRequest request, HttpServletResponse response) {
+        Map<String, File> filesToBeZipped = new HashMap<>();
 
         /*
         Filter uuids, keep only:
@@ -131,25 +134,39 @@ public class ApplicationService {
          - fileStatus with COMPLETED status
          - Existing files on disk
         */
-        uuids.stream()
+        request.getUuids().stream()
                 .filter(filesStatus::containsKey)
                 .map(filesStatus::get)
                 .filter(fs -> ProgressStatus.COMPLETED.equals(fs.getStatus()))
                 // FIXME extension
                 .map(fileStatus -> new File(DOWNLOAD_FOLDER + File.separator + fileStatus.getName() + ".mp3"))
                 .filter(File::exists)
-                .forEach(filesToBeZipped::add);
+                .forEach(file -> filesToBeZipped.put(file.getName(), file));
 
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
 
             // Package files into zip
-            for (File file : filesToBeZipped) {
-                zipOutputStream.putNextEntry(new ZipEntry(file.getName()));
-                FileInputStream fileInputStream = new FileInputStream(file);
+            for (Map.Entry<String, File> entry : filesToBeZipped.entrySet()) {
+                zipOutputStream.putNextEntry(new ZipEntry(entry.getKey()));
+                FileInputStream fileInputStream = new FileInputStream(entry.getValue());
 
                 IOUtils.copy(fileInputStream, zipOutputStream);
 
                 fileInputStream.close();
+                zipOutputStream.closeEntry();
+            }
+
+            // Include playlist if needed
+            if (request.getCreatePlaylist() && !StringUtils.isEmpty(request.getFilePath())) {
+                String text = filesToBeZipped.keySet()
+                        .stream()
+                        .map(fileName -> request.getFilePath() + fileName)
+                        .collect(Collectors.joining("\n"));
+
+                InputStream inputStream = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
+                zipOutputStream.putNextEntry(new ZipEntry("playlist.m3u8"));
+                IOUtils.copy(inputStream, zipOutputStream);
+                inputStream.close();
                 zipOutputStream.closeEntry();
             }
 

@@ -94,8 +94,8 @@ export class AppManager {
             );
     }
 
-    sendDownloadAsZipRequest(uuids: string[]): void {
-        this.apiService.downloadFilesAsZip(uuids)
+    sendDownloadAsZipRequest(uuids: string[], createPlaylist: boolean, filePath: string): void {
+        this.apiService.downloadFilesAsZip(uuids, createPlaylist, filePath)
             .subscribe(
                 response => {
                     const blob = new Blob([response.body], {type: 'application/zip'});
