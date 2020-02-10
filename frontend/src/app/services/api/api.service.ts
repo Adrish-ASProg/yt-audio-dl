@@ -24,7 +24,7 @@ const zipHttpOptions = {
 @Injectable({providedIn: APIModule})
 export class APIService {
 
-    private apiUrl: string = "http://localhost:8080";
+    private apiUrl: string = `http://${window.location.hostname}:8080`;
     private convertUrl: string = "/ytdl";
     private statusUrl: string = "/status/all";
     private downloadUrl: string = "/dl";

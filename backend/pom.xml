@@ -109,6 +109,42 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- deploy -->
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.8.2</version>
+                <executions>
+                    <!-- skip default-deploy -->
+                    <execution>
+                        <id>default-deploy</id>
+                        <goals>
+                            <goal>deploy</goal>
+                        </goals>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </execution>
+
+                    <!-- deploy-file -->
+                    <execution>
+                        <id>deploy-file</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>deploy-file</goal>
+                        </goals>
+                        <configuration>
+                            <repositoryId>ftp-repo</repositoryId>
+                            <url>ftp://192.168.1.4/media/pi/berryboot/download</url>
+                            <file>${project.basedir}/target/yt-audio-dl-backend-${project.version}.jar</file>
+
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>${project.artifactId}</artifactId>
+                            <version>${project.version}</version>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
