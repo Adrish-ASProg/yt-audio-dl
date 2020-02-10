@@ -6,6 +6,9 @@ import lombok.Setter;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 interface CmdOutputEvent {
     void onOutput(String text);
@@ -32,7 +35,7 @@ public class CmdManager {
         long startTime = System.currentTimeMillis();
 
         try {
-            Process process = Runtime.getRuntime().exec(command);
+            Process process = exec(command);
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             BufferedReader errReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
@@ -49,5 +52,18 @@ public class CmdManager {
             err.printStackTrace();
         }
         outputEvent.onOutput("Process terminated in " + (System.currentTimeMillis() - startTime) + "ms");
+    }
+
+    /**
+     * Replace default "Runtime.getRuntime().exec(String)" method ignoring quoted strings.
+     **/
+    private Process exec(String command) throws IOException {
+        var l = new ArrayList<String>();
+        Matcher m = Pattern.compile("\"([^\"]*)\"|(\\S+)").matcher(command);
+        while (m.find()) l.add(m.group(1) != null ? m.group(1) : m.group(2));
+        String[] cmdarray = new String[l.size()];
+        l.toArray(cmdarray);
+
+        return Runtime.getRuntime().exec(cmdarray);
     }
 }
