@@ -40,7 +40,7 @@
         <!-- Date Column -->
         <ng-container matColumnDef="startDate">
             <th *matHeaderCellDef mat-header-cell mat-sort-header> Date</th>
-            <td *matCellDef="let element" mat-cell> {{element.startDate | date:"dd/MM/yyyy HH:mm"}} </td>
+            <td *matCellDef="let element" mat-cell> {{element.startDate | date:"dd/MM - HH:mm"}} </td>
         </ng-container>
 
         <tr *matHeaderRowDef="displayedColumns" mat-header-row></tr>
