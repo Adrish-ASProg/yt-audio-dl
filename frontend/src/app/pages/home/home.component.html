@@ -12,7 +12,9 @@
                 <mat-error *ngIf="urlFormControl.invalid">
                     Please enter a valid url address
                 </mat-error>
-                <button (click)="convertButtonClicked()" [disabled]="this.urlFormControl.invalid" color="primary" mat-raised-button matSuffix>Request convert</button>
+                <button (click)="convertButtonClicked()" [disabled]="this.urlFormControl.invalid" color="primary" mat-icon-button matSuffix>
+                    <i class="material-icons">send</i>
+                </button>
             </mat-form-field>
 
             <mat-button-toggle-group (change)="setUrl($event)" name="fontStyle">
