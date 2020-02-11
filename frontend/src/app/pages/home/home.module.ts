@@ -18,6 +18,7 @@ import {PostProcessorDialog} from "../../components/post-processor-dialog/post-p
 import {PostProcessorDialogModule} from "../../components/post-processor-dialog/post-processor-dialog.module";
 import {PlaylistDialogModule} from "../../components/playlist-dialog/playlist-dialog.module";
 import {PlaylistDialog} from "../../components/playlist-dialog/playlist-dialog.component";
+import {MatProgressBarModule} from "@angular/material/progress-bar";
 
 @NgModule({
     entryComponents: [PlaylistDialog, TagEditorDialog, PostProcessorDialog, SettingsDialog],
@@ -40,7 +41,8 @@ import {PlaylistDialog} from "../../components/playlist-dialog/playlist-dialog.c
         MatInputModule,
         MatButtonModule,
         MatMenuModule,
-        MatButtonToggleModule
+        MatButtonToggleModule,
+        MatProgressBarModule
     ]
 })
 export class HomeModule {

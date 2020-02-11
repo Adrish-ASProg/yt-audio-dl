@@ -52,19 +52,6 @@
     .server-status-container {
         margin: 25px 0;
         text-align: center;
-
-        .server-status-label {
-            border-radius: 20px;
-            padding: 10px 50px;
-
-            &.connected {
-                background-color: $success-light;
-            }
-
-            &.disconnected {
-                background-color: $danger-light;
-            }
-        }
     }
 
     .table-container {

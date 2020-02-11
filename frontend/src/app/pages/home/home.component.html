@@ -1,9 +1,5 @@
+<mat-progress-bar *ngIf="!appManager.isServerOn" color="warn" mode="indeterminate"></mat-progress-bar>
 <div class="content" role="main">
-    <!-- Server status -->
-    <div class="server-status-container">
-        <span [ngClass]="{'connected': appManager.isServerOn, 'disconnected': !appManager.isServerOn}" class="server-status-label">Server status: {{ appManager.isServerOn ? "Connected" : "Disconnected" }}</span>
-    </div>
-
     <!--  Input / Button to make request -->
     <div class="request-container">
         <div class="url-button-container">
@@ -12,7 +8,8 @@
                 <mat-error *ngIf="urlFormControl.invalid">
                     Please enter a valid url address
                 </mat-error>
-                <button (click)="convertButtonClicked()" [disabled]="this.urlFormControl.invalid" color="primary" mat-icon-button matSuffix>
+                <button (click)="convertButtonClicked()" [disabled]="this.urlFormControl.invalid" color="primary"
+                        mat-icon-button matSuffix>
                     <i class="material-icons">send</i>
                 </button>
             </mat-form-field>
