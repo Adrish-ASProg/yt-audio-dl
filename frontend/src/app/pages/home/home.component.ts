@@ -69,7 +69,7 @@ export class HomeComponent implements OnInit {
 
     public refreshActionClicked() {
         this.fileStatusTable.resetSelection();
-        this.appManager.sendUpdateRequest();
+        this.appManager.runAutomaticUpdate();
     }
 
     public settingsActionClicked() {

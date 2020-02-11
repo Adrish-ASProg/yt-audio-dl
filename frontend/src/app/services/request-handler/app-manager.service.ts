@@ -43,7 +43,7 @@ export class AppManager {
             .subscribe(filesStatus => this.onUpdateReceived(filesStatus),
                 response => {
                     this.isServerOn = false;
-                    console.error("Unable to retrieve files status from server.", response.error);
+                    console.error("Unable to retrieve files status from server, stopping automatic updates.", response.error);
                     if (response.error != void 0 && response.error.message != void 0)
                         alert(response.error.message);
                 });
