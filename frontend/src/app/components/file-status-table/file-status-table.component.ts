@@ -44,11 +44,6 @@ export class FileStatusTableComponent {
         this.snackBar.open(filename, "Hide", {duration: 2000});
     }
 
-    public getFileStatusClass(progressStatus: string): string {
-        return (progressStatus === "COMPLETED") ? "completed" :
-            (progressStatus === "ERROR") ? "error" : "loading";
-    }
-
     refreshDataTable(data: FileStatus[]) {
         this.dataSource.data = data;
     }

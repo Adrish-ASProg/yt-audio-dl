@@ -6,14 +6,20 @@ table {
     margin-top: 15px;
     padding: 0 10px;
 
-    ::ng-deep th.mat-header-cell:first-of-type,
-    ::ng-deep td.mat-cell:first-of-type {
+    ::ng-deep th.checkbox-header-cell,
+    ::ng-deep td.checkbox-cell {
         padding: 0 10px;
         width: 32px;
     }
 
-    ::ng-deep th.mat-header-cell:last-of-type,
-    ::ng-deep td.mat-cell:last-of-type {
+    ::ng-deep th.status-header-cell {
+        .mat-sort-header-container {
+            justify-content: center;
+        }
+    }
+
+    ::ng-deep th.date-header-cell,
+    ::ng-deep td.date-cell {
         padding: 0;
         width: 100px;
     }
@@ -25,7 +31,6 @@ table {
     .checkbox-container {
         text-align: center;
     }
-
 
 
     .mat-cell {
@@ -45,19 +50,22 @@ table {
         }
 
         .span-file-status {
-            font-family: "Roboto Black", sans-serif;
+            display: block;
+            text-align: center;
             font-size: 12px;
-            padding: 0 5px;
 
-            &.completed {
+            .success-icon {
                 color: $success;
             }
-            &.loading {
-                color: $primary;
-            }
-            &.error {
+
+            .error-icon {
                 color: $danger;
             }
+        }
+
+        .loading-spinner-container {
+            display: flex;
+            justify-content: center;
         }
     }
 }

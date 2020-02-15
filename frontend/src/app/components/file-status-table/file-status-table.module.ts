@@ -10,6 +10,7 @@ import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {MatButtonModule} from "@angular/material/button";
 import {EllipsisModule} from "ngx-ellipsis";
 import {MatSnackBarModule} from "@angular/material/snack-bar";
+import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 
 @NgModule({
     entryComponents: [],
@@ -25,6 +26,7 @@ import {MatSnackBarModule} from "@angular/material/snack-bar";
         MatIconModule,
         MatButtonModule,
         MatSnackBarModule,
+        MatProgressSpinnerModule,
 
         EllipsisModule
     ],

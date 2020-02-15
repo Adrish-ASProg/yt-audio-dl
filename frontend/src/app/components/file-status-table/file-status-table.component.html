@@ -1,10 +1,10 @@
 <div class="status-container">
+    <!-- Table -->
     <table [dataSource]="dataSource" class="mat-elevation-z8" mat-table matSort matSortActive="startDate" matSortDirection="desc">
 
-
-        <!-- Checkbox -->
+        <!-- Checkbox Column -->
         <ng-container matColumnDef="select">
-            <th *matHeaderCellDef mat-header-cell>
+            <th *matHeaderCellDef class="checkbox-header-cell" mat-header-cell>
                 <div class="checkbox-container">
                     <mat-checkbox (change)="$event ? masterToggle() : null"
                                   [checked]="selection.hasValue() && isAllSelected()"
@@ -12,7 +12,7 @@
                     </mat-checkbox>
                 </div>
             </th>
-            <td *matCellDef="let row" mat-cell>
+            <td *matCellDef="let row" class="checkbox-cell" mat-cell>
                 <div class="checkbox-container">
                     <mat-checkbox (change)="$event ? selection.toggle(row) : null"
                                   (click)="$event.stopPropagation()"
@@ -34,16 +34,31 @@
 
         <!-- Status Column -->
         <ng-container matColumnDef="status">
-            <th *matHeaderCellDef mat-header-cell mat-sort-header> Status</th>
+            <th *matHeaderCellDef class="status-header-cell" mat-header-cell mat-sort-header> Status</th>
             <td *matCellDef="let element" mat-cell>
-                <span [ngClass]="getFileStatusClass(element.status)" class="span-file-status">{{element.status}}</span>
+                <!-- COMPLETED -->
+                <span *ngIf="element.status === 'COMPLETED'" class="span-file-status">
+                    <i class="material-icons success-icon">check_circle</i>
+                </span>
+
+                <!-- LOADING -->
+                <div class="loading-spinner-container">
+                    <span *ngIf="element.status !== 'COMPLETED' && element.status !== 'ERROR'" class="span-file-status">
+                        <mat-spinner [diameter]="24" [strokeWidth]="2"></mat-spinner>
+                    </span>
+                </div>
+
+                <!-- ERROR -->
+                <span *ngIf="element.status === 'ERROR'" class="span-file-status">
+                    <i class="material-icons error-icon">error</i>
+                </span>
             </td>
         </ng-container>
 
         <!-- Date Column -->
         <ng-container matColumnDef="startDate">
-            <th *matHeaderCellDef mat-header-cell mat-sort-header> Date</th>
-            <td *matCellDef="let element" mat-cell> {{element.startDate | date:"dd/MM - HH:mm"}} </td>
+            <th *matHeaderCellDef class="date-header-cell" mat-header-cell mat-sort-header> Date</th>
+            <td *matCellDef="let element" class="date-cell" mat-cell> {{element.startDate | date:"dd/MM - HH:mm"}} </td>
         </ng-container>
 
         <tr *matHeaderRowDef="displayedColumns" mat-header-row></tr>
