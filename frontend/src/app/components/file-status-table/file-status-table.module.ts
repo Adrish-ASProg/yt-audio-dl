@@ -8,6 +8,8 @@ import {MatIconModule} from "@angular/material/icon";
 import {BrowserModule} from "@angular/platform-browser";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {MatButtonModule} from "@angular/material/button";
+import {EllipsisModule} from "ngx-ellipsis";
+import {MatSnackBarModule} from "@angular/material/snack-bar";
 
 @NgModule({
     entryComponents: [],
@@ -21,7 +23,10 @@ import {MatButtonModule} from "@angular/material/button";
         MatPaginatorModule,
         MatSortModule,
         MatIconModule,
-        MatButtonModule
+        MatButtonModule,
+        MatSnackBarModule,
+
+        EllipsisModule
     ],
     exports: [FileStatusTableComponent],
     providers: []

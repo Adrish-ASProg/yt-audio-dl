@@ -4,6 +4,7 @@ import {MatTableDataSource} from "@angular/material/table";
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
 import {SelectionModel} from "@angular/cdk/collections";
+import {MatSnackBar} from "@angular/material/snack-bar";
 
 @Component({
     selector: 'app-file-status-table',
@@ -34,6 +35,13 @@ export class FileStatusTableComponent {
         this.dataSource = new MatTableDataSource(this.filesStatus);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
+    }
+
+    constructor(private snackBar: MatSnackBar) {}
+
+    showSnackbar(e: MouseEvent, filename: string) {
+        e.stopPropagation();
+        this.snackBar.open(filename, "Hide", {duration: 2000});
     }
 
     public getFileStatusClass(progressStatus: string): string {
