@@ -5,9 +5,18 @@ import {MatInputModule} from "@angular/material/input";
 import {MatButtonModule} from "@angular/material/button";
 import {FormsModule} from "@angular/forms";
 import {CommonModule} from "@angular/common";
+import {MatAutocompleteModule} from "@angular/material/autocomplete";
 
 @NgModule({
-    imports: [FormsModule, CommonModule, MatDialogModule, MatInputModule, MatButtonModule],
+    imports: [
+        FormsModule,
+        CommonModule,
+
+        MatDialogModule,
+        MatInputModule,
+        MatButtonModule,
+        MatAutocompleteModule
+    ],
     declarations: [PlaylistDialog]
 })
 export class PlaylistDialogModule {}

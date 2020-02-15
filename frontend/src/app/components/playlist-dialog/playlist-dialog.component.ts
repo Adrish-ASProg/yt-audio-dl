@@ -1,5 +1,6 @@
 import {Component} from '@angular/core';
 import {MatDialogRef} from "@angular/material/dialog";
+import {SettingsService} from "../../services/settings/settings.service";
 
 @Component({
     selector: 'app-playlist-dialog',
@@ -10,8 +11,12 @@ export class PlaylistDialog {
 
     showError: boolean = false;
     filePath: string = "";
+    savedFolders: string[] = [];
 
-    constructor(private dialogRef: MatDialogRef<PlaylistDialog>) {}
+    constructor(private dialogRef: MatDialogRef<PlaylistDialog>,
+                private settings: SettingsService) {
+        this.savedFolders = settings.getSavedFolders().split("|").filter(s => s != "");
+    }
 
     //#region Buttons
 

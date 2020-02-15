@@ -5,8 +5,12 @@
     <div class="message">Do you want to add a m3u8 playlist with these files ?</div>
 
     <mat-form-field>
-        <input [(ngModel)]="filePath" matInput placeholder="Mp3 path">
+        <input [(ngModel)]="filePath" [matAutocomplete]="autocomplete" matInput placeholder="Mp3 path">
     </mat-form-field>
+
+    <mat-autocomplete #autocomplete="matAutocomplete">
+        <mat-option *ngFor="let savedFolder of savedFolders" [value]="savedFolder">{{savedFolder}}</mat-option>
+    </mat-autocomplete>
     <mat-error *ngIf="showError">Path is required</mat-error>
 </div>
 

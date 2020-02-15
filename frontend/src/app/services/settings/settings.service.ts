@@ -3,7 +3,8 @@ import {SettingsServiceModule} from "./settings-service.module";
 
 
 enum OptionsKeys {
-    REFRESH_RATE = "REFRESH_RATE"
+    REFRESH_RATE = "REFRESH_RATE",
+    SAVED_FOLDERS = "SAVED_FOLDERS"
 }
 
 class Option {
@@ -16,7 +17,8 @@ class Option {
 export class SettingsService {
 
     options: Option[] = [
-        {name: OptionsKeys.REFRESH_RATE, value: 1500, defaultValue: 1500}
+        {name: OptionsKeys.REFRESH_RATE, value: 1500, defaultValue: 1500},
+        {name: OptionsKeys.SAVED_FOLDERS, value: "", defaultValue: ""}
     ];
 
     constructor() {
@@ -46,6 +48,16 @@ export class SettingsService {
 
         this.setOption(OptionsKeys.REFRESH_RATE, value);
         console.debug("Refresh rate value set to " + value);
+        return true;
+    }
+
+    getSavedFolders(): string {
+        return this.getOption(OptionsKeys.SAVED_FOLDERS).value;
+    }
+
+    setSavedFolders(value: string): boolean {
+        this.setOption(OptionsKeys.SAVED_FOLDERS, value);
+        console.debug("Saved folders value set to " + value);
         return true;
     }
 

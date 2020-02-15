@@ -6,17 +6,24 @@ import {MatButtonModule} from "@angular/material/button";
 import {SettingsServiceModule} from "../../services/settings/settings-service.module";
 import {FormsModule} from "@angular/forms";
 import {CommonModule} from "@angular/common";
+import {MatSelectModule} from "@angular/material/select";
+import {MatInputModule} from "@angular/material/input";
+import {MatDividerModule} from "@angular/material/divider";
 
 @NgModule({
     declarations: [SettingsDialog],
     imports: [
         FormsModule,
 
+        CommonModule,
+
         SettingsServiceModule,
         MatDialogModule,
         MatSliderModule,
         MatButtonModule,
-        CommonModule
+        MatSelectModule,
+        MatInputModule,
+        MatDividerModule
     ]
 })
 export class SettingsDialogModule {}
