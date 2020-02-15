@@ -35,7 +35,8 @@ export class PostProcessorDialog {
         this.exampleItem = YTDLUtils.copyObject(data.fileStatus[0]);
     }
 
-    updateTableResults() {
+    updateTableResults(format: Format) {
+        this.selectedFormat = format;
         if (this.selectedFormat) {
             const metadata: Mp3Metadata = this.setTagsFromName(this.data.fileStatus[0], this.selectedFormat);
             this.exampleItem.metadata.album = metadata.album;

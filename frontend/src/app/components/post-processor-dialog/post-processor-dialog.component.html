@@ -19,7 +19,7 @@
                     <!-- Select Format -->
                     <mat-form-field>
                         <mat-label>Format</mat-label>
-                        <mat-select (ngModelChange)="updateTableResults()" [(ngModel)]="selectedFormat">
+                        <mat-select (ngModelChange)="updateTableResults($event)" [ngModel]="selectedFormat">
                             <mat-option *ngFor="let format of formats" [value]="format">
                                 {{format.label}}
                             </mat-option>
