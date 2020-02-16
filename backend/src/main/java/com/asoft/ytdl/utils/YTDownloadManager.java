@@ -6,11 +6,14 @@ import com.asoft.ytdl.interfaces.DownloadCompletedEvent;
 import com.asoft.ytdl.interfaces.ErrorEvent;
 import com.asoft.ytdl.interfaces.ProgressEvent;
 import com.asoft.ytdl.interfaces.TitleRetrievedEvent;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.collections.CollectionUtils;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -19,14 +22,14 @@ import static com.asoft.ytdl.utils.SettingsManager.DOWNLOAD_FOLDER;
 
 
 @Setter
+@NoArgsConstructor
 public class YTDownloadManager {
 
     private DownloadCompletedEvent downloadCompletedEvent = (id, fileName) -> {};
     private TitleRetrievedEvent titleRetrievedEvent = (id, title) -> {};
     private ProgressEvent progressEvent = (id, progressStatus) -> {};
     private ErrorEvent errorEvent = (id, exception) -> {};
-
-    public YTDownloadManager() {}
+    private List<String> skippedId = new ArrayList<>();
 
     /**
      * Téléchargement de vidéo / playlist YouTube au format mp3
@@ -37,6 +40,20 @@ public class YTDownloadManager {
 
         if (fileNames.size() == 0) {
             errorEvent.onError(null, new YTDLException("[download] Unable to download file: No file found"));
+        }
+
+        if (!CollectionUtils.isEmpty(skippedId)) {
+            skippedId.forEach(id -> {
+                if (fileNames.containsKey(id)) {
+                    System.out.printf("Skipping already existing file %s (%s)\n", fileNames.get(id), id);
+                    fileNames.remove(id);
+                }
+            });
+        }
+
+        if (fileNames.size() < 1) {
+            System.out.println("No files to download");
+            return;
         }
 
         System.out.println(String.format("Starting download of %d files..\n", fileNames.size()));

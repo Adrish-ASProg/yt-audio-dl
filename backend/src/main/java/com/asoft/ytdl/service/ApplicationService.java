@@ -98,6 +98,7 @@ public class ApplicationService {
                     saveData();
                 }
             });
+            dlManager.setSkippedId(new ArrayList<>(filesStatus.keySet()));
             dlManager.download(ytRequest.getUrl());
         });
 
