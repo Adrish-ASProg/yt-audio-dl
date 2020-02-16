@@ -28,7 +28,7 @@
             <td *matCellDef="let element" mat-cell>
                 <span (click)="fileNameClicked.emit(element)" (ellipsis-click-more)="showSnackbar($event, element.name)"
                       [ngClass]="{'clickable': element.status === 'COMPLETED'}" class="span-file-name"
-                      ellipsis>{{element.name}}</span>
+                      [ellipsis-content]="element.name" ellipsis></span>
             </td>
         </ng-container>
 
