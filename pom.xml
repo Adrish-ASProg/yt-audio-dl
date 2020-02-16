@@ -5,9 +5,9 @@
 
 
     <groupId>com.asoft</groupId>
-    <artifactId>yt-audio-dl-parent</artifactId>
+    <artifactId>yt-audio-dl</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>yt-audio-dl-parent</name>
+    <name>yt-audio-dl</name>
     <description>YouTube audio downloader</description>
     <packaging>pom</packaging>
 
@@ -22,9 +22,57 @@
         <java.version>11</java.version>
     </properties>
 
+
+    <distributionManagement>
+        <repository>
+            <id>ftp-repo</id>
+            <url>ftp://192.168.1.4/media/pi/berryboot/download</url>
+        </repository>
+    </distributionManagement>
+
+
+    <build>
+        <extensions>
+            <!-- FTP -->
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ftp</artifactId>
+                <version>3.3.4</version>
+            </extension>
+        </extensions>
+
+        <plugins>
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-deploy</id>
+                        <goals>
+                            <goal>deploy</goal>
+                        </goals>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-release-plugin</artifactId>
+                <configuration>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
     <modules>
         <module>backend</module>
         <module>frontend</module>
     </modules>
+
+    <scm>
+        <connection>scm:git:git@github.com:Adrish-ASProg/yt-audio-dl.git</connection>
+        <tag>HEAD</tag>
+    </scm>
 
 </project>

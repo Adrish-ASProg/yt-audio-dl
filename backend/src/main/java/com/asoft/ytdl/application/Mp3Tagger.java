@@ -27,31 +27,34 @@ public class Mp3Tagger {
         Mp3File mp3File = getMp3File(filePath);
         if (mp3File == null) return;
 
-        if (mp3File.hasId3v1Tag() || mp3File.hasId3v2Tag()) {
+        if (!mp3File.hasId3v1Tag() && !mp3File.hasId3v2Tag()) {
+            System.err.println("Unable to set tags: No Id3v1/Id3v2 tags found in file " + filePath);
+            return;
+        }
 
-            ID3v1 mp3TagsV1 = mp3File.getId3v1Tag();
+        if (mp3File.hasId3v1Tag()) {
+            ID3v1 mp3Tags = mp3File.getId3v1Tag();
+            mp3Tags.setAlbum(tags.getAlbum());
+            mp3Tags.setArtist(tags.getArtist());
+            mp3Tags.setGenre(ID3v1Genres.matchGenreDescription(tags.getGenre()));
+            mp3Tags.setTitle(tags.getTitle());
+
+            mp3File.setId3v1Tag(mp3Tags);
+        }
+
+        if (mp3File.hasId3v2Tag()) {
             ID3v2 mp3Tags = mp3File.getId3v2Tag();
-
-            if (mp3File.hasId3v1Tag()) {
-                mp3TagsV1.setAlbum(tags.getAlbum());
-                mp3TagsV1.setArtist(tags.getArtist());
-                mp3TagsV1.setGenre(ID3v1Genres.matchGenreDescription(tags.getGenre()));
-                mp3TagsV1.setTitle(tags.getTitle());
-            }
-
-            if (mp3File.hasId3v2Tag()) {
-                mp3Tags.setAlbum(tags.getAlbum());
-                mp3Tags.setArtist(tags.getArtist());
-                mp3Tags.setGenre(ID3v1Genres.matchGenreDescription(tags.getGenre()));
-                mp3Tags.setTitle(tags.getTitle());
-            }
+            mp3Tags.setAlbum(tags.getAlbum());
+            mp3Tags.setArtist(tags.getArtist());
+            mp3Tags.setGenre(ID3v1Genres.matchGenreDescription(tags.getGenre()));
+            mp3Tags.setTitle(tags.getTitle());
 
             mp3File.setId3v2Tag(mp3Tags);
-            mp3File.save(mp3File.getFilename() + RETAG_EXTENSION);
-            renameFiles(mp3File.getFilename());
-
-            System.out.println("Successfully set tags: " + tags + " in file " + filePath);
         }
+
+        mp3File.save(mp3File.getFilename() + RETAG_EXTENSION);
+        renameFiles(mp3File.getFilename());
+        System.out.println("Successfully set tags: " + tags + " in file " + filePath);
     }
 
     public static Mp3Metadata getTags(String filePath) {

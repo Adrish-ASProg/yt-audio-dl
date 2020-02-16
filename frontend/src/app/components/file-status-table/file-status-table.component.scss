@@ -4,15 +4,36 @@
 table {
     width: 100%;
     margin-top: 15px;
+    padding: 0 10px;
 
-
-    .refresh_button {
-        color: $grey;
+    ::ng-deep th.checkbox-header-cell,
+    ::ng-deep td.checkbox-cell {
+        padding: 0 10px;
+        width: 32px;
     }
 
+    ::ng-deep th.status-header-cell {
+        .mat-sort-header-container {
+            justify-content: center;
+        }
+    }
+
+    ::ng-deep th.date-header-cell,
+    ::ng-deep td.date-cell {
+        padding: 0;
+        width: 100px;
+    }
+
+    .mat-column-select {
+        overflow: initial;
+    }
+
+    .checkbox-container {
+        text-align: center;
+    }
+
+
     .mat-cell {
-        padding-left: 10px;
-        padding-right: 10px;
 
         .clickable {
             cursor: pointer;
@@ -22,20 +43,29 @@ table {
             text-decoration: underline;
         }
 
-        .span-file-status {
-            font-family: "Roboto Black", sans-serif;
-            font-size: 12px;
-            padding: 0 5px;
+        .span-file-name {
+            display: block;
+            overflow: hidden;
+            max-height: 34px;
+        }
 
-            &.completed {
+        .span-file-status {
+            display: block;
+            text-align: center;
+            font-size: 12px;
+
+            .success-icon {
                 color: $success;
             }
-            &.loading {
-                color: $primary;
-            }
-            &.error {
+
+            .error-icon {
                 color: $danger;
             }
+        }
+
+        .loading-spinner-container {
+            display: flex;
+            justify-content: center;
         }
     }
 }

@@ -1,0 +1,35 @@
+.title-container {
+}
+
+.content {
+    .refresh-rate-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    mat-divider {
+        margin: 20px 0;
+    }
+
+    .playlist-folders-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-items: center;
+
+        .url-container {
+            width: 200px;
+        }
+
+        .select-folder-container {
+            display: flex;
+            align-items: center;
+            width: 200px;
+        }
+    }
+}
+
+.mat-dialog-actions {
+    justify-content: flex-end;
+}

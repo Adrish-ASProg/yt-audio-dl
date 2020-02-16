@@ -3,39 +3,59 @@ package com.asoft.ytdl.service;
 import com.asoft.ytdl.application.Mp3Tagger;
 import com.asoft.ytdl.enums.ProgressStatus;
 import com.asoft.ytdl.exception.UncompletedDownloadException;
+import com.asoft.ytdl.model.DLAsZipRequest;
 import com.asoft.ytdl.model.FileStatus;
 import com.asoft.ytdl.model.Mp3Metadata;
 import com.asoft.ytdl.model.TagRequest;
+import com.asoft.ytdl.model.XmlConfiguration;
 import com.asoft.ytdl.model.YTRequest;
 import com.asoft.ytdl.utils.FileUtils;
+import com.asoft.ytdl.utils.SettingsManager;
+import com.asoft.ytdl.utils.XMLManager;
 import com.asoft.ytdl.utils.YTDownloadManager;
 import com.mpatric.mp3agic.NotSupportedException;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static com.asoft.ytdl.utils.FileUtils.getFile;
+import static com.asoft.ytdl.utils.SettingsManager.DOWNLOAD_FOLDER;
 
 @Service
 public class ApplicationService {
 
-    public final static String DOWNLOAD_FOLDER = "downloaded";
-    private final Map<String, FileStatus> filesStatus = new HashMap<>();
+    private Map<String, FileStatus> filesStatus = new HashMap<>();
 
     ApplicationService() {
-        retrieveFilesOnDisk();
+        SettingsManager.initialize();
+        var config = XMLManager.read();
+        if (config != null && config.getFilesData() != null) {
+            filesStatus = config.getFilesData().stream().collect(Collectors.toMap(FileStatus::getId, Function.identity()));
+        }
     }
+
+    //#region Requests handler
 
     /**
      * POST /ytdl
@@ -43,39 +63,43 @@ public class ApplicationService {
     public void downloadFileFromYT(YTRequest ytRequest) {
         Thread downloadThread = new Thread(() -> {
             YTDownloadManager dlManager = new YTDownloadManager();
-            dlManager.setProgressEvent((uuid, progressStatus) -> {
-                if (filesStatus.containsKey(uuid)) {
-                    filesStatus.get(uuid).setStatus(progressStatus);
+            dlManager.setProgressEvent((id, progressStatus) -> {
+                if (filesStatus.containsKey(id) && !progressStatus.equals(filesStatus.get(id).getStatus())) {
+                    filesStatus.get(id).setStatus(progressStatus);
+                    saveData();
                 }
             });
-            dlManager.setDownloadCompletedEvent((uuid, fileName) -> {
-                FileStatus fs = filesStatus.get(uuid);
+            dlManager.setDownloadCompletedEvent((id, fileName) -> {
+                FileStatus fs = filesStatus.get(id);
                 fs.setStatus(ProgressStatus.COMPLETED);
-                fs.setMetadata(Mp3Tagger.getTags(DOWNLOAD_FOLDER + File.separator + fs.getFileName()));
+                // FIXME extension
+                fs.setMetadata(Mp3Tagger.getTags(DOWNLOAD_FOLDER + File.separator + fs.getName() + ".mp3"));
+                saveData();
             });
-            dlManager.setTitleRetrievedEvent((uuid, title) -> {
-                if (!filesStatus.containsKey(uuid)) {
-                    filesStatus.put(uuid,
+            dlManager.setTitleRetrievedEvent((id, title) -> {
+                if (!filesStatus.containsKey(id)) {
+                    filesStatus.put(id,
                             new FileStatus() {{
-                                setUuid(uuid);
+                                setId(id);
                                 setName(title);
-                                // FIXME extension
-                                setFileName(title + ".mp3");
                                 setStatus(ProgressStatus.INITIALIZING);
                                 setStartDate(new Date().getTime());
                             }}
                     );
+                    saveData();
                 }
             });
-            dlManager.setErrorEvent((uuid, error) -> {
+            dlManager.setErrorEvent((id, error) -> {
                 System.err.println("[AppService.downloadFileFromYT] " + error.getMessage());
 
-                if (filesStatus.containsKey(uuid)) {
-                    System.err.println("\n[AppService.downloadFileFromYT] " + filesStatus.get(uuid));
-                    filesStatus.get(uuid).setStatus(ProgressStatus.ERROR);
+                if (filesStatus.containsKey(id)) {
+                    System.err.println("[AppService.downloadFileFromYT] " + filesStatus.get(id));
+                    filesStatus.get(id).setStatus(ProgressStatus.ERROR);
+                    saveData();
                 }
             });
-            dlManager.download(ytRequest.getUrl(), ytRequest.getAudioOnly());
+            dlManager.setSkippedId(new ArrayList<>(filesStatus.keySet()));
+            dlManager.download(ytRequest.getUrl());
         });
 
         downloadThread.setUncaughtExceptionHandler((thread, e) -> {
@@ -87,10 +111,10 @@ public class ApplicationService {
     /**
      * POST /dl
      **/
-    public void downloadFile(String uuid, HttpServletResponse response) throws FileNotFoundException, UncompletedDownloadException {
-        checkFileIsPresent(uuid);
+    public void downloadFile(String id, HttpServletResponse response) throws FileNotFoundException, UncompletedDownloadException {
+        checkFileIsPresent(id);
 
-        FileStatus fileStatus = filesStatus.get(uuid);
+        FileStatus fileStatus = filesStatus.get(id);
 
         // File not downloaded yet
         if (fileStatus.getStatus() != ProgressStatus.COMPLETED) {
@@ -105,6 +129,7 @@ public class ApplicationService {
             response.setHeader("Content-Disposition", "attachment; filename=" + file.getName());
             response.setHeader("Content-Length", String.valueOf(file.length()));
             response.setHeader("FileName", fileStatus.getName() + ".mp3");
+            response.setStatus(HttpServletResponse.SC_OK);
             FileCopyUtils.copy(in, response.getOutputStream());
         } catch (IOException e) {
             e.printStackTrace();
@@ -113,29 +138,98 @@ public class ApplicationService {
     }
 
     /**
+     * POST /dl-zip
+     **/
+    public void downloadFiles(DLAsZipRequest request, HttpServletResponse response) {
+        Map<String, File> filesToBeZipped = new HashMap<>();
+
+        /*
+        Filter ids, keep only:
+         - file's id present in "fileStatus"
+         - fileStatus with COMPLETED status
+         - Existing files on disk
+        */
+        request.getIds().stream()
+                .filter(filesStatus::containsKey)
+                .map(filesStatus::get)
+                .filter(fs -> ProgressStatus.COMPLETED.equals(fs.getStatus()))
+                // FIXME extension
+                .map(fileStatus -> new File(DOWNLOAD_FOLDER + File.separator + fileStatus.getName() + ".mp3"))
+                .filter(File::exists)
+                .forEach(file -> filesToBeZipped.put(file.getName(), file));
+
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
+
+            // Package files into zip
+            for (Map.Entry<String, File> entry : filesToBeZipped.entrySet()) {
+                System.out.println("Zipping " + entry.getKey());
+                zipOutputStream.putNextEntry(new ZipEntry(entry.getKey()));
+                FileInputStream fileInputStream = new FileInputStream(entry.getValue());
+
+                IOUtils.copy(fileInputStream, zipOutputStream);
+
+                fileInputStream.close();
+                zipOutputStream.closeEntry();
+                System.out.println(entry.getKey() + " zipped");
+            }
+
+            // Include playlist if needed
+            if (request.getCreatePlaylist() && !StringUtils.isEmpty(request.getFilePath())) {
+                System.out.println("Creating playlist");
+                String text = filesToBeZipped.keySet()
+                        .stream()
+                        .map(fileName -> request.getFilePath() + fileName)
+                        .collect(Collectors.joining("\n"));
+
+                InputStream inputStream = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
+                zipOutputStream.putNextEntry(new ZipEntry("playlist.m3u8"));
+                IOUtils.copy(inputStream, zipOutputStream);
+                inputStream.close();
+                zipOutputStream.closeEntry();
+                System.out.println("Playlist created");
+            }
+
+            //setting headers
+            response.addHeader("Content-Disposition", "attachment; filename=\"yt-audio-dl.zip\"");
+            response.setStatus(HttpServletResponse.SC_OK);
+        } catch (IOException e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+    /**
      * POST /tags
      **/
     public Mp3Metadata setTags(TagRequest tag) throws IOException, NotSupportedException {
-        checkFileIsPresent(tag.getUuid());
+        checkFileIsPresent(tag.getId());
+        FileStatus fs = filesStatus.get(tag.getId());
 
-        String filePath = DOWNLOAD_FOLDER + File.separator + filesStatus.get(tag.getUuid()).getName() + ".mp3";
+        String directory = DOWNLOAD_FOLDER + File.separator;
+        String fileName = directory + fs.getName() + ".mp3";
+        String newFileName = directory + tag.getName() + ".mp3";
 
         // Set tags in file
-        Mp3Tagger.setTags(filePath, tag.getMetadata());
+        Mp3Tagger.setTags(fileName, tag.getMetadata());
+        fs.setMetadata(Mp3Tagger.getTags(fileName));
 
-        // Update stored file info
-        filesStatus.get(tag.getUuid()).setMetadata(Mp3Tagger.getTags(filePath));
+        // Rename file if needed
+        if (!Objects.equals(fileName, newFileName)
+                && FileUtils.renameFile(new File(fileName), newFileName))
+            fs.setName(tag.getName());
 
-        return filesStatus.get(tag.getUuid()).getMetadata();
+        saveData();
+
+        return fs.getMetadata();
     }
-
 
     /**
      * GET /status
      **/
-    public FileStatus getFileStatus(String uuid) throws FileNotFoundException {
-        checkFileIsPresent(uuid);
-        return filesStatus.get(uuid);
+    public FileStatus getFileStatus(String id) throws FileNotFoundException {
+        checkFileIsPresent(id);
+        return filesStatus.get(id);
     }
 
     /**
@@ -145,41 +239,59 @@ public class ApplicationService {
         return this.filesStatus.values();
     }
 
+    /**
+     * DELETE /delete
+     **/
+    public boolean deleteFiles(List<String> ids) throws FileNotFoundException {
+        boolean allFilesDeleted = true;
+
+        // Keep only ERRORED or COMPLETED fileStatus
+        ids = ids.stream()
+                .filter(filesStatus::containsKey)
+                .map(filesStatus::get)
+                .filter(fileStatus -> ProgressStatus.ERROR.equals(fileStatus.getStatus())
+                        || ProgressStatus.COMPLETED.equals(fileStatus.getStatus()))
+                .map(FileStatus::getId)
+                .collect(Collectors.toList());
+
+        for (String id : ids) {
+            FileStatus fs = filesStatus.get(id);
+
+            // Retrieve filename
+            File f = FileUtils.getFile(DOWNLOAD_FOLDER + File.separator + fs.getName() + ".mp3");
+
+            // Status completed -> Rm from memory / rm from disk
+            if (ProgressStatus.COMPLETED.equals(fs.getStatus())) {
+                boolean result = FileUtils.deleteFile(f);
+                if (result) filesStatus.remove(id);
+                allFilesDeleted = allFilesDeleted && result;
+            }
+
+            // Status error -> Rm from memory only
+            else if (ProgressStatus.ERROR.equals(fs.getStatus())) {
+                filesStatus.remove(id);
+            }
+        }
+
+        saveData();
+
+        return allFilesDeleted;
+    }
+
+    // #endregion
 
     //#region Private methods
 
-    private void retrieveFilesOnDisk() {
-        File downloadFolder;
-        try {
-            downloadFolder = getFile(DOWNLOAD_FOLDER);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            System.err.println("[AppService.retrieveFilesOnDisk] Unable to retrieve files in « " + DOWNLOAD_FOLDER + " » folder");
-            return;
-        }
-
-        FileUtils.getAllFilesInDirectory(downloadFolder)
-                .stream()
-                .filter(file -> file.getName().endsWith(".mp3"))
-                .forEach(file -> {
-                    UUID uuid = UUID.randomUUID();
-                    filesStatus.put(uuid.toString(),
-                            new FileStatus() {{
-                                setUuid(uuid.toString());
-                                setFileName(file.getName());
-                                setName(file.getName().replace(".mp3", ""));
-                                setStatus(ProgressStatus.COMPLETED);
-                                setStartDate(FileUtils.getCreationDate(file));
-                                setMetadata(Mp3Tagger.getTags(DOWNLOAD_FOLDER + File.separator + file.getName()));
-                            }}
-                    );
-                });
+    private void saveData() {
+        var config = new XmlConfiguration();
+        config.setFilesData(new ArrayList<>(filesStatus.values()));
+        XMLManager.write(config);
     }
 
-    private void checkFileIsPresent(String uuid) throws FileNotFoundException {
-        // UUID not found
-        if (!filesStatus.containsKey(uuid)) {
-            throw new FileNotFoundException("Unable to find file with uuid « " + uuid + " »");
+    private void checkFileIsPresent(String id) throws FileNotFoundException {
+        // ID not found
+        if (!filesStatus.containsKey(id)) {
+            throw new FileNotFoundException("Unable to find file with id « " + id + " »");
         }
     }
 

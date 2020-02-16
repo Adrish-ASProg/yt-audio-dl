@@ -3,6 +3,8 @@ import {FileStatus} from "../../model/filestatus.model";
 import {MatTableDataSource} from "@angular/material/table";
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
+import {SelectionModel} from "@angular/cdk/collections";
+import {MatSnackBar} from "@angular/material/snack-bar";
 
 @Component({
     selector: 'app-file-status-table',
@@ -12,8 +14,6 @@ import {MatSort} from "@angular/material/sort";
 export class FileStatusTableComponent {
 
     @Output("fileNameClicked") fileNameClicked = new EventEmitter();
-    @Output("refreshButtonClicked") refreshButtonClicked = new EventEmitter();
-    @Output("downloadButtonClicked") downloadButtonClicked = new EventEmitter<string>();
 
     @Input() displayedColumns: string[] = [];
 
@@ -22,8 +22,11 @@ export class FileStatusTableComponent {
     dataSource = new MatTableDataSource<FileStatus>(this.filesStatus);
 
     private _filesStatus: FileStatus[] = [];
+    public selection: SelectionModel<FileStatus> = new SelectionModel<FileStatus>(true, []);
 
-    get filesStatus(): FileStatus[] { return this._filesStatus; }
+    get filesStatus(): FileStatus[] {
+        return this._filesStatus;
+    }
 
     @Input()
     set filesStatus(filesStatus: FileStatus[]) {
@@ -34,8 +37,40 @@ export class FileStatusTableComponent {
         this.dataSource.sort = this.sort;
     }
 
-    public getFileStatusClass(progressStatus: string): string {
-        return (progressStatus === "COMPLETED") ? "completed" :
-            (progressStatus === "ERROR") ? "error" : "loading";
+    constructor(private snackBar: MatSnackBar) {}
+
+    showSnackbar(e: MouseEvent, filename: string) {
+        e.stopPropagation();
+        this.snackBar.open(filename, "Hide", {duration: 2000});
     }
+
+    refreshDataTable(data: FileStatus[]) {
+        this.dataSource.data = data;
+    }
+
+    //#region Selection
+
+    getSelected(): FileStatus[] {
+        return this.selection.selected;
+    }
+
+    resetSelection(): void {
+        this.selection.clear();
+    }
+
+    /** Whether the number of selected elements matches the total number of rows. */
+    isAllSelected() {
+        const numSelected = this.selection.selected.length;
+        const numRows = this.dataSource.data.length;
+        return numSelected == numRows;
+    }
+
+    /** Selects all rows if they are not all selected; otherwise clear selection. */
+    masterToggle() {
+        this.isAllSelected() ?
+            this.selection.clear() :
+            this.dataSource.data.forEach(row => this.selection.select(row));
+    }
+
+    // #endregion
 }

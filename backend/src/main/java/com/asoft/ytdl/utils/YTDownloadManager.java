@@ -6,104 +6,129 @@ import com.asoft.ytdl.interfaces.DownloadCompletedEvent;
 import com.asoft.ytdl.interfaces.ErrorEvent;
 import com.asoft.ytdl.interfaces.ProgressEvent;
 import com.asoft.ytdl.interfaces.TitleRetrievedEvent;
-import com.asoft.ytdl.service.ApplicationService;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.collections.CollectionUtils;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.UUID;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import static com.asoft.ytdl.utils.SettingsManager.DOWNLOAD_FOLDER;
 
 
 @Setter
+@NoArgsConstructor
 public class YTDownloadManager {
 
-    private DownloadCompletedEvent downloadCompletedEvent = (uuid, fileName) -> {};
-    private TitleRetrievedEvent titleRetrievedEvent = (uuid, title) -> {};
-    private ProgressEvent progressEvent = (uuid, progressStatus) -> {};
-    private ErrorEvent errorEvent = (uuid, exception) -> {};
-
-    public YTDownloadManager() {}
+    private DownloadCompletedEvent downloadCompletedEvent = (id, fileName) -> {};
+    private TitleRetrievedEvent titleRetrievedEvent = (id, title) -> {};
+    private ProgressEvent progressEvent = (id, progressStatus) -> {};
+    private ErrorEvent errorEvent = (id, exception) -> {};
+    private List<String> skippedId = new ArrayList<>();
 
     /**
-     * Téléchargement d'une vidéo YouTube
+     * Téléchargement de vidéo / playlist YouTube au format mp3
      */
-    public void download(String url, boolean audioOnly) {
-        String destination = ApplicationService.DOWNLOAD_FOLDER + File.separator + "%(title)s.%(ext)s";
-        String format = audioOnly ? "mp3" : "best";
-
+    public void download(String url) {
         // Retrieve file(s) name(s)
         final LinkedHashMap<String, String> fileNames = getVideoTitles(url);
-
 
         if (fileNames.size() == 0) {
             errorEvent.onError(null, new YTDLException("[download] Unable to download file: No file found"));
         }
 
-        for (int i = 0; i < fileNames.keySet().size(); i++) {
-            String uuid = (new ArrayList<>(fileNames.keySet())).get(i);
-
-            // Prepare download
-            String dlCommand = audioOnly
-                    ? String.format("youtube-dl -o \"%s\" --no-playlist --extract-audio --audio-format %s --playlist-items %d %s", destination, format, i + 1, url)
-                    : String.format("youtube-dl -o \"%s\" --no-playlist -f %s %s", destination, format, url);
-
-            System.out.println(dlCommand);
-            progressEvent.onProgress(uuid, ProgressStatus.STARTING_DOWNLOAD);
-
-            // Handle progress
-            final String downloadPagePrefix = "[youtube]";
-            final String downloadPrefix = "[download]";
-            final String convertPrefix = "[ffmpeg]";
-
-            CmdManager cmdManager = new CmdManager();
-            cmdManager.setOutputEvent((text) -> {
-                if (text.startsWith(downloadPagePrefix)) {
-                    progressEvent.onProgress(uuid, ProgressStatus.DOWNLOADING_WEBPAGE);
-                } else if (text.startsWith(downloadPrefix)) {
-                    progressEvent.onProgress(uuid, ProgressStatus.DOWNLOADING_VIDEO);
-                } else if (text.startsWith(convertPrefix)) {
-                    progressEvent.onProgress(uuid, ProgressStatus.CONVERTING_TO_AUDIO);
+        if (!CollectionUtils.isEmpty(skippedId)) {
+            skippedId.forEach(id -> {
+                if (fileNames.containsKey(id)) {
+                    System.out.printf("Skipping already existing file %s (%s)\n", fileNames.get(id), id);
+                    fileNames.remove(id);
                 }
-
-                System.out.println(text);
             });
-            cmdManager.setErrorEvent((text) -> errorEvent.onError(uuid, new YTDLException(text)));
-            cmdManager.executeCommand(dlCommand);
-
-            String fileName = fileNames.get(uuid);
-            System.out.println("Completed, file name: " + fileName);
-            downloadCompletedEvent.onDownloadCompleted(uuid, fileName);
         }
+
+        if (fileNames.size() < 1) {
+            System.out.println("No files to download");
+            return;
+        }
+
+        System.out.println(String.format("Starting download of %d files..\n", fileNames.size()));
+
+        final ExecutorService executor = Executors.newFixedThreadPool(12);
+        for (int i = 0; i < fileNames.keySet().size(); i++) {
+            // Prepare download
+            String id = (new ArrayList<>(fileNames.keySet())).get(i);
+            String fileName = fileNames.get(id);
+            String destination = DOWNLOAD_FOLDER + File.separator + fileName + ".%(ext)s";
+
+            String dlCommand = String.format("youtube-dl -o \"%s\" --no-playlist --extract-audio --audio-format mp3 --playlist-items %d %s", destination, i + 1, url);
+            executor.execute(() -> downloadFile(dlCommand, id, fileName, executor));
+        }
+
+        try {
+            executor.awaitTermination(15, TimeUnit.MINUTES);
+            System.out.println("########## All files downloaded successfully ##########");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void downloadFile(String dlCommand, String id, String fileName, ExecutorService executor) {
+        System.out.println(String.format("########## Downloading « %s » ##########", fileName));
+
+        progressEvent.onProgress(id, ProgressStatus.STARTING_DOWNLOAD);
+
+        // Handle progress
+        final String downloadPagePrefix = "[youtube]";
+        final String downloadPrefix = "[download]";
+        final String convertPrefix = "[ffmpeg]";
+
+        CmdManager cmdManager = new CmdManager(false);
+        cmdManager.setOutputEvent(text -> {
+            if (text.startsWith(downloadPagePrefix)) {
+                progressEvent.onProgress(id, ProgressStatus.DOWNLOADING_WEBPAGE);
+            } else if (text.startsWith(downloadPrefix)) {
+                progressEvent.onProgress(id, ProgressStatus.DOWNLOADING_VIDEO);
+            } else if (text.startsWith(convertPrefix)) {
+                progressEvent.onProgress(id, ProgressStatus.CONVERTING_TO_AUDIO);
+            }
+            System.out.println(id + " " + text);
+        });
+        cmdManager.setErrorEvent(text -> errorEvent.onError(id, new YTDLException(text)));
+        cmdManager.executeCommand(dlCommand);
+
+        System.out.println("_________ File downloaded: " + fileName + " _________");
+        downloadCompletedEvent.onDownloadCompleted(id, fileName);
+        executor.shutdown();
     }
 
     /**
      * Retrieve videos title
      **/
     private LinkedHashMap<String, String> getVideoTitles(String url) {
-        String getNameCommand = "youtube-dl -e --no-playlist --flat-playlist " + url;
-        System.out.println(getNameCommand);
+        String getNameCommand = "youtube-dl --get-filename --no-playlist --flat-playlist --restrict-filenames -o %(id)s__--__%(title)s " + url;
 
         final LinkedHashMap<String, String> fileNames = new LinkedHashMap<>();
-        CmdManager cmdManager = new CmdManager();
+        CmdManager cmdManager = new CmdManager(true);
         cmdManager.setErrorEvent((text) ->
                 errorEvent.onError(null, new YTDLException("Unable to retrieve video title\n" + text))
         );
-        cmdManager.setOutputEvent((text) -> {
-            if (!text.startsWith("Process terminated")) {
-                String uuid = UUID.randomUUID().toString();
-                String fileName = this.sanitizeFileName(text);
-                fileNames.put(uuid, fileName);
-                titleRetrievedEvent.onTitleRetrievedEvent(uuid, fileName);
-                System.out.println("File name: " + fileName);
+        cmdManager.setOutputEvent(output -> {
+            if (!output.startsWith("Process terminated")) {
+                String[] splittedOutput = output.split("__--__");
+                String id = splittedOutput[0];
+                String title = splittedOutput[1].replace("_", " ");
+                fileNames.put(id, title);
+                titleRetrievedEvent.onTitleRetrievedEvent(id, title);
+                System.out.println(String.format("File name: « %s »", title));
             }
         });
         cmdManager.executeCommand(getNameCommand);
 
         return fileNames;
-    }
-
-    private String sanitizeFileName(String filename) {
-        return filename.replace("\"", "'");
     }
 }

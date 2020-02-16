@@ -1,0 +1,52 @@
+<mat-progress-bar *ngIf="!appManager.isServerOn" color="warn" mode="indeterminate"></mat-progress-bar>
+<div class="content" role="main">
+    <!--  Input / Button to make request -->
+    <div class="request-container">
+        <div class="url-button-container">
+            <mat-form-field class="url-container">
+                <input [formControl]="urlFormControl" matInput placeholder="Video URL">
+                <mat-error *ngIf="urlFormControl.invalid">
+                    Please enter a valid url address
+                </mat-error>
+                <button (click)="convertButtonClicked()" [disabled]="this.urlFormControl.invalid" color="primary"
+                        mat-icon-button matSuffix>
+                    <i class="material-icons">send</i>
+                </button>
+            </mat-form-field>
+
+            <mat-button-toggle-group (change)="setUrl($event)" name="fontStyle">
+                <mat-button-toggle value="bg">Playlist BG</mat-button-toggle>
+                <mat-button-toggle [checked]="true" value="test">Playlist Test</mat-button-toggle>
+                <mat-button-toggle value="video">Video</mat-button-toggle>
+            </mat-button-toggle-group>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <div class="control-buttons">
+            <!-- Download button -->
+            <button (click)="downloadButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
+                    class="download-button"
+                    mat-raised-button>Download
+            </button>
+
+            <!-- Post-Processor button -->
+            <button (click)="postProcessorButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
+                    class="processor-button"
+                    mat-raised-button>Post-Processor
+            </button>
+
+            <!-- Delete button -->
+            <button (click)="deleteButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
+                    class="delete-button"
+                    mat-raised-button>Delete
+            </button>
+        </div>
+
+        <!--  Table files status -->
+        <app-file-status-table #fileStatusTable
+                               (fileNameClicked)="openTagEditorDialog($event)"
+                               [displayedColumns]="displayedColumns" [filesStatus]="appManager.filesStatus">
+        </app-file-status-table>
+    </div>
+</div>
