@@ -10,7 +10,7 @@
 
     <parent>
         <groupId>com.asoft</groupId>
-        <artifactId>yt-audio-dl-parent</artifactId>
+        <artifactId>yt-audio-dl</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
@@ -49,7 +49,6 @@
                     </execution>
                 </executions>
             </plugin>
-
 
             <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>

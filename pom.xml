@@ -5,9 +5,9 @@
 
 
     <groupId>com.asoft</groupId>
-    <artifactId>yt-audio-dl-parent</artifactId>
+    <artifactId>yt-audio-dl</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>yt-audio-dl-parent</name>
+    <name>yt-audio-dl</name>
     <description>YouTube audio downloader</description>
     <packaging>pom</packaging>
 
@@ -63,5 +63,9 @@
         <module>backend</module>
         <module>frontend</module>
     </modules>
+
+    <scm>
+        <connection>scm:git:git@github.com:Adrish-ASProg/yt-audio-dl.git</connection>
+    </scm>
 
 </project>

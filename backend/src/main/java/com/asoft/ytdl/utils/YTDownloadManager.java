@@ -96,6 +96,7 @@ public class YTDownloadManager {
             } else if (text.startsWith(convertPrefix)) {
                 progressEvent.onProgress(id, ProgressStatus.CONVERTING_TO_AUDIO);
             }
+            System.out.println(id + " " + text);
         });
         cmdManager.setErrorEvent(text -> errorEvent.onError(id, new YTDLException(text)));
         cmdManager.executeCommand(dlCommand);

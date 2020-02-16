@@ -162,6 +162,7 @@ public class ApplicationService {
 
             // Package files into zip
             for (Map.Entry<String, File> entry : filesToBeZipped.entrySet()) {
+                System.out.println("Zipping " + entry.getKey());
                 zipOutputStream.putNextEntry(new ZipEntry(entry.getKey()));
                 FileInputStream fileInputStream = new FileInputStream(entry.getValue());
 
@@ -169,10 +170,12 @@ public class ApplicationService {
 
                 fileInputStream.close();
                 zipOutputStream.closeEntry();
+                System.out.println(entry.getKey() + " zipped");
             }
 
             // Include playlist if needed
             if (request.getCreatePlaylist() && !StringUtils.isEmpty(request.getFilePath())) {
+                System.out.println("Creating playlist");
                 String text = filesToBeZipped.keySet()
                         .stream()
                         .map(fileName -> request.getFilePath() + fileName)
@@ -183,6 +186,7 @@ public class ApplicationService {
                 IOUtils.copy(inputStream, zipOutputStream);
                 inputStream.close();
                 zipOutputStream.closeEntry();
+                System.out.println("Playlist created");
             }
 
             //setting headers
