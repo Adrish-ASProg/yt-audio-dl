@@ -35,29 +35,29 @@ export class APIService {
     constructor(private http: HttpClient) {}
 
     /** POST: process new file */
-    requestConvert(url: string): Observable<{ uuid: string }> {
-        return this.http.post<{ uuid: string }>(`${this.apiUrl}${this.convertUrl}`, {url: url, audioOnly: true}, jsonHttpOptions);
+    requestConvert(url: string): Observable<{ id: string }> {
+        return this.http.post<{ id: string }>(`${this.apiUrl}${this.convertUrl}`, {url: url, audioOnly: true}, jsonHttpOptions);
     }
 
     /** POST: download file */
-    downloadFile(uuid: string): Observable<any> {
-        return this.http.get<any>(`${this.apiUrl}${this.downloadUrl}?uuid=${uuid}`, audioHttpOptions);
+    downloadFile(id: string): Observable<any> {
+        return this.http.get<any>(`${this.apiUrl}${this.downloadUrl}?id=${id}`, audioHttpOptions);
     }
 
     /** POST: download files as zip */
-    downloadFilesAsZip(uuids: string[], createPlaylist: boolean, filePath: string): Observable<any> {
+    downloadFilesAsZip(ids: string[], createPlaylist: boolean, filePath: string): Observable<any> {
         return this.http.post<any>(
             `${this.apiUrl}${this.downloadAsZipUrl}`,
-            {uuids: uuids, createPlaylist: createPlaylist, filePath: filePath},
+            {ids: ids, createPlaylist: createPlaylist, filePath: filePath},
             zipHttpOptions
         );
     }
 
     /** POST: set tags */
-    setTags(uuid: string, name: string, metadata: Mp3Metadata): Observable<Mp3Metadata> {
+    setTags(id: string, name: string, metadata: Mp3Metadata): Observable<Mp3Metadata> {
         return this.http.post<Mp3Metadata>(
             `${this.apiUrl}${this.setTagsUrl}`,
-            {uuid: uuid, name: name, metadata: metadata},
+            {id: id, name: name, metadata: metadata},
             jsonHttpOptions
         );
     }
@@ -68,10 +68,10 @@ export class APIService {
     }
 
     /** DELETE: delete files */
-    deleteFiles(uuids: string[]): Observable<boolean> {
+    deleteFiles(ids: string[]): Observable<boolean> {
         return this.http.post<boolean>(
             `${this.apiUrl}${this.deleteUrl}`,
-            uuids,
+            ids,
             jsonHttpOptions
         );
     }

@@ -4,10 +4,13 @@ import com.asoft.ytdl.enums.ProgressStatus;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 @Getter
 @Setter
+@XmlRootElement
 public class FileStatus {
-    private String uuid;
+    private String id;
     private String name;
     private ProgressStatus status;
     private Long startDate;
@@ -16,7 +19,7 @@ public class FileStatus {
     @Override
     public String toString() {
         return "FileStatus{" +
-                "uuid='" + uuid + '\'' +
+                "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 ", status=" + status +
                 ", startDate=" + startDate +

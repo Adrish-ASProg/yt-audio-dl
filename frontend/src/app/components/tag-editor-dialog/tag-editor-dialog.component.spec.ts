@@ -31,7 +31,7 @@ describe('TagEditorDialogComponent', () => {
                 {
                     provide: MAT_DIALOG_DATA,
                     useValue: {
-                        uuid: "sample_uuid",
+                        id: "sample_id",
                         name: "sample_name",
                         status: "sample_status",
                         startDate: new Date().getTime(),

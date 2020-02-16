@@ -94,17 +94,17 @@ export class HomeComponent implements OnInit {
             return;
         }
 
-        const uuids: string[] = selectedItems.filter(fs => fs.status == "COMPLETED").map(fs => fs.uuid);
+        const ids: string[] = selectedItems.filter(fs => fs.status == "COMPLETED").map(fs => fs.id);
 
         // Download only one file
-        if (uuids.length == 1) this.appManager.sendDownloadRequest(uuids[0]);
+        if (ids.length == 1) this.appManager.sendDownloadRequest(ids[0]);
 
         // Download file as zip (+ eventually playlist)
         else {
             const dialogRef = this.openPlaylistDialog();
             dialogRef.afterClosed().subscribe(result => {
                 if (!result) return;
-                this.appManager.sendDownloadAsZipRequest(uuids, result.createPlaylist, result.filePath);
+                this.appManager.sendDownloadAsZipRequest(ids, result.createPlaylist, result.filePath);
             });
         }
     }
@@ -134,7 +134,7 @@ export class HomeComponent implements OnInit {
 
         if (!confirm(confirmMsg)) return;
 
-        this.appManager.sendDeleteRequest(selectedItems.map(fileStatus => fileStatus.uuid));
+        this.appManager.sendDeleteRequest(selectedItems.map(fileStatus => fileStatus.id));
         this.fileStatusTable.resetSelection();
     }
 
@@ -161,7 +161,7 @@ export class HomeComponent implements OnInit {
         const dialogRef = this.dialog.open(TagEditorDialog, {data: YTDLUtils.copyObject(event)});
         dialogRef.afterClosed().subscribe(result => {
             if (!result) return;
-            this.appManager.sendTagRequest(result.uuid, result.name, result.metadata);
+            this.appManager.sendTagRequest(result.id, result.name, result.metadata);
         });
     }
 
@@ -170,7 +170,7 @@ export class HomeComponent implements OnInit {
         dialogRef.afterClosed().subscribe((result: FileStatus[]) => {
             if (!result) return;
 
-            result.forEach(fs => this.appManager.sendTagRequest(fs.uuid, fs.name, fs.metadata));
+            result.forEach(fs => this.appManager.sendTagRequest(fs.id, fs.name, fs.metadata));
             this.appManager.sendUpdateRequest().subscribe(fs => this.fileStatusTable.refreshDataTable(fs));
         });
     }

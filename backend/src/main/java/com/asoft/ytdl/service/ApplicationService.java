@@ -53,22 +53,22 @@ public class ApplicationService {
     public void downloadFileFromYT(YTRequest ytRequest) {
         Thread downloadThread = new Thread(() -> {
             YTDownloadManager dlManager = new YTDownloadManager();
-            dlManager.setProgressEvent((uuid, progressStatus) -> {
-                if (filesStatus.containsKey(uuid)) {
-                    filesStatus.get(uuid).setStatus(progressStatus);
+            dlManager.setProgressEvent((id, progressStatus) -> {
+                if (filesStatus.containsKey(id) && !progressStatus.equals(filesStatus.get(id).getStatus())) {
+                    filesStatus.get(id).setStatus(progressStatus);
                 }
             });
-            dlManager.setDownloadCompletedEvent((uuid, fileName) -> {
-                FileStatus fs = filesStatus.get(uuid);
+            dlManager.setDownloadCompletedEvent((id, fileName) -> {
+                FileStatus fs = filesStatus.get(id);
                 fs.setStatus(ProgressStatus.COMPLETED);
                 // FIXME extension
                 fs.setMetadata(Mp3Tagger.getTags(DOWNLOAD_FOLDER + File.separator + fs.getName() + ".mp3"));
             });
-            dlManager.setTitleRetrievedEvent((uuid, title) -> {
-                if (!filesStatus.containsKey(uuid)) {
-                    filesStatus.put(uuid,
+            dlManager.setTitleRetrievedEvent((id, title) -> {
+                if (!filesStatus.containsKey(id)) {
+                    filesStatus.put(id,
                             new FileStatus() {{
-                                setUuid(uuid);
+                                setId(id);
                                 setName(title);
                                 setStatus(ProgressStatus.INITIALIZING);
                                 setStartDate(new Date().getTime());
@@ -76,12 +76,12 @@ public class ApplicationService {
                     );
                 }
             });
-            dlManager.setErrorEvent((uuid, error) -> {
+            dlManager.setErrorEvent((id, error) -> {
                 System.err.println("[AppService.downloadFileFromYT] " + error.getMessage());
 
-                if (filesStatus.containsKey(uuid)) {
-                    System.err.println("[AppService.downloadFileFromYT] " + filesStatus.get(uuid));
-                    filesStatus.get(uuid).setStatus(ProgressStatus.ERROR);
+                if (filesStatus.containsKey(id)) {
+                    System.err.println("[AppService.downloadFileFromYT] " + filesStatus.get(id));
+                    filesStatus.get(id).setStatus(ProgressStatus.ERROR);
                 }
             });
             dlManager.download(ytRequest.getUrl(), ytRequest.getAudioOnly());
@@ -96,10 +96,10 @@ public class ApplicationService {
     /**
      * POST /dl
      **/
-    public void downloadFile(String uuid, HttpServletResponse response) throws FileNotFoundException, UncompletedDownloadException {
-        checkFileIsPresent(uuid);
+    public void downloadFile(String id, HttpServletResponse response) throws FileNotFoundException, UncompletedDownloadException {
+        checkFileIsPresent(id);
 
-        FileStatus fileStatus = filesStatus.get(uuid);
+        FileStatus fileStatus = filesStatus.get(id);
 
         // File not downloaded yet
         if (fileStatus.getStatus() != ProgressStatus.COMPLETED) {
@@ -129,12 +129,12 @@ public class ApplicationService {
         Map<String, File> filesToBeZipped = new HashMap<>();
 
         /*
-        Filter uuids, keep only:
-         - file's uuid present in "fileStatus"
+        Filter ids, keep only:
+         - file's id present in "fileStatus"
          - fileStatus with COMPLETED status
          - Existing files on disk
         */
-        request.getUuids().stream()
+        request.getIds().stream()
                 .filter(filesStatus::containsKey)
                 .map(filesStatus::get)
                 .filter(fs -> ProgressStatus.COMPLETED.equals(fs.getStatus()))
@@ -184,8 +184,8 @@ public class ApplicationService {
      * POST /tags
      **/
     public Mp3Metadata setTags(TagRequest tag) throws IOException, NotSupportedException {
-        checkFileIsPresent(tag.getUuid());
-        FileStatus fs = filesStatus.get(tag.getUuid());
+        checkFileIsPresent(tag.getId());
+        FileStatus fs = filesStatus.get(tag.getId());
 
         String directory = DOWNLOAD_FOLDER + File.separator;
         String fileName = directory + fs.getName() + ".mp3";
@@ -208,9 +208,9 @@ public class ApplicationService {
     /**
      * GET /status
      **/
-    public FileStatus getFileStatus(String uuid) throws FileNotFoundException {
-        checkFileIsPresent(uuid);
-        return filesStatus.get(uuid);
+    public FileStatus getFileStatus(String id) throws FileNotFoundException {
+        checkFileIsPresent(id);
+        return filesStatus.get(id);
     }
 
     /**
@@ -223,20 +223,20 @@ public class ApplicationService {
     /**
      * DELETE /delete
      **/
-    public boolean deleteFiles(List<String> uuids) throws FileNotFoundException {
+    public boolean deleteFiles(List<String> ids) throws FileNotFoundException {
         boolean allFilesDeleted = true;
 
         // Keep only ERRORED or COMPLETED fileStatus
-        uuids = uuids.stream()
+        ids = ids.stream()
                 .filter(filesStatus::containsKey)
                 .map(filesStatus::get)
                 .filter(fileStatus -> ProgressStatus.ERROR.equals(fileStatus.getStatus())
                         || ProgressStatus.COMPLETED.equals(fileStatus.getStatus()))
-                .map(FileStatus::getUuid)
+                .map(FileStatus::getId)
                 .collect(Collectors.toList());
 
-        for (String uuid : uuids) {
-            FileStatus fs = filesStatus.get(uuid);
+        for (String id : ids) {
+            FileStatus fs = filesStatus.get(id);
 
             // Retrieve filename
             File f = FileUtils.getFile(DOWNLOAD_FOLDER + File.separator + fs.getName() + ".mp3");
@@ -244,13 +244,13 @@ public class ApplicationService {
             // Status completed -> Rm from memory / rm from disk
             if (ProgressStatus.COMPLETED.equals(fs.getStatus())) {
                 boolean result = FileUtils.deleteFile(f);
-                if (result) filesStatus.remove(uuid);
+                if (result) filesStatus.remove(id);
                 allFilesDeleted = allFilesDeleted && result;
             }
 
             // Status error -> Rm from memory only
             else if (ProgressStatus.ERROR.equals(fs.getStatus())) {
-                filesStatus.remove(uuid);
+                filesStatus.remove(id);
             }
         }
 
@@ -287,10 +287,10 @@ public class ApplicationService {
                 });
     }
 
-    private void checkFileIsPresent(String uuid) throws FileNotFoundException {
-        // UUID not found
-        if (!filesStatus.containsKey(uuid)) {
-            throw new FileNotFoundException("Unable to find file with uuid « " + uuid + " »");
+    private void checkFileIsPresent(String id) throws FileNotFoundException {
+        // ID not found
+        if (!filesStatus.containsKey(id)) {
+            throw new FileNotFoundException("Unable to find file with id « " + id + " »");
         }
     }
 

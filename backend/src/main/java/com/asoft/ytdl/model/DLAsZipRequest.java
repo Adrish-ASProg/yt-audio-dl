@@ -8,7 +8,7 @@ import java.util.List;
 @Getter
 @Setter
 public class DLAsZipRequest {
-    private List<String> uuids;
+    private List<String> ids;
     private Boolean createPlaylist;
     private String filePath;
 }

@@ -44,9 +44,9 @@ public class FileController {
 
     @RequestMapping(value = "/dl", method = RequestMethod.GET, produces = "audio/mpeg")
     public @ResponseBody
-    void download(HttpServletResponse response, @RequestParam(value = "uuid") String uuid)
+    void download(HttpServletResponse response, @RequestParam(value = "id") String id)
             throws FileNotFoundException, UncompletedDownloadException {
-        applicationService.downloadFile(uuid, response);
+        applicationService.downloadFile(id, response);
     }
 
     @RequestMapping(value = "/dl-zip", method = RequestMethod.POST, produces = "application/zip")
@@ -56,8 +56,8 @@ public class FileController {
 
 
     @RequestMapping(value = "/status", method = RequestMethod.GET)
-    public ResponseEntity<FileStatus> status(@RequestParam(value = "uuid") String uuid) throws FileNotFoundException {
-        return new ResponseEntity<>(applicationService.getFileStatus(uuid), HttpStatus.OK);
+    public ResponseEntity<FileStatus> status(@RequestParam(value = "id") String id) throws FileNotFoundException {
+        return new ResponseEntity<>(applicationService.getFileStatus(id), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/status/all", method = RequestMethod.GET)
@@ -73,8 +73,8 @@ public class FileController {
 
 
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
-    public ResponseEntity<Boolean> delete(@RequestBody List<String> uuids) throws FileNotFoundException {
-        return new ResponseEntity<>(applicationService.deleteFiles(uuids), HttpStatus.OK);
+    public ResponseEntity<Boolean> delete(@RequestBody List<String> ids) throws FileNotFoundException {
+        return new ResponseEntity<>(applicationService.deleteFiles(ids), HttpStatus.OK);
     }
 
 

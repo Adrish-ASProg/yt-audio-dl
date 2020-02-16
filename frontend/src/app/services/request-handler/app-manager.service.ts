@@ -54,11 +54,11 @@ export class AppManager {
         this.isServerOn = true;
 
         // Remove old file status
-        this.filesStatus = this.filesStatus.filter(fs => filesStatus.find(f => f.uuid === fs.uuid));
+        this.filesStatus = this.filesStatus.filter(fs => filesStatus.find(f => f.id === fs.id));
 
         // Add / Edit each filestatus rather than replace them (deal with reference issues)
         filesStatus.forEach(fs => {
-            const oldFileStatus = this.filesStatus.find(f => f.uuid === fs.uuid);
+            const oldFileStatus = this.filesStatus.find(f => f.id === fs.id);
             if (oldFileStatus) {
                 oldFileStatus.name = fs.name;
                 oldFileStatus.metadata = fs.metadata;
@@ -86,16 +86,16 @@ export class AppManager {
 
     sendUpdateRequest(): Observable<FileStatus[]> { return this.apiService.getAllFileStatus(); }
 
-    sendDownloadRequest(uuid: string): void {
-        this.apiService.downloadFile(uuid)
+    sendDownloadRequest(id: string): void {
+        this.apiService.downloadFile(id)
             .subscribe(
                 response => YTDLUtils.saveFileFromServerResponse(response),
                 response => YTDLUtils.parseErrorBlob(response).subscribe(e => alert(e.message))
             );
     }
 
-    sendDownloadAsZipRequest(uuids: string[], createPlaylist: boolean, filePath: string): void {
-        this.apiService.downloadFilesAsZip(uuids, createPlaylist, filePath)
+    sendDownloadAsZipRequest(ids: string[], createPlaylist: boolean, filePath: string): void {
+        this.apiService.downloadFilesAsZip(ids, createPlaylist, filePath)
             .subscribe(
                 response => {
                     const blob = new Blob([response.body], {type: 'application/zip'});
@@ -106,8 +106,8 @@ export class AppManager {
             );
     }
 
-    sendDeleteRequest(uuids: string[]): void {
-        this.apiService.deleteFiles(uuids)
+    sendDeleteRequest(ids: string[]): void {
+        this.apiService.deleteFiles(ids)
             .subscribe(
                 (result: boolean) => {
                     if (!result) alert("An error occurred while trying to delete files, some files may not have been deleted");
@@ -118,8 +118,8 @@ export class AppManager {
                 })
     }
 
-    sendTagRequest(uuid: string, name: string, metadata: Mp3Metadata): void {
-        this.apiService.setTags(uuid, name, metadata).subscribe();
+    sendTagRequest(id: string, name: string, metadata: Mp3Metadata): void {
+        this.apiService.setTags(id, name, metadata).subscribe();
     }
 
     // #endregion
