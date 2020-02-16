@@ -7,8 +7,11 @@ import com.asoft.ytdl.model.DLAsZipRequest;
 import com.asoft.ytdl.model.FileStatus;
 import com.asoft.ytdl.model.Mp3Metadata;
 import com.asoft.ytdl.model.TagRequest;
+import com.asoft.ytdl.model.XmlConfiguration;
 import com.asoft.ytdl.model.YTRequest;
 import com.asoft.ytdl.utils.FileUtils;
+import com.asoft.ytdl.utils.SettingsManager;
+import com.asoft.ytdl.utils.XMLManager;
 import com.asoft.ytdl.utils.YTDownloadManager;
 import com.mpatric.mp3agic.NotSupportedException;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -24,28 +27,35 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static com.asoft.ytdl.utils.FileUtils.getFile;
+import static com.asoft.ytdl.utils.SettingsManager.DOWNLOAD_FOLDER;
 
 @Service
 public class ApplicationService {
 
-    public final static String DOWNLOAD_FOLDER = "downloaded";
-    private final Map<String, FileStatus> filesStatus = new HashMap<>();
+    private Map<String, FileStatus> filesStatus = new HashMap<>();
 
     ApplicationService() {
-        retrieveFilesOnDisk();
+        SettingsManager.initialize();
+        var config = XMLManager.read();
+        if (config != null && config.getFilesData() != null) {
+            filesStatus = config.getFilesData().stream().collect(Collectors.toMap(FileStatus::getId, Function.identity()));
+        }
     }
+
+    //#region Requests handler
 
     /**
      * POST /ytdl
@@ -56,6 +66,7 @@ public class ApplicationService {
             dlManager.setProgressEvent((id, progressStatus) -> {
                 if (filesStatus.containsKey(id) && !progressStatus.equals(filesStatus.get(id).getStatus())) {
                     filesStatus.get(id).setStatus(progressStatus);
+                    saveData();
                 }
             });
             dlManager.setDownloadCompletedEvent((id, fileName) -> {
@@ -63,6 +74,7 @@ public class ApplicationService {
                 fs.setStatus(ProgressStatus.COMPLETED);
                 // FIXME extension
                 fs.setMetadata(Mp3Tagger.getTags(DOWNLOAD_FOLDER + File.separator + fs.getName() + ".mp3"));
+                saveData();
             });
             dlManager.setTitleRetrievedEvent((id, title) -> {
                 if (!filesStatus.containsKey(id)) {
@@ -74,6 +86,7 @@ public class ApplicationService {
                                 setStartDate(new Date().getTime());
                             }}
                     );
+                    saveData();
                 }
             });
             dlManager.setErrorEvent((id, error) -> {
@@ -82,6 +95,7 @@ public class ApplicationService {
                 if (filesStatus.containsKey(id)) {
                     System.err.println("[AppService.downloadFileFromYT] " + filesStatus.get(id));
                     filesStatus.get(id).setStatus(ProgressStatus.ERROR);
+                    saveData();
                 }
             });
             dlManager.download(ytRequest.getUrl(), ytRequest.getAudioOnly());
@@ -200,10 +214,10 @@ public class ApplicationService {
                 && FileUtils.renameFile(new File(fileName), newFileName))
             fs.setName(tag.getName());
 
+        saveData();
 
         return fs.getMetadata();
     }
-
 
     /**
      * GET /status
@@ -254,37 +268,19 @@ public class ApplicationService {
             }
         }
 
+        saveData();
+
         return allFilesDeleted;
     }
 
+    // #endregion
 
     //#region Private methods
 
-    private void retrieveFilesOnDisk() {
-        File downloadFolder;
-        try {
-            downloadFolder = getFile(DOWNLOAD_FOLDER);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            System.err.println("[AppService.retrieveFilesOnDisk] Unable to retrieve files in « " + DOWNLOAD_FOLDER + " » folder");
-            return;
-        }
-
-        FileUtils.getAllFilesInDirectory(downloadFolder)
-                .stream()
-                .filter(file -> file.getName().endsWith(".mp3"))
-                .forEach(file -> {
-                    UUID uuid = UUID.randomUUID();
-                    filesStatus.put(uuid.toString(),
-                            new FileStatus() {{
-                                setUuid(uuid.toString());
-                                setName(file.getName().replace(".mp3", ""));
-                                setStatus(ProgressStatus.COMPLETED);
-                                setStartDate(FileUtils.getCreationDate(file));
-                                setMetadata(Mp3Tagger.getTags(DOWNLOAD_FOLDER + File.separator + file.getName()));
-                            }}
-                    );
-                });
+    private void saveData() {
+        var config = new XmlConfiguration();
+        config.setFilesData(new ArrayList<>(filesStatus.values()));
+        XMLManager.write(config);
     }
 
     private void checkFileIsPresent(String id) throws FileNotFoundException {

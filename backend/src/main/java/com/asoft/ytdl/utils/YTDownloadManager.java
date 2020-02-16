@@ -6,12 +6,13 @@ import com.asoft.ytdl.interfaces.DownloadCompletedEvent;
 import com.asoft.ytdl.interfaces.ErrorEvent;
 import com.asoft.ytdl.interfaces.ProgressEvent;
 import com.asoft.ytdl.interfaces.TitleRetrievedEvent;
-import com.asoft.ytdl.service.ApplicationService;
 import lombok.Setter;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+
+import static com.asoft.ytdl.utils.SettingsManager.DOWNLOAD_FOLDER;
 
 
 @Setter
@@ -41,7 +42,7 @@ public class YTDownloadManager {
         for (int i = 0; i < fileNames.keySet().size(); i++) {
             String id = (new ArrayList<>(fileNames.keySet())).get(i);
             String fileName = fileNames.get(id);
-            String destination = ApplicationService.DOWNLOAD_FOLDER + File.separator + fileName + ".%(ext)s";
+            String destination = DOWNLOAD_FOLDER + File.separator + fileName + ".%(ext)s";
 
             System.out.println(String.format("\n########## Downloading « %s » ##########", fileName));
 
@@ -92,7 +93,7 @@ public class YTDownloadManager {
         );
         cmdManager.setOutputEvent(output -> {
             if (!output.startsWith("Process terminated")) {
-                String[] splittedOutput =  output.split("__--__");
+                String[] splittedOutput = output.split("__--__");
                 String id = splittedOutput[0];
                 String title = splittedOutput[1].replace("_", " ");
                 fileNames.put(id, title);
