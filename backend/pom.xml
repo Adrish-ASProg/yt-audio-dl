@@ -11,7 +11,7 @@
 
     <parent>
         <groupId>com.asoft</groupId>
-        <artifactId>yt-audio-dl-parent</artifactId>
+        <artifactId>yt-audio-dl</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
@@ -156,9 +156,10 @@
                             <goal>deploy-file</goal>
                         </goals>
                         <configuration>
+
                             <repositoryId>ftp-repo</repositoryId>
                             <url>ftp://192.168.1.4/media/pi/berryboot/download</url>
-                            <file>${project.basedir}/target/yt-audio-dl-backend-${project.version}.jar</file>
+                            <file>${project.build.directory}/${project.build.finalName}.${project.packaging}</file>
 
                             <groupId>${project.groupId}</groupId>
                             <artifactId>${project.artifactId}</artifactId>

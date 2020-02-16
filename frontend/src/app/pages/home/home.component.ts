@@ -157,7 +157,7 @@ export class HomeComponent implements OnInit {
         }
     }
 
-    private openTagEditorDialog(event): void {
+    public openTagEditorDialog(event): void {
         const dialogRef = this.dialog.open(TagEditorDialog, {data: YTDLUtils.copyObject(event)});
         dialogRef.afterClosed().subscribe(result => {
             if (!result) return;

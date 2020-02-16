@@ -4,7 +4,7 @@
     "scripts": {
         "ng": "ng",
         "start": "ng serve --host 192.168.1.1",
-        "build": "ng build --outputPath=target/resources",
+        "build": "ng build --outputPath=target/resources --prod",
         "test": "ng test",
         "lint": "ng lint",
         "e2e": "ng e2e"
