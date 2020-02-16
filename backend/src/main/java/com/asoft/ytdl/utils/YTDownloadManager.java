@@ -70,7 +70,7 @@ public class YTDownloadManager {
         }
 
         try {
-            executor.awaitTermination(300, TimeUnit.SECONDS);
+            executor.awaitTermination(15, TimeUnit.MINUTES);
             System.out.println("########## All files downloaded successfully ##########");
         } catch (InterruptedException e) {
             e.printStackTrace();
