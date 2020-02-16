@@ -98,7 +98,7 @@ public class ApplicationService {
                     saveData();
                 }
             });
-            dlManager.download(ytRequest.getUrl(), ytRequest.getAudioOnly());
+            dlManager.download(ytRequest.getUrl());
         });
 
         downloadThread.setUncaughtExceptionHandler((thread, e) -> {

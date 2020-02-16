@@ -11,6 +11,9 @@ import lombok.Setter;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static com.asoft.ytdl.utils.SettingsManager.DOWNLOAD_FOLDER;
 
@@ -26,11 +29,9 @@ public class YTDownloadManager {
     public YTDownloadManager() {}
 
     /**
-     * Téléchargement d'une vidéo YouTube
+     * Téléchargement de vidéo / playlist YouTube au format mp3
      */
-    public void download(String url, boolean audioOnly) {
-        String format = audioOnly ? "mp3" : "best";
-
+    public void download(String url) {
         // Retrieve file(s) name(s)
         final LinkedHashMap<String, String> fileNames = getVideoTitles(url);
 
@@ -38,46 +39,53 @@ public class YTDownloadManager {
             errorEvent.onError(null, new YTDLException("[download] Unable to download file: No file found"));
         }
 
-        System.out.println(String.format("Starting download of %d files..", fileNames.size()));
+        System.out.println(String.format("Starting download of %d files..\n", fileNames.size()));
+
+        final ExecutorService executor = Executors.newFixedThreadPool(12);
         for (int i = 0; i < fileNames.keySet().size(); i++) {
+            // Prepare download
             String id = (new ArrayList<>(fileNames.keySet())).get(i);
             String fileName = fileNames.get(id);
             String destination = DOWNLOAD_FOLDER + File.separator + fileName + ".%(ext)s";
 
-            System.out.println(String.format("\n########## Downloading « %s » ##########", fileName));
-
-            // Prepare download
-            String dlCommand = audioOnly
-                    ? String.format("youtube-dl -o \"%s\" --no-playlist --extract-audio --audio-format %s --playlist-items %d %s", destination, format, i + 1, url)
-                    : String.format("youtube-dl -o \"%s\" --no-playlist -f %s %s", destination, format, url);
-
-            progressEvent.onProgress(id, ProgressStatus.STARTING_DOWNLOAD);
-
-            // Handle progress
-            final String downloadPagePrefix = "[youtube]";
-            final String downloadPrefix = "[download]";
-            final String convertPrefix = "[ffmpeg]";
-
-            CmdManager cmdManager = new CmdManager(true);
-            cmdManager.setOutputEvent(text -> {
-                if (text.startsWith(downloadPagePrefix)) {
-                    progressEvent.onProgress(id, ProgressStatus.DOWNLOADING_WEBPAGE);
-                } else if (text.startsWith(downloadPrefix)) {
-                    progressEvent.onProgress(id, ProgressStatus.DOWNLOADING_VIDEO);
-                } else if (text.startsWith(convertPrefix)) {
-                    progressEvent.onProgress(id, ProgressStatus.CONVERTING_TO_AUDIO);
-                }
-
-                System.out.println(text);
-            });
-            cmdManager.setErrorEvent(text -> errorEvent.onError(id, new YTDLException(text)));
-            cmdManager.executeCommand(dlCommand);
-
-            System.out.println("########## File downloaded: " + fileName + " ##########\n");
-            downloadCompletedEvent.onDownloadCompleted(id, fileName);
+            String dlCommand = String.format("youtube-dl -o \"%s\" --no-playlist --extract-audio --audio-format mp3 --playlist-items %d %s", destination, i + 1, url);
+            executor.execute(() -> downloadFile(dlCommand, id, fileName, executor));
         }
 
-        System.out.println("########## All files downloaded successfully ##########");
+        try {
+            executor.awaitTermination(300, TimeUnit.SECONDS);
+            System.out.println("########## All files downloaded successfully ##########");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void downloadFile(String dlCommand, String id, String fileName, ExecutorService executor) {
+        System.out.println(String.format("########## Downloading « %s » ##########", fileName));
+
+        progressEvent.onProgress(id, ProgressStatus.STARTING_DOWNLOAD);
+
+        // Handle progress
+        final String downloadPagePrefix = "[youtube]";
+        final String downloadPrefix = "[download]";
+        final String convertPrefix = "[ffmpeg]";
+
+        CmdManager cmdManager = new CmdManager(false);
+        cmdManager.setOutputEvent(text -> {
+            if (text.startsWith(downloadPagePrefix)) {
+                progressEvent.onProgress(id, ProgressStatus.DOWNLOADING_WEBPAGE);
+            } else if (text.startsWith(downloadPrefix)) {
+                progressEvent.onProgress(id, ProgressStatus.DOWNLOADING_VIDEO);
+            } else if (text.startsWith(convertPrefix)) {
+                progressEvent.onProgress(id, ProgressStatus.CONVERTING_TO_AUDIO);
+            }
+        });
+        cmdManager.setErrorEvent(text -> errorEvent.onError(id, new YTDLException(text)));
+        cmdManager.executeCommand(dlCommand);
+
+        System.out.println("_________ File downloaded: " + fileName + " _________");
+        downloadCompletedEvent.onDownloadCompleted(id, fileName);
+        executor.shutdown();
     }
 
     /**
