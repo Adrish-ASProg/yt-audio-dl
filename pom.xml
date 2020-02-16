@@ -5,7 +5,7 @@
 
     <groupId>com.asoft</groupId>
     <artifactId>yt-audio-dl</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2-SNAPSHOT</version>
     <name>yt-audio-dl</name>
     <description>YouTube audio downloader</description>
     <packaging>pom</packaging>
@@ -14,7 +14,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.2.2.RELEASE</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath /> <!-- lookup parent from repository -->
     </parent>
 
     <properties>
@@ -65,7 +65,7 @@
 
     <scm>
         <connection>scm:git:git@github.com:Adrish-ASProg/yt-audio-dl.git</connection>
-        <tag>yt-audio-dl-0.0.1</tag>
+        <tag>HEAD</tag>
     </scm>
 
 </project>
