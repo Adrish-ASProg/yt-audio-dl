@@ -23,24 +23,19 @@
     </div>
 
     <div class="table-container">
+        <!-- Buttons Download / Post Processor / Delete -->
         <div class="control-buttons">
-            <!-- Download button -->
-            <button (click)="downloadButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
-                    class="download-button"
-                    mat-raised-button>Download
-            </button>
+            <ion-button (click)="downloadButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
+                        color="success">Download
+            </ion-button>
 
-            <!-- Post-Processor button -->
-            <button (click)="postProcessorButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
-                    class="processor-button"
-                    mat-raised-button>Post-Processor
-            </button>
+            <ion-button (click)="postProcessorButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
+                        class="processor-button" color="warning">Post-Processor
+            </ion-button>
 
-            <!-- Delete button -->
-            <button (click)="deleteButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
-                    class="delete-button"
-                    mat-raised-button>Delete
-            </button>
+            <ion-button (click)="deleteButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
+                        color="danger">Delete
+            </ion-button>
         </div>
 
         <!--  Table files status -->

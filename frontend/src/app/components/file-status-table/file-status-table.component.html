@@ -35,11 +35,9 @@
         <!-- Status Column -->
         <ng-container matColumnDef="status">
             <th *matHeaderCellDef class="status-header-cell" mat-header-cell mat-sort-header> Status</th>
-            <td *matCellDef="let element" mat-cell>
+            <td *matCellDef="let element" class="status-cell" mat-cell>
                 <!-- COMPLETED -->
-                <span *ngIf="element.status === 'COMPLETED'" class="span-file-status">
-                    <i class="material-icons success-icon">check_circle</i>
-                </span>
+                <ion-icon *ngIf="element.status === 'COMPLETED'" class="span-file-status" color="success" name="checkmark-circle-outline"></ion-icon>
 
                 <!-- LOADING -->
                 <div class="loading-spinner-container">
@@ -49,9 +47,7 @@
                 </div>
 
                 <!-- ERROR -->
-                <span *ngIf="element.status === 'ERROR'" class="span-file-status">
-                    <i class="material-icons error-icon">error</i>
-                </span>
+                <ion-icon *ngIf="element.status === 'ERROR'" class="span-file-status" color="danger" name="alert-circle-outline"></ion-icon>
             </td>
         </ng-container>
 

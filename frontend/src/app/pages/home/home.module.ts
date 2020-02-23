@@ -19,6 +19,7 @@ import {PostProcessorDialogModule} from "../../components/post-processor-dialog/
 import {PlaylistDialogModule} from "../../components/playlist-dialog/playlist-dialog.module";
 import {PlaylistDialog} from "../../components/playlist-dialog/playlist-dialog.component";
 import {MatProgressBarModule} from "@angular/material/progress-bar";
+import {IonicModule} from "@ionic/angular";
 
 @NgModule({
     entryComponents: [PlaylistDialog, TagEditorDialog, PostProcessorDialog, SettingsDialog],
@@ -26,6 +27,8 @@ import {MatProgressBarModule} from "@angular/material/progress-bar";
     imports: [
         BrowserModule,
         BrowserAnimationsModule,
+
+        IonicModule,
 
         SettingsServiceModule,
         FileStatusTableModule,
