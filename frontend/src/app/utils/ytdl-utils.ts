@@ -21,7 +21,7 @@ export class YTDLUtils {
         return obs;
     }
 
-    static saveBlobToStorage(blob: Blob, filename: string, mimeType: string): void {
+    static saveBlobToStorage(blob: Blob, filename: string): void {
         // IE doesn't allow using a blob object directly as link href
         // instead it is necessary to use msSaveOrOpenBlob
         if (window.navigator && window.navigator.msSaveOrOpenBlob) {

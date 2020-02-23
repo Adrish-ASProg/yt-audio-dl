@@ -9,6 +9,8 @@ import {SettingsService} from "../settings/settings.service";
 import {AppManagerModule} from "./app-manager.module";
 import {Platform} from "@ionic/angular";
 import {FileTransferService} from "../file-transfer/file-transfer.service";
+import {HttpResponse} from "@angular/common/http";
+import {LoadingService} from "../loading/loading.service";
 
 @Injectable({providedIn: AppManagerModule})
 export class AppManager {
@@ -25,6 +27,7 @@ export class AppManager {
     constructor(private platform: Platform,
                 private apiService: APIService,
                 private settingsService: SettingsService,
+                private loadingService: LoadingService,
                 private fileTransferService: FileTransferService) {
 
         // Send first update immediately
@@ -90,20 +93,53 @@ export class AppManager {
 
     sendUpdateRequest(): Observable<FileStatus[]> { return this.apiService.getAllFileStatus(); }
 
-    sendDownloadRequest(id: string): void {
+    async sendDownloadRequest(id: string) {
+        await this.loadingService.showDialog("Downloading file..");
+
         this.apiService.downloadFile(id)
             .subscribe(
-                response => this.handleBlobDownload(response.body, response.headers.get('FileName'), 'audio/mpeg'),
+                async (response: HttpResponse<any>) => {
+                    await this.loadingService.showDialog("Saving file as " + response.headers.get('FileName'));
+
+                    this.handleBlobDownload(response.body, response.headers.get('FileName'), 'audio/mpeg')
+                        .then(
+                            success => {
+                                console.log('Successfully saved file', success);
+                                this.loadingService.dismissDialog();
+                            },
+                            error => {
+                                console.error('Error when saving file:', error)
+                                this.loadingService.dismissDialog();
+                            }
+                        );
+                },
                 response => YTDLUtils.parseErrorBlob(response).subscribe(e => alert(e.message))
             );
     }
 
-    sendDownloadAsZipRequest(ids: string[], createPlaylist: boolean, filePath: string): void {
+    async sendDownloadAsZipRequest(ids: string[], createPlaylist: boolean, filePath: string) {
+        await this.loadingService.showDialog("Downloading file..");
+
         this.apiService.downloadFilesAsZip(ids, createPlaylist, filePath)
             .subscribe(
-                response => this.handleBlobDownload(response.body, 'yt-audio-dl.zip', 'application/zip'),
-                response => YTDLUtils.parseErrorBlob(response)
-                    .subscribe(e => alert(e.message))
+                async (response: HttpResponse<any>) => {
+                    await this.loadingService.showDialog("Saving file as yt-audio-dl.zip");
+
+                    this.handleBlobDownload(response.body, 'yt-audio-dl.zip', 'application/zip')
+                        .then(
+                            success => {
+                                console.log('Successfully saved file', success);
+                                this.loadingService.dismissDialog();
+                            },
+                            error => {
+                                console.error('Error when saving file:', error);
+                                this.loadingService.dismissDialog();
+                            }
+                        );
+                },
+                error => {
+                    YTDLUtils.parseErrorBlob(error).subscribe(e => alert(e.message));
+                }
             );
     }
 
@@ -125,19 +161,16 @@ export class AppManager {
 
     // #endregion
 
-    handleBlobDownload(blob: Blob, filename: string, mimeType: 'audio/mpeg' | 'application/zip') {
+    handleBlobDownload(blob: Blob, filename: string, mimeType: 'audio/mpeg' | 'application/zip'): Promise<any> {
         // It is necessary to create a new blob object with mime-type explicitly set
         // otherwise only Chrome works like it should
         const newBlob = new Blob([blob], {type: mimeType});
 
         if (this.platform.is('android')) {
-            this.fileTransferService.writeBlobToStorage(newBlob, filename)
-                .then(
-                    success => console.log('Successfully saved file', success),
-                    error => console.log('Error when saving file:', error)
-                );
+            return this.fileTransferService.writeBlobToStorage(newBlob, filename);
         } else {
-            YTDLUtils.saveBlobToStorage(newBlob, filename, mimeType);
+            YTDLUtils.saveBlobToStorage(newBlob, filename);
+            return new Promise(r => r());
         }
     }
 }
