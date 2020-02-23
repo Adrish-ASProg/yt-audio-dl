@@ -2,8 +2,7 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
-.toolbar {
-    .project_title {
-        flex: 1 1 auto;
-    }
+// Toolbar offset
+::ng-deep ion-router-outlet > * {
+    padding-top: 56px;
 }
