@@ -14,7 +14,7 @@ import {AndroidPermissions} from '@ionic-native/android-permissions/ngx';
 export class AppComponent {
 
     // Toolbar
-    projectTitle: string = 'yt-audio-dl';
+    projectTitle: string = 'YT-Audio-DL';
 
     menuButtons: { label: string, action: () => void }[] = [];
 
