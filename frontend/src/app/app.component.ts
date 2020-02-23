@@ -29,13 +29,11 @@ export class AppComponent {
             this.statusBar.styleDefault();
             this.splashScreen.hide();
 
-
             this.androidPermissions.checkPermission(this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE).then(
-                result => console.log('Has permhission?', result.hasPermission),
+                result => { if (!result.hasPermission) this.androidPermissions.requestPermissions([this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE])},
                 err => this.androidPermissions.requestPermission(this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE)
             );
 
-            this.androidPermissions.requestPermissions([this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE]);
         });
     }
 

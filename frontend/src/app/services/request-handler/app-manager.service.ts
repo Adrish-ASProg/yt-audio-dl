@@ -7,6 +7,8 @@ import {flatMap} from "rxjs/operators";
 import {FileStatus} from "../../model/filestatus.model";
 import {SettingsService} from "../settings/settings.service";
 import {AppManagerModule} from "./app-manager.module";
+import {Platform} from "@ionic/angular";
+import {FileTransferService} from "../file-transfer/file-transfer.service";
 
 @Injectable({providedIn: AppManagerModule})
 export class AppManager {
@@ -20,8 +22,10 @@ export class AppManager {
     isAutoUpdateRunning: boolean = false;
     autoUpdateObservable: Subscription;
 
-    constructor(private apiService: APIService,
-                private settingsService: SettingsService) {
+    constructor(private platform: Platform,
+                private apiService: APIService,
+                private settingsService: SettingsService,
+                private fileTransferService: FileTransferService) {
 
         // Send first update immediately
         this.sendUpdateRequest().subscribe(fs => this.onUpdateReceived(fs));
@@ -89,7 +93,7 @@ export class AppManager {
     sendDownloadRequest(id: string): void {
         this.apiService.downloadFile(id)
             .subscribe(
-                response => YTDLUtils.saveBlobToStorage(response.body, response.headers.get('FileName'), 'audio/mpeg'),
+                response => this.handleBlobDownload(response.body, response.headers.get('FileName'), 'audio/mpeg'),
                 response => YTDLUtils.parseErrorBlob(response).subscribe(e => alert(e.message))
             );
     }
@@ -97,7 +101,7 @@ export class AppManager {
     sendDownloadAsZipRequest(ids: string[], createPlaylist: boolean, filePath: string): void {
         this.apiService.downloadFilesAsZip(ids, createPlaylist, filePath)
             .subscribe(
-                response => YTDLUtils.saveBlobToStorage(response.body, 'yt-audio-dl.zip', 'application/zip'),
+                response => this.handleBlobDownload(response.body, 'yt-audio-dl.zip', 'application/zip'),
                 response => YTDLUtils.parseErrorBlob(response)
                     .subscribe(e => alert(e.message))
             );
@@ -120,4 +124,20 @@ export class AppManager {
     }
 
     // #endregion
+
+    handleBlobDownload(blob: Blob, filename: string, mimeType: 'audio/mpeg' | 'application/zip') {
+        // It is necessary to create a new blob object with mime-type explicitly set
+        // otherwise only Chrome works like it should
+        const newBlob = new Blob([blob], {type: mimeType});
+
+        if (this.platform.is('android')) {
+            this.fileTransferService.writeBlobToStorage(newBlob, filename)
+                .then(
+                    success => console.log('Successfully saved file', success),
+                    error => console.log('Error when saving file:', error)
+                );
+        } else {
+            YTDLUtils.saveBlobToStorage(newBlob, filename, mimeType);
+        }
+    }
 }

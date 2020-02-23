@@ -8,6 +8,7 @@ import {MatMenuModule} from "@angular/material/menu";
 import {IonicModule, IonicRouteStrategy} from '@ionic/angular';
 import {SplashScreen} from '@ionic-native/splash-screen/ngx';
 import {StatusBar} from '@ionic-native/status-bar/ngx';
+import {File} from '@ionic-native/file/ngx';
 
 import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
@@ -32,6 +33,7 @@ import {AndroidPermissions} from "@ionic-native/android-permissions/ngx";
         StatusBar,
         SplashScreen,
         AndroidPermissions,
+        File,
         {provide: RouteReuseStrategy, useClass: IonicRouteStrategy}
     ],
     bootstrap: [AppComponent]

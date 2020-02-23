@@ -22,20 +22,16 @@ export class YTDLUtils {
     }
 
     static saveBlobToStorage(blob: Blob, filename: string, mimeType: string): void {
-        // It is necessary to create a new blob object with mime-type explicitly set
-        // otherwise only Chrome works like it should
-        const newBlob = new Blob([blob], {type: mimeType});
-
         // IE doesn't allow using a blob object directly as link href
         // instead it is necessary to use msSaveOrOpenBlob
         if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-            window.navigator.msSaveOrOpenBlob(newBlob);
+            window.navigator.msSaveOrOpenBlob(blob);
             return;
         }
 
         // For other browsers:
         // Create a link pointing to the ObjectURL containing the blob.
-        const data = window.URL.createObjectURL(newBlob);
+        const data = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = data;
         link.download = filename;
