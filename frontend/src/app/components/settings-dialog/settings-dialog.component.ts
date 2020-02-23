@@ -9,6 +9,7 @@ import {ModalController} from '@ionic/angular';
 })
 export class SettingsDialog {
 
+    serverAddress: string;
     refreshRate: number;
 
     savedFolders: string[] = [];
@@ -18,6 +19,7 @@ export class SettingsDialog {
     constructor(private settings: SettingsService,
                 private modalController: ModalController) {
 
+        this.serverAddress = settings.getServerAddress();
         this.refreshRate = settings.getRefreshRate() / 1000;
         this.savedFolders = settings.getSavedFolders().split("|").filter(s => s != "");
         if (this.savedFolders.length > 0) this.selectedFolder = this.savedFolders[0];
@@ -42,6 +44,7 @@ export class SettingsDialog {
     // #endregion
 
     onCloseButtonClicked(): void {
+        this.settings.setServerAddress(this.serverAddress);
         this.settings.setRefreshRate(this.refreshRate * 1000);
         this.modalController.dismiss();
     }

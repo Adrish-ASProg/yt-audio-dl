@@ -11,6 +11,11 @@
 
 <ion-content>
     <ion-list>
+        <!-- Server address -->
+        <ion-item>
+            <ion-input [(ngModel)]="serverAddress" clearInput placeholder="Server address"></ion-input>
+        </ion-item>
+
         <!-- Update rate -->
         <ion-item>
             <ion-label class="ion-text-wrap">Update rate (s)</ion-label>

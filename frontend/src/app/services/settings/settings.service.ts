@@ -3,6 +3,7 @@ import {SettingsServiceModule} from "./settings-service.module";
 
 
 enum OptionsKeys {
+    API_ADDRESS = "API_ADDRESS",
     REFRESH_RATE = "REFRESH_RATE",
     SAVED_FOLDERS = "SAVED_FOLDERS"
 }
@@ -17,6 +18,7 @@ class Option {
 export class SettingsService {
 
     options: Option[] = [
+        {name: OptionsKeys.API_ADDRESS, value: "http://192.168.1.1:8080", defaultValue: "http://192.168.1.1:8080"},
         {name: OptionsKeys.REFRESH_RATE, value: 1500, defaultValue: 1500},
         {name: OptionsKeys.SAVED_FOLDERS, value: "", defaultValue: ""}
     ];
@@ -26,13 +28,23 @@ export class SettingsService {
             let value: any = window.localStorage.getItem(opt.name);
             if (value == void 0) {
                 window.localStorage.setItem(opt.name, opt.defaultValue.toString());
-            }
-            else opt.value = value;
+            } else opt.value = value;
         });
     }
 
-    getRefreshRate() {
-        return this.getOption(OptionsKeys.REFRESH_RATE).value;
+    getServerAddress(): string {
+        return this.getOption(OptionsKeys.API_ADDRESS);
+    }
+
+    setServerAddress(value: string): boolean {
+        // TODO Check
+        this.setOption(OptionsKeys.API_ADDRESS, value);
+        console.debug("Api address set to " + value);
+        return true;
+    }
+
+    getRefreshRate(): number {
+        return this.getOption(OptionsKeys.REFRESH_RATE);
     }
 
     setRefreshRate(value: number): boolean {
@@ -52,7 +64,7 @@ export class SettingsService {
     }
 
     getSavedFolders(): string {
-        return this.getOption(OptionsKeys.SAVED_FOLDERS).value;
+        return this.getOption(OptionsKeys.SAVED_FOLDERS);
     }
 
     setSavedFolders(value: string): boolean {
@@ -61,8 +73,10 @@ export class SettingsService {
         return true;
     }
 
-    private getOption(name: string): Option {
-        return this.options.find(opt => name === opt.name)
+    private getOption(name: string) {
+        const option = this.options.find(opt => name === opt.name);
+        return option.value != void 0 && option.value !== ""
+            ? option.value : option.defaultValue;
     }
 
     private setOption(name: string, value: any): void {

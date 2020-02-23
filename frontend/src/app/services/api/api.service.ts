@@ -4,6 +4,7 @@ import {Observable} from "rxjs";
 import {FileStatus} from "../../model/filestatus.model";
 import {Mp3Metadata} from "../../model/mp3metadata.model";
 import {APIModule} from "./api.module";
+import {SettingsService} from "../settings/settings.service";
 
 
 const jsonHttpOptions = {
@@ -24,7 +25,9 @@ const zipHttpOptions = {
 @Injectable({providedIn: APIModule})
 export class APIService {
 
-    private apiUrl: string = `http://${window.location.hostname}:8080`;
+    constructor(private http: HttpClient,
+                private settings: SettingsService) {}
+
     private convertUrl: string = "/ytdl";
     private statusUrl: string = "/status/all";
     private downloadUrl: string = "/dl";
@@ -32,7 +35,7 @@ export class APIService {
     private setTagsUrl: string = "/tags";
     private deleteUrl: string = "/delete";
 
-    constructor(private http: HttpClient) {}
+    get apiUrl() { return this.settings.getServerAddress();}
 
     /** POST: process new file */
     requestConvert(url: string): Observable<{ id: string }> {
