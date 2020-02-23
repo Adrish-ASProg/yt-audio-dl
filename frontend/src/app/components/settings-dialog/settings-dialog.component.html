@@ -1,46 +1,39 @@
-<!--<div class="title-container"></div>-->
-
-<div class="content" mat-dialog-content>
-    <div class="refresh-rate-container">
-        <span>Refresh frequency</span>
-        <mat-slider [(ngModel)]="refreshRate" [max]="5 * 60 * 1000 - 1" [step]="getSliderStep()" min="500"></mat-slider>
-        <span>{{ formatRefreshRate() }}</span>
-    </div>
-
-    <mat-divider></mat-divider>
-
-    <div class="playlist-folders-container">
-        <span>Playlist folders</span>
-
-        <!-- Input / Button add folder -->
-        <mat-form-field class="url-container">
-            <input [(ngModel)]="folderToSave" matInput placeholder="Path">
-            <button (click)="addFolder()" [disabled]="folderToSave == ''" color="primary"
-                    mat-icon-button matSuffix>
-                <i class="material-icons">add</i>
+<ion-header>
+    <ion-toolbar color="primary">
+        <ion-title>Settings</ion-title>
+        <ion-buttons slot="end">
+            <button (click)="onCloseButtonClicked()" mat-icon-button>
+                <i class="material-icons">done</i>
             </button>
-        </mat-form-field>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
 
-        <!-- Select / Delete folder -->
-        <div class="select-folder-container">
+<ion-content>
+    <ion-list>
+        <!-- Update rate -->
+        <ion-item>
+            <ion-label class="ion-text-wrap">Update rate (s)</ion-label>
+            <ion-range [(ngModel)]="refreshRate" color="danger" max="30" min="1" pin="true"></ion-range>
+        </ion-item>
+
+        <!-- Playlist folders -->
+        <ion-item>
+            <ion-label class="ion-text-wrap">Playlist folders</ion-label>
             <mat-form-field>
-                <mat-label>Saved folders</mat-label>
-                <mat-select [(value)]="selectedFolder">
-                    <mat-option></mat-option>
-                    <mat-option *ngFor="let folder of savedFolders" [value]="folder">
-                        {{folder}}
-                    </mat-option>
-                </mat-select>
+                <input [(ngModel)]="folderToSave" [matAutocomplete]="autocomplete" matInput placeholder="Path">
+                <button (click)="addFolder()" *ngIf="!savedFolders.includes(folderToSave)" [disabled]="folderToSave == ''" color="primary"
+                        mat-icon-button matSuffix>
+                    <i class="material-icons">add</i>
+                </button>
+                <button (click)="deleteFolder()" *ngIf="savedFolders.includes(folderToSave)" [disabled]="folderToSave == ''" color="primary"
+                        mat-icon-button matSuffix>
+                    <i class="material-icons">clear</i>
+                </button>
             </mat-form-field>
-            <button (click)="deleteFolder()" [disabled]="selectedFolder == ''" color="primary"
-                    mat-icon-button matSuffix>
-                <i class="material-icons">clear</i>
-            </button>
-        </div>
-    </div>
-</div>
-
-<div mat-dialog-actions>
-    <button (click)="onValidButtonClicked()" cdkFocusInitial mat-button>Ok</button>
-    <button (click)="onCancelButtonClicked()" mat-button>Cancel</button>
-</div>
+            <mat-autocomplete #autocomplete="matAutocomplete">
+                <mat-option *ngFor="let savedFolder of savedFolders" [value]="savedFolder">{{savedFolder}}</mat-option>
+            </mat-autocomplete>
+        </ion-item>
+    </ion-list>
+</ion-content>

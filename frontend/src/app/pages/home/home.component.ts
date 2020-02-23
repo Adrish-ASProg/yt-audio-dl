@@ -7,11 +7,11 @@ import {FileStatusTableComponent} from "../../components/file-status-table/file-
 import {FileStatus} from "../../model/filestatus.model";
 import {FormControl, Validators} from "@angular/forms";
 import {SettingsDialog} from "../../components/settings-dialog/settings-dialog.component";
-import {SettingsService} from "../../services/settings/settings.service";
 import {YT_URLS} from "../../utils/ytdl-constants";
 import {AppManager} from "../../services/request-handler/app-manager.service";
 import {PostProcessorDialog} from "../../components/post-processor-dialog/post-processor-dialog.component";
 import {PlaylistDialog} from "../../components/playlist-dialog/playlist-dialog.component";
+import {ModalController} from "@ionic/angular";
 
 @Component({
     selector: 'app-home',
@@ -37,8 +37,8 @@ export class HomeComponent implements OnInit {
 
     constructor(private route: ActivatedRoute,
                 public appManager: AppManager,
-                private settingsService: SettingsService,
-                private dialog: MatDialog) {}
+                private dialog: MatDialog,
+                public modalController: ModalController) {}
 
 
     ngOnInit() {
@@ -175,11 +175,10 @@ export class HomeComponent implements OnInit {
         });
     }
 
-    private openSettingsDialog(): void {
-        const dialogRef = this.dialog.open(SettingsDialog, {width: "300px"});
-        dialogRef.afterClosed().subscribe(result => {
-            if (result) this.appManager.getSettings();
-        });
+    private async openSettingsDialog(): Promise<void> {
+        const modal = await this.modalController.create({component: SettingsDialog});
+        modal.onDidDismiss().then(_ => this.appManager.getSettings());
+        return modal.present();
     }
 
     private openPlaylistDialog(): MatDialogRef<PlaylistDialog, any> {

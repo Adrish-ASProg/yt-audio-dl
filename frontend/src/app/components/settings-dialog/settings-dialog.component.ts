@@ -1,6 +1,6 @@
-import {Component, Inject} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
+import {Component} from '@angular/core';
 import {SettingsService} from "../../services/settings/settings.service";
+import {ModalController} from '@ionic/angular';
 
 @Component({
     selector: 'app-settings-dialog',
@@ -16,30 +16,12 @@ export class SettingsDialog {
     selectedFolder: string = "";
 
     constructor(private settings: SettingsService,
-                private dialogRef: MatDialogRef<SettingsDialog>,
-                @Inject(MAT_DIALOG_DATA) public result: boolean) {
+                private modalController: ModalController) {
 
-        this.refreshRate = settings.getRefreshRate();
+        this.refreshRate = settings.getRefreshRate() / 1000;
         this.savedFolders = settings.getSavedFolders().split("|").filter(s => s != "");
         if (this.savedFolders.length > 0) this.selectedFolder = this.savedFolders[0];
     }
-
-    //#region Refresh rate
-
-    formatRefreshRate(): string {
-        if (this.refreshRate < 1000) return this.refreshRate + "ms";
-        else if (this.refreshRate < 60000) return Math.round(this.refreshRate * 10 / 1000) / 10 + "s";
-        else return Math.round(this.refreshRate * 10 / 1000 / 60) / 10 + "mn";
-    }
-
-    getSliderStep(): number {
-        if (this.refreshRate < 1000) return 100;
-        else if (this.refreshRate < 10000) return 1000;
-        else if (this.refreshRate < 60000) return 10000;
-        else return 30000;
-    }
-
-    // #endregion
 
     //#region Playlist folders
 
@@ -59,12 +41,8 @@ export class SettingsDialog {
 
     // #endregion
 
-
-    onValidButtonClicked(): void {
-        this.result = this.settings.setRefreshRate(this.refreshRate);
-        this.dialogRef.close(this.result);
+    onCloseButtonClicked(): void {
+        this.settings.setRefreshRate(this.refreshRate * 1000);
+        this.modalController.dismiss();
     }
-
-    onCancelButtonClicked(): void { this.dialogRef.close(); }
-
 }
