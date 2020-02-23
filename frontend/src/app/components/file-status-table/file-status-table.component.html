@@ -7,8 +7,8 @@
             <th *matHeaderCellDef class="checkbox-header-cell" mat-header-cell>
                 <div class="checkbox-container">
                     <mat-checkbox (change)="$event ? masterToggle() : null"
-                                  [checked]="selection.hasValue() && isAllSelected()"
-                                  [indeterminate]="selection.hasValue() && !isAllSelected()">
+                                  [checked]="selection.hasValue() && isEntirePageSelected()"
+                                  [indeterminate]="selection.hasValue() && !isEntirePageSelected()">
                     </mat-checkbox>
                 </div>
             </th>

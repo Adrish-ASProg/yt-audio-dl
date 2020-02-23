@@ -58,18 +58,19 @@ export class FileStatusTableComponent {
         this.selection.clear();
     }
 
-    /** Whether the number of selected elements matches the total number of rows. */
-    isAllSelected() {
-        const numSelected = this.selection.selected.length;
-        const numRows = this.dataSource.data.length;
-        return numSelected == numRows;
+    getPageData() {
+        return this.dataSource._pageData(this.dataSource._orderData(this.dataSource.filteredData));
     }
 
-    /** Selects all rows if they are not all selected; otherwise clear selection. */
+    isEntirePageSelected() {
+        return this.getPageData().every((row) => this.selection.isSelected(row));
+    }
+
+    /** Select / unselect all rows on the current page. */
     masterToggle() {
-        this.isAllSelected() ?
-            this.selection.clear() :
-            this.dataSource.data.forEach(row => this.selection.select(row));
+        this.isEntirePageSelected() ?
+            this.selection.deselect(...this.getPageData()) :
+            this.selection.select(...this.getPageData());
     }
 
     // #endregion
