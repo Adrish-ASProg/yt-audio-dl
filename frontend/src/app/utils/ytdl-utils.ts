@@ -1,4 +1,3 @@
-import {HttpErrorResponse} from "@angular/common/http";
 import {Observable, Observer} from "rxjs";
 
 export class YTDLUtils {
@@ -6,7 +5,7 @@ export class YTDLUtils {
         return JSON.parse(JSON.stringify(object));
     }
 
-    static parseErrorBlob(err: HttpErrorResponse): Observable<any> {
+    static parseErrorBlob(err): Observable<any> {
         const reader: FileReader = new FileReader();
 
         const obs = new Observable((observer: Observer<any>) => {
@@ -17,7 +16,7 @@ export class YTDLUtils {
                 observer.complete();
             }
         });
-        reader.readAsText(err.error);
+        reader.readAsText(err);
         return obs;
     }
 

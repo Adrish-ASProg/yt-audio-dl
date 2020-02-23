@@ -104,16 +104,20 @@ export class AppManager {
                     this.handleBlobDownload(response.body, response.headers.get('FileName'), 'audio/mpeg')
                         .then(
                             success => {
-                                console.log('Successfully saved file');
                                 this.loadingService.dismissDialog();
+                                console.log('Successfully saved file');
                             },
                             error => {
-                                console.error('Error when saving file:', error)
                                 this.loadingService.dismissDialog();
+                                alert(`Error ${error.status} when saving file: ${error.statusText}`);
                             }
                         );
                 },
-                response => YTDLUtils.parseErrorBlob(response).subscribe(e => alert(e.message))
+                error => {
+                    this.loadingService.dismissDialog();
+                    alert(`Error ${error.status} when downloading file: ${error.statusText}`);
+                    if (error.error instanceof Blob) YTDLUtils.parseErrorBlob(error.error).subscribe(e => alert(e.message));
+                }
             );
     }
 
@@ -128,17 +132,19 @@ export class AppManager {
                     this.handleBlobDownload(response.body, 'yt-audio-dl.zip', 'application/zip')
                         .then(
                             success => {
-                                console.log('Successfully saved file');
                                 this.loadingService.dismissDialog();
+                                console.log('Successfully saved file');
                             },
                             error => {
-                                console.error('Error when saving file:', error);
                                 this.loadingService.dismissDialog();
+                                alert(`Error ${error.status} when saving file: ${error.statusText}`);
                             }
                         );
                 },
                 error => {
-                    YTDLUtils.parseErrorBlob(error).subscribe(e => alert(e.message));
+                    this.loadingService.dismissDialog();
+                    alert(`Error ${error.status} when downloading file: ${error.statusText}`);
+                    if (error.error instanceof Blob) YTDLUtils.parseErrorBlob(error.error).subscribe(e => alert(e.message));
                 }
             );
     }
