@@ -5,4 +5,5 @@
 // Toolbar offset
 ::ng-deep ion-router-outlet > * {
     padding-top: 56px;
+    overflow: auto !important;
 }

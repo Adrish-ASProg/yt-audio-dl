@@ -104,7 +104,7 @@ export class AppManager {
                     this.handleBlobDownload(response.body, response.headers.get('FileName'), 'audio/mpeg')
                         .then(
                             success => {
-                                console.log('Successfully saved file', success);
+                                console.log('Successfully saved file');
                                 this.loadingService.dismissDialog();
                             },
                             error => {
@@ -128,7 +128,7 @@ export class AppManager {
                     this.handleBlobDownload(response.body, 'yt-audio-dl.zip', 'application/zip')
                         .then(
                             success => {
-                                console.log('Successfully saved file', success);
+                                console.log('Successfully saved file');
                                 this.loadingService.dismissDialog();
                             },
                             error => {

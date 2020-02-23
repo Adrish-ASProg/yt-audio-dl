@@ -38,7 +38,7 @@ export class HomeComponent implements OnInit {
     constructor(private route: ActivatedRoute,
                 public appManager: AppManager,
                 private dialog: MatDialog,
-                public modalController: ModalController) {}
+                private modalController: ModalController) {}
 
 
     ngOnInit() {

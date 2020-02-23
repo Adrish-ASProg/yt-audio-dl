@@ -160,6 +160,7 @@ public class ApplicationService {
 
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
 
+            int zippedFilesCount = 0;
             // Package files into zip
             for (Map.Entry<String, File> entry : filesToBeZipped.entrySet()) {
                 System.out.println("Zipping " + entry.getKey());
@@ -170,7 +171,7 @@ public class ApplicationService {
 
                 fileInputStream.close();
                 zipOutputStream.closeEntry();
-                System.out.println(entry.getKey() + " zipped");
+                System.out.printf("%s zipped (%d/%d)\n", entry.getKey(), ++zippedFilesCount, filesToBeZipped.size());
             }
 
             // Include playlist if needed
