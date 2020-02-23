@@ -96,57 +96,29 @@ export class AppManager {
     async sendDownloadRequest(id: string) {
         await this.loadingService.showDialog("Downloading file..");
 
-        this.apiService.downloadFile(id)
-            .subscribe(
-                async (response: HttpResponse<any>) => {
-                    await this.loadingService.showDialog("Saving file as " + response.headers.get('FileName'));
+        this.apiService.downloadFile(id).subscribe(
+            async (response: HttpResponse<any>) => {
+                await this.loadingService.showDialog("Saving file as " + response.headers.get('FileName'));
 
-                    this.handleBlobDownload(response.body, response.headers.get('FileName'), 'audio/mpeg')
-                        .then(
-                            success => {
-                                this.loadingService.dismissDialog();
-                                console.log('Successfully saved file');
-                            },
-                            error => {
-                                this.loadingService.dismissDialog();
-                                alert(`Error ${error.status} when saving file: ${error.statusText}`);
-                            }
-                        );
-                },
-                error => {
-                    this.loadingService.dismissDialog();
-                    alert(`Error ${error.status} when downloading file: ${error.statusText}`);
-                    if (error.error instanceof Blob) YTDLUtils.parseErrorBlob(error.error).subscribe(e => alert(e.message));
-                }
-            );
+                this.handleBlobDownload(response.body, response.headers.get('FileName'), 'audio/mpeg')
+                    .then(_ => this.handleSaveSuccess(), error => this.handleSaveError(error));
+            },
+            error => this.handleDownloadError(error)
+        );
     }
 
     async sendDownloadAsZipRequest(ids: string[], createPlaylist: boolean, filePath: string) {
         await this.loadingService.showDialog("Downloading file..");
 
-        this.apiService.downloadFilesAsZip(ids, createPlaylist, filePath)
-            .subscribe(
-                async (response: HttpResponse<any>) => {
-                    await this.loadingService.showDialog("Saving file as yt-audio-dl.zip");
+        this.apiService.downloadFilesAsZip(ids, createPlaylist, filePath).subscribe(
+            async (response: HttpResponse<any>) => {
+                await this.loadingService.showDialog("Saving file as yt-audio-dl.zip");
 
-                    this.handleBlobDownload(response.body, 'yt-audio-dl.zip', 'application/zip')
-                        .then(
-                            success => {
-                                this.loadingService.dismissDialog();
-                                console.log('Successfully saved file');
-                            },
-                            error => {
-                                this.loadingService.dismissDialog();
-                                alert(`Error ${error.status} when saving file: ${error.statusText}`);
-                            }
-                        );
-                },
-                error => {
-                    this.loadingService.dismissDialog();
-                    alert(`Error ${error.status} when downloading file: ${error.statusText}`);
-                    if (error.error instanceof Blob) YTDLUtils.parseErrorBlob(error.error).subscribe(e => alert(e.message));
-                }
-            );
+                this.handleBlobDownload(response.body, 'yt-audio-dl.zip', 'application/zip')
+                    .then(_ => this.handleSaveSuccess(), error => this.handleSaveError(error));
+            },
+            error => this.handleDownloadError(error)
+        );
     }
 
     sendDeleteRequest(ids: string[]): void {
@@ -178,5 +150,21 @@ export class AppManager {
             YTDLUtils.saveBlobToStorage(newBlob, filename);
             return new Promise(r => r());
         }
+    }
+
+    handleDownloadError(error) {
+        this.loadingService.dismissDialog();
+        alert(`Error ${error.status} when downloading file: ${error.statusText}`);
+        if (error.error instanceof Blob) YTDLUtils.parseErrorBlob(error.error).subscribe(e => alert(e.message));
+    }
+
+    handleSaveError(error) {
+        this.loadingService.dismissDialog();
+        alert(`Error ${error.status} when saving file: ${error.statusText}`);
+    }
+
+    handleSaveSuccess() {
+        this.loadingService.dismissDialog();
+        console.log('Successfully saved file');
     }
 }
