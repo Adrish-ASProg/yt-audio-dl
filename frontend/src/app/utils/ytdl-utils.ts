@@ -21,10 +21,10 @@ export class YTDLUtils {
         return obs;
     }
 
-    static saveFileFromServerResponse(response): void {
+    static saveBlobToStorage(blob: Blob, filename: string, mimeType: string): void {
         // It is necessary to create a new blob object with mime-type explicitly set
         // otherwise only Chrome works like it should
-        const newBlob = new Blob([response.body], {type: "audio/mpeg"});
+        const newBlob = new Blob([blob], {type: mimeType});
 
         // IE doesn't allow using a blob object directly as link href
         // instead it is necessary to use msSaveOrOpenBlob
@@ -38,7 +38,7 @@ export class YTDLUtils {
         const data = window.URL.createObjectURL(newBlob);
         const link = document.createElement('a');
         link.href = data;
-        link.download = response.headers.get('FileName');
+        link.download = filename;
         // this is necessary as link.click() does not work on the latest firefox
         link.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true, view: window}));
 
@@ -47,14 +47,5 @@ export class YTDLUtils {
             window.URL.revokeObjectURL(data);
             link.remove();
         }, 100);
-    }
-
-    static downloadBlobWithName(blob: Blob, fileName: string) {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = fileName;
-        a.click();
-        window.URL.revokeObjectURL(url);
     }
 }

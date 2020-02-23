@@ -89,7 +89,7 @@ export class AppManager {
     sendDownloadRequest(id: string): void {
         this.apiService.downloadFile(id)
             .subscribe(
-                response => YTDLUtils.saveFileFromServerResponse(response),
+                response => YTDLUtils.saveBlobToStorage(response.body, response.headers.get('FileName'), 'audio/mpeg'),
                 response => YTDLUtils.parseErrorBlob(response).subscribe(e => alert(e.message))
             );
     }
@@ -97,10 +97,7 @@ export class AppManager {
     sendDownloadAsZipRequest(ids: string[], createPlaylist: boolean, filePath: string): void {
         this.apiService.downloadFilesAsZip(ids, createPlaylist, filePath)
             .subscribe(
-                response => {
-                    const blob = new Blob([response.body], {type: 'application/zip'});
-                    YTDLUtils.downloadBlobWithName(blob, 'yt-audio-dl.zip');
-                },
+                response => YTDLUtils.saveBlobToStorage(response.body, 'yt-audio-dl.zip', 'application/zip'),
                 response => YTDLUtils.parseErrorBlob(response)
                     .subscribe(e => alert(e.message))
             );
