@@ -80,18 +80,25 @@ export class AppManager {
 
     //#region Send_xxx_Request
 
-    sendConvertRequest(request: string): void {
+    async sendConvertRequest(request: string) {
+        await this.loadingService.showDialog("Retrieving titles..");
         this.apiService.requestConvert(request)
             .subscribe(
-                () => this.sendUpdateRequest(),
+                () => {
+                    this.loadingService.dismissDialog();
+                    this.sendUpdateRequest();
+                },
                 response => {
+                    this.loadingService.dismissDialog();
                     console.error(response.error);
                     alert(response.error.message);
                 }
             );
     }
 
-    sendUpdateRequest(): Observable<FileStatus[]> { return this.apiService.getAllFileStatus(); }
+    sendUpdateRequest(): Observable<FileStatus[]> {
+        return this.apiService.getAllFileStatus();
+    }
 
     async sendDownloadRequest(id: string) {
         await this.loadingService.showDialog("Downloading file..");
