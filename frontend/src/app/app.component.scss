@@ -6,4 +6,5 @@
 ::ng-deep ion-router-outlet > * {
     padding-top: 56px;
     overflow: auto !important;
+    justify-content: flex-start !important;
 }
