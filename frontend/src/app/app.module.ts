@@ -3,8 +3,6 @@ import {NgModule} from '@angular/core';
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {RouteReuseStrategy} from "@angular/router";
 
-import {MatMenuModule} from "@angular/material/menu";
-
 import {IonicModule, IonicRouteStrategy} from '@ionic/angular';
 import {SplashScreen} from '@ionic-native/splash-screen/ngx';
 import {StatusBar} from '@ionic-native/status-bar/ngx';
@@ -15,8 +13,11 @@ import {AppComponent} from './app.component';
 import {HomeModule} from "./pages/home/home.module";
 import {AppManagerModule} from "./services/request-handler/app-manager.module";
 import {AndroidPermissions} from "@ionic-native/android-permissions/ngx";
+import {MenuPopoverModule} from "./components/menu-popover/menu-popover.module";
+import {MenuPopoverComponent} from "./components/menu-popover/menu-popover.component";
 
 @NgModule({
+    entryComponents: [MenuPopoverComponent],
     declarations: [AppComponent],
     imports: [
         BrowserModule,
@@ -27,7 +28,7 @@ import {AndroidPermissions} from "@ionic-native/android-permissions/ngx";
         AppManagerModule,
         HomeModule,
 
-        MatMenuModule
+        MenuPopoverModule
     ],
     providers: [
         StatusBar,
@@ -38,4 +39,5 @@ import {AndroidPermissions} from "@ionic-native/android-permissions/ngx";
     ],
     bootstrap: [AppComponent]
 })
-export class AppModule {}
+export class AppModule {
+}
