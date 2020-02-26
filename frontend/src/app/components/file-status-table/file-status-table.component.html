@@ -16,6 +16,7 @@
                 <div class="checkbox-container">
                     <mat-checkbox (change)="$event ? selection.toggle(row) : null"
                                   (click)="$event.stopPropagation()"
+                                  [disabled]="row.status !== 'COMPLETED' && row.status !== 'ERROR'"
                                   [checked]="selection.isSelected(row)">
                     </mat-checkbox>
                 </div>

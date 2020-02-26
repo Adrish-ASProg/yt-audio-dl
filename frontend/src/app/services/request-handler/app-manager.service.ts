@@ -81,7 +81,7 @@ export class AppManager {
     //#region Send_xxx_Request
 
     async sendConvertRequest(request: string) {
-        await this.loadingService.showDialog("Retrieving titles..");
+        await this.loadingService.showDialog("Retrieving title(s)..");
         this.apiService.requestConvert(request)
             .subscribe(
                 () => {

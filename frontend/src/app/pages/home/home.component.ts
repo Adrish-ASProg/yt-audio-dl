@@ -87,14 +87,14 @@ export class HomeComponent implements OnInit {
     }
 
     public downloadButtonClicked() {
-        const selectedItems: FileStatus[] = this.fileStatusTable.getSelected();
+        const selectedItems: FileStatus[] = this.fileStatusTable.getSelected().filter(fs => fs.status == "COMPLETED");
 
         if (selectedItems.length < 1) {
-            alert("No files selected");
+            alert("No files selected. Files should be in « COMPLETED » status to be downloaded");
             return;
         }
 
-        const ids: string[] = selectedItems.filter(fs => fs.status == "COMPLETED").map(fs => fs.id);
+        const ids: string[] = selectedItems.map(fs => fs.id);
 
         // Download only one file
         if (ids.length == 1) this.appManager.sendDownloadRequest(ids[0]);
