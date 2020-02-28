@@ -1,7 +1,6 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {TagEditorDialog} from "../../components/tag-editor-dialog/tag-editor-dialog.component";
 import {YTDLUtils} from "../../utils/ytdl-utils";
-import {ActivatedRoute} from "@angular/router";
 import {MatDialog, MatDialogRef} from "@angular/material/dialog";
 import {FileStatusTableComponent} from "../../components/file-status-table/file-status-table.component";
 import {FileStatus} from "../../model/filestatus.model";
@@ -11,7 +10,8 @@ import {YT_URLS} from "../../utils/ytdl-constants";
 import {AppManager} from "../../services/request-handler/app-manager.service";
 import {PostProcessorDialog} from "../../components/post-processor-dialog/post-processor-dialog.component";
 import {PlaylistDialog} from "../../components/playlist-dialog/playlist-dialog.component";
-import {ModalController} from "@ionic/angular";
+import {ModalController, Platform} from "@ionic/angular";
+import {IntentService} from "../../services/intent/intent.service";
 
 @Component({
     selector: 'app-home',
@@ -35,29 +35,27 @@ export class HomeComponent implements OnInit {
         Validators.pattern("^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$")
     ]);
 
-    constructor(private route: ActivatedRoute,
+    constructor(private platform: Platform,
+                private intentService: IntentService,
                 public appManager: AppManager,
                 private dialog: MatDialog,
-                private modalController: ModalController) {}
+                private modalController: ModalController) {
+    }
 
 
     ngOnInit() {
-        this.urlFormControl.setValue(YT_URLS.Playlist_Test);
+        this.platform.ready().then(() => {
+            this.urlFormControl.setValue(YT_URLS.Playlist_Test);
 
-        this.appManager.onFilesStatusUpdated
-            .subscribe((fs: FileStatus[]) => { this.fileStatusTable.refreshDataTable(fs); });
+            this.intentService.onIntentReceived = (url) => {
+                this.urlFormControl.setValue(url);
+                this.appManager.sendConvertRequest(this.urlFormControl.value);
+            };
+            this.intentService.init();
 
-        if (this.route.queryParams) {
-            this.route.queryParams.subscribe(params => {
-                const videoId = params["videoId"];
-                if (videoId == void 0) return;
-
-                if (videoId.length === 11) {
-                    this.urlFormControl.setValue(`https://www.youtube.com/watch?v=${videoId}`);
-                    this.appManager.sendConvertRequest(this.urlFormControl.value);
-                }
-            });
-        }
+            this.appManager.onFilesStatusUpdated
+                .subscribe((fs: FileStatus[]) => this.fileStatusTable.refreshDataTable(fs));
+        });
     }
 
 
