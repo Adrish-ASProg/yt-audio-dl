@@ -21,6 +21,13 @@ export class AppComponent {
 
     popover: HTMLIonPopoverElement;
 
+    constructor(private platform: Platform,
+                private splashScreen: SplashScreen,
+                private statusBar: StatusBar,
+                private popoverController: PopoverController,
+                private androidPermissions: AndroidPermissions) {
+        this.initializeApp();
+    }
 
     initializeApp() {
         this.platform.ready().then(() => {
@@ -28,22 +35,17 @@ export class AppComponent {
             this.splashScreen.hide();
 
             this.androidPermissions.checkPermission(this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE).then(
-                result => { if (!result.hasPermission) this.androidPermissions.requestPermissions([this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE])},
+                result => {
+                    if (!result.hasPermission) this.androidPermissions.requestPermissions([this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE])
+                },
                 err => this.androidPermissions.requestPermission(this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE)
             );
-
         });
     }
 
     public onRouterOutletActivate(event: any) {
         this.menuButtons = event.getMenu ? event.getMenu() : [];
     }
-
-    constructor(private platform: Platform,
-                private splashScreen: SplashScreen,
-                private statusBar: StatusBar,
-                private popoverController: PopoverController,
-                private androidPermissions: AndroidPermissions) { this.initializeApp(); }
 
     public async showMenu(event) {
         this.popover = await this.popoverController.create({
