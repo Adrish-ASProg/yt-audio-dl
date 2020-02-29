@@ -11,6 +11,7 @@ import {Platform} from "@ionic/angular";
 import {FileTransferService} from "../file-transfer/file-transfer.service";
 import {HttpResponse} from "@angular/common/http";
 import {LoadingService} from "../loading/loading.service";
+import {MatSnackBar} from "@angular/material/snack-bar";
 
 @Injectable({providedIn: AppManagerModule})
 export class AppManager {
@@ -26,6 +27,7 @@ export class AppManager {
 
     constructor(private platform: Platform,
                 private apiService: APIService,
+                private snackBar: MatSnackBar,
                 private settingsService: SettingsService,
                 private loadingService: LoadingService,
                 private fileTransferService: FileTransferService) {
@@ -151,7 +153,7 @@ export class AppManager {
         // otherwise only Chrome works like it should
         const newBlob = new Blob([blob], {type: mimeType});
 
-        if (this.platform.is('android')) {
+        if (this.platform.is('cordova')) {
             return this.fileTransferService.writeBlobToStorage(newBlob, filename);
         } else {
             YTDLUtils.saveBlobToStorage(newBlob, filename);
@@ -172,6 +174,6 @@ export class AppManager {
 
     handleSaveSuccess() {
         this.loadingService.dismissDialog();
-        console.log('Successfully saved file');
+        this.snackBar.open("File downloaded successfully", "Hide", {duration: 1500});
     }
 }
