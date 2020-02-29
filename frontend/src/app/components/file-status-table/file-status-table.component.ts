@@ -1,10 +1,12 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {FileStatus} from "../../model/filestatus.model";
 import {MatTableDataSource} from "@angular/material/table";
-import {MatPaginator} from "@angular/material/paginator";
+import {MatPaginator, PageEvent} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
 import {SelectionModel} from "@angular/cdk/collections";
 import {MatSnackBar} from "@angular/material/snack-bar";
+
+import {SettingsService} from "../../services/settings/settings.service";
+import {FileStatus} from "../../model/filestatus.model";
 
 @Component({
     selector: 'app-file-status-table',
@@ -37,7 +39,17 @@ export class FileStatusTableComponent {
         this.dataSource.sort = this.sort;
     }
 
-    constructor(private snackBar: MatSnackBar) {}
+    pageSize: number = 10;
+
+    constructor(private snackBar: MatSnackBar,
+                private settingsService: SettingsService) {
+        this.pageSize = settingsService.getPageSize();
+    }
+
+    setPageSize(event: PageEvent) {
+        this.settingsService.setPageSize(event.pageSize);
+        this.pageSize = event.pageSize;
+    }
 
     showSnackbar(e: MouseEvent, filename: string) {
         e.stopPropagation();

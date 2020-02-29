@@ -4,6 +4,7 @@ import {SettingsServiceModule} from "./settings-service.module";
 
 enum OptionsKeys {
     API_ADDRESS = "API_ADDRESS",
+    PAGE_SIZE = "PAGE_SIZE",
     REFRESH_RATE = "REFRESH_RATE",
     SAVED_FOLDERS = "SAVED_FOLDERS"
 }
@@ -19,6 +20,7 @@ export class SettingsService {
 
     options: Option[] = [
         {name: OptionsKeys.API_ADDRESS, value: "http://192.168.1.1:8080", defaultValue: "http://192.168.1.1:8080"},
+        {name: OptionsKeys.PAGE_SIZE, value: "10", defaultValue: "10"},
         {name: OptionsKeys.REFRESH_RATE, value: 1500, defaultValue: 1500},
         {name: OptionsKeys.SAVED_FOLDERS, value: "", defaultValue: ""}
     ];
@@ -30,6 +32,16 @@ export class SettingsService {
                 window.localStorage.setItem(opt.name, opt.defaultValue.toString());
             } else opt.value = value;
         });
+    }
+
+    getPageSize(): number {
+        return this.getOption(OptionsKeys.PAGE_SIZE);
+    }
+
+    setPageSize(value: number): boolean {
+        this.setOption(OptionsKeys.PAGE_SIZE, value);
+        console.debug("Page size value set to " + value);
+        return true;
     }
 
     getServerAddress(): string {
@@ -72,6 +84,7 @@ export class SettingsService {
         console.debug("Saved folders value set to " + value);
         return true;
     }
+
 
     private getOption(name: string) {
         const option = this.options.find(opt => name === opt.name);
