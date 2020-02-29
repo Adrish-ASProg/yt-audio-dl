@@ -11,6 +11,7 @@ import {EllipsisModule} from "ngx-ellipsis";
 import {MatSnackBarModule} from "@angular/material/snack-bar";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import {IonicModule} from "@ionic/angular";
+import {MatTooltipModule} from "@angular/material/tooltip";
 
 @NgModule({
     entryComponents: [],
@@ -29,7 +30,8 @@ import {IonicModule} from "@ionic/angular";
         MatSnackBarModule,
         MatProgressSpinnerModule,
 
-        EllipsisModule
+        EllipsisModule,
+        MatTooltipModule
     ],
     exports: [FileStatusTableComponent],
     providers: []

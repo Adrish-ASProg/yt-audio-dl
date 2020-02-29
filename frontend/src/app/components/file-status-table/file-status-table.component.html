@@ -38,17 +38,19 @@
             <th *matHeaderCellDef class="status-header-cell" mat-header-cell mat-sort-header> Status</th>
             <td *matCellDef="let element" class="status-cell" mat-cell>
                 <!-- COMPLETED -->
-                <ion-icon *ngIf="element.status === 'COMPLETED'" class="span-file-status" color="success" name="checkmark-circle-outline"></ion-icon>
+                <ion-icon *ngIf="element.status === 'COMPLETED'" [matTooltip]="element.status" class="span-file-status"
+                          color="success" name="checkmark-circle-outline"></ion-icon>
 
                 <!-- LOADING -->
-                <div class="loading-spinner-container">
+                <div [matTooltip]="element.status" class="loading-spinner-container">
                     <span *ngIf="element.status !== 'COMPLETED' && element.status !== 'ERROR'" class="span-file-status">
                         <mat-spinner [diameter]="24" [strokeWidth]="2"></mat-spinner>
                     </span>
                 </div>
 
                 <!-- ERROR -->
-                <ion-icon *ngIf="element.status === 'ERROR'" class="span-file-status" color="danger" name="alert-circle-outline"></ion-icon>
+                <ion-icon *ngIf="element.status === 'ERROR'" [matTooltip]="element.status" class="span-file-status"
+                          color="danger" name="alert-circle-outline"></ion-icon>
             </td>
         </ng-container>
 
