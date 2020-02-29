@@ -3,32 +3,12 @@
     flex-direction: column;
     padding: 15px;
 
-
-    /* Request container (url input / audio switch / send button) */
+    /* Request container (url input / send button / debug buttons) */
     .request-container {
         display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        flex: 1;
 
-        .url-button-container {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            align-items: center;
-
-            .url-container {
-                width: 100%;
-            }
-
-            mat-button-toggle-group {
-                margin-bottom: 15px;
-
-                ::ng-deep .mat-button-toggle-label-content {
-                    line-height: 36px;
-                }
-            }
+        .input-container {
+            flex: 1;
         }
     }
 
@@ -38,7 +18,7 @@
     }
 
     .table-container {
-        margin-top: 50px;
+        margin-top: 10px;
 
         .control-buttons {
             display: flex;

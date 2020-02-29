@@ -5,6 +5,7 @@ import {SplashScreen} from '@ionic-native/splash-screen/ngx';
 import {StatusBar} from '@ionic-native/status-bar/ngx';
 
 import {AndroidPermissions} from '@ionic-native/android-permissions/ngx';
+import {MatMenu} from "@angular/material/menu";
 
 @Component({
     selector: 'app-root',
@@ -16,7 +17,7 @@ export class AppComponent {
     // Toolbar
     projectTitle: string = 'YT-Audio-DL';
 
-    menuButtons: { label: string, action: () => void }[] = [];
+    menu: MatMenu;
 
     constructor(private platform: Platform,
                 private splashScreen: SplashScreen,
@@ -39,7 +40,7 @@ export class AppComponent {
         });
     }
 
-    public onRouterOutletActivate(event: any) {
-        this.menuButtons = event.getMenu ? event.getMenu() : [];
+    public onRouterOutletActivate(component: any) {
+        this.menu = component.menu || undefined;
     }
 }

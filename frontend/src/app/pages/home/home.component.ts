@@ -12,6 +12,7 @@ import {PostProcessorDialog} from "../../components/post-processor-dialog/post-p
 import {PlaylistDialog} from "../../components/playlist-dialog/playlist-dialog.component";
 import {ModalController, Platform} from "@ionic/angular";
 import {IntentService} from "../../services/intent/intent.service";
+import {MatMenu} from "@angular/material/menu";
 
 @Component({
     selector: 'app-home',
@@ -20,10 +21,8 @@ import {IntentService} from "../../services/intent/intent.service";
 })
 export class HomeComponent implements OnInit {
 
-    menu: any = [
-        {label: "Refresh", action: () => this.refreshActionClicked()},
-        {label: "Settings", action: () => this.settingsActionClicked()}
-    ];
+    @ViewChild("mainMenu", {read: MatMenu, static: false})
+    public menu: MatMenu;
 
     @ViewChild(FileStatusTableComponent, {static: false})
     fileStatusTable: FileStatusTableComponent;
@@ -60,10 +59,6 @@ export class HomeComponent implements OnInit {
 
 
     //#region Menu
-
-    public getMenu() {
-        return this.menu;
-    }
 
     public refreshActionClicked() {
         this.fileStatusTable.resetSelection();
@@ -139,7 +134,7 @@ export class HomeComponent implements OnInit {
     // #endregion
 
     setUrl(event) {
-        switch (event.value) {
+        switch (event) {
             case "bg":
                 this.urlFormControl.setValue(YT_URLS.Playlist_Background);
                 break;
