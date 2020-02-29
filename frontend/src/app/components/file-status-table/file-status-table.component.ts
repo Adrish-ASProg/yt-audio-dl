@@ -63,14 +63,22 @@ export class FileStatusTableComponent {
     }
 
     isEntirePageSelected() {
-        return this.getPageData().every((row) => this.selection.isSelected(row));
+        return this.getPageData()
+            .filter(fs => fs.status === 'COMPLETED')
+            .every(fs => this.selection.isSelected(fs));
     }
 
     /** Select / unselect all rows on the current page. */
     masterToggle() {
         this.isEntirePageSelected() ?
             this.selection.deselect(...this.getPageData()) :
-            this.selection.select(...this.getPageData());
+            this.selectAll();
+    }
+
+    selectAll(): void {
+        this.selection.select(
+            ...this.getPageData().filter(fs => fs.status === 'COMPLETED')
+        );
     }
 
     // #endregion
