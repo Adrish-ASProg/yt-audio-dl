@@ -7,6 +7,7 @@ import {MatExpansionModule} from "@angular/material/expansion";
 import {FormsModule} from "@angular/forms";
 import {MatSelectModule} from "@angular/material/select";
 import {CommonModule} from "@angular/common";
+import {EllipsisModule} from "ngx-ellipsis";
 
 @NgModule({
     declarations: [PostProcessorDialog],
@@ -18,7 +19,9 @@ import {CommonModule} from "@angular/common";
         MatExpansionModule,
         MatSelectModule,
         MatGridListModule,
-        MatButtonModule
+        MatButtonModule,
+
+        EllipsisModule
     ]
 })
 export class PostProcessorDialogModule {}

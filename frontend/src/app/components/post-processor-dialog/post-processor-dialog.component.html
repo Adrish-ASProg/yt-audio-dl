@@ -10,8 +10,7 @@
 
                 <!-- Title -->
                 <mat-expansion-panel-header>
-                    <mat-panel-title>Filename --> Tags</mat-panel-title>
-                    <mat-panel-description>Set metadata from filename</mat-panel-description>
+                    <mat-panel-title>Set metadata from filename</mat-panel-title>
                 </mat-expansion-panel-header>
 
                 <div class="name-to-tags-content">
@@ -28,14 +27,14 @@
 
 
                     <!-- Example -->
-                    <span class="example-filename">E.g. <span>{{ exampleItem.name }}</span></span>
-                    <mat-grid-list class="example-grid" cols="3" rowHeight="4:1">
+                    <span class="example-filename" ellipsis>E.g. <span>{{ exampleItem.name }}</span></span>
+                    <mat-grid-list class="example-grid" cols="4" rowHeight="16px">
                         <mat-grid-tile>Artist</mat-grid-tile>
-                        <mat-grid-tile [colspan]="2">{{exampleItem.metadata.artist}}</mat-grid-tile>
+                        <mat-grid-tile [colspan]="3"><span>{{exampleItem.metadata.artist}}</span></mat-grid-tile>
                         <mat-grid-tile>Album</mat-grid-tile>
-                        <mat-grid-tile [colspan]="2">{{exampleItem.metadata.album}}</mat-grid-tile>
+                        <mat-grid-tile [colspan]="3"><span>{{exampleItem.metadata.album}}</span></mat-grid-tile>
                         <mat-grid-tile>Title</mat-grid-tile>
-                        <mat-grid-tile [colspan]="2">{{exampleItem.metadata.title}}</mat-grid-tile>
+                        <mat-grid-tile [colspan]="3"><span>{{exampleItem.metadata.title}}</span></mat-grid-tile>
                     </mat-grid-list>
                 </div>
             </mat-expansion-panel>

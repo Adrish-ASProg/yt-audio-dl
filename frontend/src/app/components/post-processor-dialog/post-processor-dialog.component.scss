@@ -20,6 +20,7 @@ mat-expansion-panel {
 
 
         .example-filename {
+            height: 40px;
             margin-top: 5px;
             font-size: 12px;
             text-align: center;
@@ -32,6 +33,14 @@ mat-expansion-panel {
         .example-grid {
             margin-top: 10px;
             font-size: 12px;
+
+            mat-grid-tile {
+                span {
+                    white-space: nowrap;
+                    overflow-x: hidden;
+                    text-overflow: ellipsis;
+                }
+            }
         }
     }
 }
