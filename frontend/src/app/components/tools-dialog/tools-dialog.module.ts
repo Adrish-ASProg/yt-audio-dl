@@ -7,13 +7,19 @@ import {MatExpansionModule} from "@angular/material/expansion";
 import {FormsModule} from "@angular/forms";
 import {MatSelectModule} from "@angular/material/select";
 import {CommonModule} from "@angular/common";
+
+import {IonicModule} from "@ionic/angular";
+
 import {EllipsisModule} from "ngx-ellipsis";
+import {MatInputModule} from "@angular/material/input";
+import {MatAutocompleteModule} from "@angular/material/autocomplete";
 
 @NgModule({
     declarations: [ToolsDialog],
     imports: [
         FormsModule,
         CommonModule,
+        IonicModule,
 
         MatDialogModule,
         MatExpansionModule,
@@ -21,7 +27,9 @@ import {EllipsisModule} from "ngx-ellipsis";
         MatGridListModule,
         MatButtonModule,
 
-        EllipsisModule
+        EllipsisModule,
+        MatInputModule,
+        MatAutocompleteModule
     ]
 })
 export class ToolsDialogModule {}

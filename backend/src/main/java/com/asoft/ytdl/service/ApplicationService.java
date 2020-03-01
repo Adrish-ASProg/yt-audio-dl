@@ -7,17 +7,17 @@ import com.asoft.ytdl.model.FileStatus;
 import com.asoft.ytdl.model.Mp3Metadata;
 import com.asoft.ytdl.model.XmlConfiguration;
 import com.asoft.ytdl.model.request.DLFileAsZipRequest;
+import com.asoft.ytdl.model.request.DLPlaylistRequest;
 import com.asoft.ytdl.model.request.TagRequest;
 import com.asoft.ytdl.utils.*;
 import com.mpatric.mp3agic.NotSupportedException;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.util.StringUtils;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -117,22 +117,6 @@ public class ApplicationService implements DownloadFromYTEvents {
                 System.out.printf("%s zipped (%d/%d)\n", entry.getKey(), ++zippedFilesCount, filesToBeZipped.size());
             }
 
-            // Include playlist if needed
-            if (request.getCreatePlaylist() && !StringUtils.isEmpty(request.getFilePath())) {
-                System.out.println("Creating playlist");
-                String text = filesToBeZipped.keySet()
-                        .stream()
-                        .map(fileName -> request.getFilePath() + fileName)
-                        .collect(Collectors.joining("\n"));
-
-                InputStream inputStream = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
-                zipOutputStream.putNextEntry(new ZipEntry("playlist.m3u8"));
-                IOUtils.copy(inputStream, zipOutputStream);
-                inputStream.close();
-                zipOutputStream.closeEntry();
-                System.out.println("Playlist created");
-            }
-
             //setting headers
             response.addHeader("Content-Disposition", "attachment; filename=\"yt-audio-dl.zip\"");
             response.setStatus(HttpServletResponse.SC_OK);
@@ -141,6 +125,46 @@ public class ApplicationService implements DownloadFromYTEvents {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
 
+    }
+
+    /**
+     * POST /dl-playlist
+     **/
+    public void downloadPlaylist(DLPlaylistRequest request, HttpServletResponse response) {
+        System.out.println("Creating playlist");
+
+        /*
+        Filter ids, keep only:
+         - file's id present in "fileStatus"
+         - fileStatus with COMPLETED status
+         - Existing files on disk
+        */
+        String playlistText = request.getIds().stream()
+                .filter(filesStatus::containsKey)
+                .map(filesStatus::get)
+                .filter(fs -> ProgressStatus.COMPLETED.equals(fs.getStatus()))
+                // FIXME extension
+                .map(fileStatus -> new File(DOWNLOAD_FOLDER + File.separator + fileStatus.getName() + ".mp3"))
+                .filter(File::exists)
+                .map(File::getName)
+                .map(fileName -> request.getFilePath() + fileName)
+                .collect(Collectors.joining("\n"));
+
+        ServletOutputStream out = null;
+        try {
+            out = response.getOutputStream();
+            out.println(playlistText);
+            out.flush();
+            out.close();
+            System.out.println("Playlist created");
+
+            //setting headers
+            response.addHeader("Content-Disposition", "attachment; filename=\"yt-audio-dl.m3u8\"");
+            response.setStatus(HttpServletResponse.SC_OK);
+        } catch (IOException e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**

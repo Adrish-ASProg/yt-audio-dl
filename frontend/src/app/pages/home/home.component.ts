@@ -1,7 +1,7 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {TagEditorDialog} from "../../components/tag-editor-dialog/tag-editor-dialog.component";
 import {YTDLUtils} from "../../utils/ytdl-utils";
-import {MatDialog, MatDialogRef} from "@angular/material/dialog";
+import {MatDialog} from "@angular/material/dialog";
 import {FileStatusTableComponent} from "../../components/file-status-table/file-status-table.component";
 import {FileStatus} from "../../model/filestatus.model";
 import {FormControl, Validators} from "@angular/forms";
@@ -9,7 +9,6 @@ import {SettingsDialog} from "../../components/settings-dialog/settings-dialog.c
 import {YT_URLS} from "../../utils/ytdl-constants";
 import {AppManager} from "../../services/request-handler/app-manager.service";
 import {ToolsDialog} from "../../components/tools-dialog/tools-dialog.component";
-import {PlaylistDialog} from "../../components/playlist-dialog/playlist-dialog.component";
 import {ModalController, Platform} from "@ionic/angular";
 import {IntentService} from "../../services/intent/intent.service";
 import {MatMenu} from "@angular/material/menu";
@@ -92,14 +91,8 @@ export class HomeComponent implements OnInit {
         // Download only one file
         if (ids.length == 1) this.appManager.sendDownloadRequest(ids[0]);
 
-        // Download file as zip (+ eventually playlist)
-        else {
-            const dialogRef = this.openPlaylistDialog();
-            dialogRef.afterClosed().subscribe(result => {
-                if (!result) return;
-                this.appManager.sendDownloadAsZipRequest(ids, result.createPlaylist, result.filePath);
-            });
-        }
+        // Download file as zip
+        else this.appManager.sendDownloadAsZipRequest(ids);
     }
 
     public postProcessorButtonClicked() {
@@ -172,9 +165,5 @@ export class HomeComponent implements OnInit {
         const modal = await this.modalController.create({component: SettingsDialog});
         modal.onDidDismiss().then(_ => this.appManager.getSettings());
         return modal.present();
-    }
-
-    private openPlaylistDialog(): MatDialogRef<PlaylistDialog, any> {
-        return this.dialog.open(PlaylistDialog, {width: "300px"});
     }
 }

@@ -7,6 +7,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class DLFileAsZipRequest {
+public class DLPlaylistRequest {
     private List<String> ids;
+    private String filePath;
 }

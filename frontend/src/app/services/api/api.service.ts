@@ -12,13 +12,17 @@ const jsonHttpOptions = {
 };
 
 const audioHttpOptions = {
-    headers: new HttpHeaders({'Content-Type': 'audio/mpeg'}),
     responseType: 'blob' as 'json',
     observe: 'response' as 'body'
 };
 
 const zipHttpOptions = {
     responseType: 'arraybuffer' as 'json',
+    observe: 'response' as 'body'
+};
+
+const playlistHttpOptions = {
+    responseType: 'text' as 'json',
     observe: 'response' as 'body'
 };
 
@@ -32,6 +36,7 @@ export class APIService {
     private statusUrl: string = "/status/all";
     private downloadUrl: string = "/dl";
     private downloadAsZipUrl: string = "/dl-zip";
+    private downloadPlaylistUrl: string = "/dl-playlist";
     private setTagsUrl: string = "/tags";
     private deleteUrl: string = "/delete";
 
@@ -52,11 +57,20 @@ export class APIService {
     }
 
     /** POST: download files as zip */
-    downloadFilesAsZip(ids: string[], createPlaylist: boolean, filePath: string): Observable<any> {
+    downloadFilesAsZip(ids: string[]): Observable<any> {
         return this.http.post<any>(
             `${this.apiUrl}${this.downloadAsZipUrl}`,
-            {ids: ids, createPlaylist: createPlaylist, filePath: filePath},
+            {ids: ids},
             zipHttpOptions
+        );
+    }
+
+    /** POST: download playlist */
+    downloadPlaylist(ids: string[], filePath: string): Observable<any> {
+        return this.http.post<any>(
+            `${this.apiUrl}${this.downloadPlaylistUrl}`,
+            {ids, filePath},
+            playlistHttpOptions
         );
     }
 

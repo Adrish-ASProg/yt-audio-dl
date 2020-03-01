@@ -116,10 +116,10 @@ export class AppManager {
         );
     }
 
-    async sendDownloadAsZipRequest(ids: string[], createPlaylist: boolean, filePath: string) {
+    async sendDownloadAsZipRequest(ids: string[]) {
         await this.loadingService.showDialog("Downloading file..");
 
-        this.apiService.downloadFilesAsZip(ids, createPlaylist, filePath).subscribe(
+        this.apiService.downloadFilesAsZip(ids).subscribe(
             async (response: HttpResponse<any>) => {
                 await this.loadingService.showDialog("Saving file as yt-audio-dl.zip");
 
