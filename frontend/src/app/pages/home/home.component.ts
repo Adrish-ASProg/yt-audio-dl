@@ -8,7 +8,7 @@ import {FormControl, Validators} from "@angular/forms";
 import {SettingsDialog} from "../../components/settings-dialog/settings-dialog.component";
 import {YT_URLS} from "../../utils/ytdl-constants";
 import {AppManager} from "../../services/request-handler/app-manager.service";
-import {PostProcessorDialog} from "../../components/post-processor-dialog/post-processor-dialog.component";
+import {ToolsDialog} from "../../components/tools-dialog/tools-dialog.component";
 import {PlaylistDialog} from "../../components/playlist-dialog/playlist-dialog.component";
 import {ModalController, Platform} from "@ionic/angular";
 import {IntentService} from "../../services/intent/intent.service";
@@ -159,7 +159,7 @@ export class HomeComponent implements OnInit {
     }
 
     private openPostProcessorDialog(selectedItems: FileStatus[]): void {
-        const dialogRef = this.dialog.open(PostProcessorDialog, {data: {fileStatus: selectedItems}});
+        const dialogRef = this.dialog.open(ToolsDialog, {data: {fileStatus: selectedItems}});
         dialogRef.afterClosed().subscribe((result: FileStatus[]) => {
             if (!result) return;
 

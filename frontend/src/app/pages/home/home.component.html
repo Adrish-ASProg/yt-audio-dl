@@ -29,7 +29,7 @@
     </div>
 
     <div class="table-container">
-        <!-- Buttons Download / Post Processor / Delete -->
+        <!-- Buttons Download / Tools / Delete -->
         <ion-grid class="control-buttons">
             <ion-row>
                 <ion-col>
@@ -40,7 +40,7 @@
 
                 <ion-col>
                     <ion-button (click)="postProcessorButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
-                                class="processor-button" color="warning" size="small">Post-Processor
+                                class="tools-button" color="warning" size="small">Tools
                     </ion-button>
                 </ion-col>
 

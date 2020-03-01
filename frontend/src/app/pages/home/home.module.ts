@@ -19,13 +19,13 @@ import {SettingsServiceModule} from "../../services/settings/settings-service.mo
 import {SettingsDialog} from "../../components/settings-dialog/settings-dialog.component";
 import {SettingsDialogModule} from "../../components/settings-dialog/settings-dialog.module";
 import {MatButtonToggleModule} from "@angular/material/button-toggle";
-import {PostProcessorDialog} from "../../components/post-processor-dialog/post-processor-dialog.component";
-import {PostProcessorDialogModule} from "../../components/post-processor-dialog/post-processor-dialog.module";
+import {ToolsDialog} from "../../components/tools-dialog/tools-dialog.component";
+import {ToolsDialogModule} from "../../components/tools-dialog/tools-dialog.module";
 import {PlaylistDialogModule} from "../../components/playlist-dialog/playlist-dialog.module";
 import {PlaylistDialog} from "../../components/playlist-dialog/playlist-dialog.component";
 
 @NgModule({
-    entryComponents: [PlaylistDialog, TagEditorDialog, PostProcessorDialog, SettingsDialog],
+    entryComponents: [PlaylistDialog, TagEditorDialog, ToolsDialog, SettingsDialog],
     declarations: [HomeComponent],
     imports: [
         BrowserModule,
@@ -37,7 +37,7 @@ import {PlaylistDialog} from "../../components/playlist-dialog/playlist-dialog.c
         FileStatusTableModule,
         PlaylistDialogModule,
         TagEditorDialogModule,
-        PostProcessorDialogModule,
+        ToolsDialogModule,
         SettingsDialogModule,
 
         FormsModule,

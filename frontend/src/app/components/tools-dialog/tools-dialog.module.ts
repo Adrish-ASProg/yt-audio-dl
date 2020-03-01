@@ -1,5 +1,5 @@
 import {NgModule} from '@angular/core';
-import {PostProcessorDialog} from "./post-processor-dialog.component";
+import {ToolsDialog} from "./tools-dialog.component";
 import {MatDialogModule} from "@angular/material/dialog";
 import {MatButtonModule} from "@angular/material/button";
 import {MatGridListModule} from "@angular/material/grid-list";
@@ -10,7 +10,7 @@ import {CommonModule} from "@angular/common";
 import {EllipsisModule} from "ngx-ellipsis";
 
 @NgModule({
-    declarations: [PostProcessorDialog],
+    declarations: [ToolsDialog],
     imports: [
         FormsModule,
         CommonModule,
@@ -24,4 +24,4 @@ import {EllipsisModule} from "ngx-ellipsis";
         EllipsisModule
     ]
 })
-export class PostProcessorDialogModule {}
+export class ToolsDialogModule {}
