@@ -1,4 +1,4 @@
-package com.asoft.ytdl.enums;
+package com.asoft.ytdl.constants.enums;
 
 public enum ProgressStatus {
     INITIALIZING("Initializing"),

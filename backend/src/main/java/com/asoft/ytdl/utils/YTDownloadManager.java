@@ -1,12 +1,9 @@
 package com.asoft.ytdl.utils;
 
-import com.asoft.ytdl.enums.ProgressStatus;
+import com.asoft.ytdl.constants.enums.ProgressStatus;
+import com.asoft.ytdl.constants.interfaces.DownloadFromYTEvents;
 import com.asoft.ytdl.exception.YTDLException;
-import com.asoft.ytdl.interfaces.DownloadCompletedEvent;
-import com.asoft.ytdl.interfaces.ErrorEvent;
-import com.asoft.ytdl.interfaces.ProgressEvent;
-import com.asoft.ytdl.interfaces.TitleRetrievedEvent;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
 
@@ -21,13 +18,10 @@ import static com.asoft.ytdl.utils.SettingsManager.DOWNLOAD_FOLDER;
 
 
 @Setter
-@NoArgsConstructor
+@RequiredArgsConstructor
 public class YTDownloadManager {
 
-    private DownloadCompletedEvent downloadCompletedEvent = (id, fileName) -> {};
-    private TitleRetrievedEvent titleRetrievedEvent = (id, title) -> {};
-    private ProgressEvent progressEvent = (id, progressStatus) -> {};
-    private ErrorEvent errorEvent = (id, exception) -> {};
+    private final DownloadFromYTEvents eventHandler;
     private List<String> skippedId = new ArrayList<>();
 
     /**
@@ -38,7 +32,7 @@ public class YTDownloadManager {
         final LinkedHashMap<String, String> fileNames = getVideoTitles(url);
 
         if (fileNames.size() == 0) {
-            errorEvent.onError(null, new YTDLException("[download] Unable to download file: No file found"));
+            eventHandler.onError(null, new YTDLException("[download] Unable to download file: No file found"));
         }
 
         if (!CollectionUtils.isEmpty(skippedId)) {
@@ -67,19 +61,12 @@ public class YTDownloadManager {
             String dlCommand = String.format("youtube-dl -o \"%s\" --no-playlist --extract-audio --audio-format mp3 --playlist-items %d %s", destination, i + 1, url);
             executor.execute(() -> downloadFile(dlCommand, id, fileName, executor));
         }
-
-//        try {
-//            executor.awaitTermination(15, TimeUnit.MINUTES);
-//            System.out.println("########## All files downloaded successfully ##########");
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
     }
 
     private void downloadFile(String dlCommand, String id, String fileName, ExecutorService executor) {
         System.out.println(String.format("########## Downloading « %s » ##########", fileName));
 
-        progressEvent.onProgress(id, ProgressStatus.STARTING_DOWNLOAD);
+        eventHandler.onProgress(id, ProgressStatus.STARTING_DOWNLOAD);
 
         // Handle progress
         final String downloadPagePrefix = "[youtube]";
@@ -89,19 +76,19 @@ public class YTDownloadManager {
         CmdManager cmdManager = new CmdManager(false);
         cmdManager.setOutputEvent(text -> {
             if (text.startsWith(downloadPagePrefix)) {
-                progressEvent.onProgress(id, ProgressStatus.DOWNLOADING_WEBPAGE);
+                eventHandler.onProgress(id, ProgressStatus.DOWNLOADING_WEBPAGE);
             } else if (text.startsWith(downloadPrefix)) {
-                progressEvent.onProgress(id, ProgressStatus.DOWNLOADING_VIDEO);
+                eventHandler.onProgress(id, ProgressStatus.DOWNLOADING_VIDEO);
             } else if (text.startsWith(convertPrefix)) {
-                progressEvent.onProgress(id, ProgressStatus.CONVERTING_TO_AUDIO);
+                eventHandler.onProgress(id, ProgressStatus.CONVERTING_TO_AUDIO);
             }
             System.out.println(id + " " + text);
         });
-        cmdManager.setErrorEvent(text -> errorEvent.onError(id, new YTDLException(text)));
+        cmdManager.setErrorEvent(text -> eventHandler.onError(id, new YTDLException(text)));
         cmdManager.executeCommand(dlCommand);
 
         System.out.println("_________ File downloaded: " + fileName + " _________");
-        downloadCompletedEvent.onDownloadCompleted(id, fileName);
+        eventHandler.onDownloadCompleted(id, fileName);
         executor.shutdown();
     }
 
@@ -111,23 +98,23 @@ public class YTDownloadManager {
     private LinkedHashMap<String, String> getVideoTitles(String url) {
         String getNameCommand = "youtube-dl --get-filename --no-playlist --flat-playlist --restrict-filenames -o %(id)s__--__%(title)s " + url;
 
-        final LinkedHashMap<String, String> fileNames = new LinkedHashMap<>();
+        final LinkedHashMap<String, String> result = new LinkedHashMap<>();
         CmdManager cmdManager = new CmdManager(true);
         cmdManager.setErrorEvent((text) ->
-                errorEvent.onError(null, new YTDLException("Unable to retrieve video title\n" + text))
+                eventHandler.onError(null, new YTDLException("Unable to retrieve video title\n" + text))
         );
         cmdManager.setOutputEvent(output -> {
             if (!output.startsWith("Process terminated")) {
                 String[] splittedOutput = output.split("__--__");
                 String id = splittedOutput[0];
                 String title = splittedOutput[1].replace("_", " ");
-                fileNames.put(id, title);
-                titleRetrievedEvent.onTitleRetrievedEvent(id, title);
+                result.put(id, title);
+                eventHandler.onTitleRetrieved(id, title);
                 System.out.println(String.format("File name: « %s »", title));
             }
         });
         cmdManager.executeCommand(getNameCommand);
 
-        return fileNames;
+        return result;
     }
 }

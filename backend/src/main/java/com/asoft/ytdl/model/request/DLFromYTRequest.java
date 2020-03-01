@@ -1,11 +1,10 @@
-package com.asoft.ytdl.model;
+package com.asoft.ytdl.model.request;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class YTRequest {
+public class DLFromYTRequest {
     private String url;
-    private Boolean audioOnly;
 }

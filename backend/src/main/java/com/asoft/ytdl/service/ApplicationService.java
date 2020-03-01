@@ -1,13 +1,14 @@
 package com.asoft.ytdl.service;
 
-import com.asoft.ytdl.application.Mp3Tagger;
-import com.asoft.ytdl.enums.ProgressStatus;
+import com.asoft.ytdl.constants.enums.ProgressStatus;
+import com.asoft.ytdl.constants.interfaces.DownloadFromYTEvents;
 import com.asoft.ytdl.exception.UncompletedDownloadException;
-import com.asoft.ytdl.model.*;
-import com.asoft.ytdl.utils.FileUtils;
-import com.asoft.ytdl.utils.SettingsManager;
-import com.asoft.ytdl.utils.XMLManager;
-import com.asoft.ytdl.utils.YTDownloadManager;
+import com.asoft.ytdl.model.FileStatus;
+import com.asoft.ytdl.model.Mp3Metadata;
+import com.asoft.ytdl.model.XmlConfiguration;
+import com.asoft.ytdl.model.request.DLFileAsZipRequest;
+import com.asoft.ytdl.model.request.TagRequest;
+import com.asoft.ytdl.utils.*;
 import com.mpatric.mp3agic.NotSupportedException;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ import static com.asoft.ytdl.utils.FileUtils.getFile;
 import static com.asoft.ytdl.utils.SettingsManager.DOWNLOAD_FOLDER;
 
 @Service
-public class ApplicationService {
+public class ApplicationService implements DownloadFromYTEvents {
 
     private Map<String, FileStatus> filesStatus = new HashMap<>();
 
@@ -44,45 +45,10 @@ public class ApplicationService {
     /**
      * POST /ytdl
      **/
-    public void downloadFileFromYT(YTRequest ytRequest) {
-        YTDownloadManager dlManager = new YTDownloadManager();
-        dlManager.setProgressEvent((id, progressStatus) -> {
-            if (filesStatus.containsKey(id) && !progressStatus.equals(filesStatus.get(id).getStatus())) {
-                filesStatus.get(id).setStatus(progressStatus);
-                saveData();
-            }
-        });
-        dlManager.setDownloadCompletedEvent((id, fileName) -> {
-            FileStatus fs = filesStatus.get(id);
-            fs.setStatus(ProgressStatus.COMPLETED);
-            // FIXME extension
-            fs.setMetadata(Mp3Tagger.getTags(DOWNLOAD_FOLDER + File.separator + fs.getName() + ".mp3"));
-            saveData();
-        });
-        dlManager.setTitleRetrievedEvent((id, title) -> {
-            if (!filesStatus.containsKey(id)) {
-                filesStatus.put(id,
-                        new FileStatus() {{
-                            setId(id);
-                            setName(title);
-                            setStatus(ProgressStatus.INITIALIZING);
-                            setStartDate(new Date().getTime());
-                        }}
-                );
-                saveData();
-            }
-        });
-        dlManager.setErrorEvent((id, error) -> {
-            System.err.println("[AppService.downloadFileFromYT] " + error.getMessage());
-
-            if (filesStatus.containsKey(id)) {
-                System.err.println("[AppService.downloadFileFromYT] " + filesStatus.get(id));
-                filesStatus.get(id).setStatus(ProgressStatus.ERROR);
-                saveData();
-            }
-        });
+    public void downloadFileFromYT(String url) {
+        YTDownloadManager dlManager = new YTDownloadManager(this);
         dlManager.setSkippedId(new ArrayList<>(filesStatus.keySet()));
-        dlManager.download(ytRequest.getUrl());
+        dlManager.download(url);
     }
 
     /**
@@ -117,7 +83,7 @@ public class ApplicationService {
     /**
      * POST /dl-zip
      **/
-    public void downloadFiles(DLAsZipRequest request, HttpServletResponse response) {
+    public void downloadFiles(DLFileAsZipRequest request, HttpServletResponse response) {
         Map<String, File> filesToBeZipped = new HashMap<>();
 
         /*
@@ -203,14 +169,6 @@ public class ApplicationService {
     }
 
     /**
-     * GET /status
-     **/
-    public FileStatus getFileStatus(String id) throws FileNotFoundException {
-        checkFileIsPresent(id);
-        return filesStatus.get(id);
-    }
-
-    /**
      * GET /status/all
      **/
     public Collection<FileStatus> getAllFilesStatus() {
@@ -257,6 +215,51 @@ public class ApplicationService {
     }
 
     // #endregion
+
+
+    //#region Download from YT events
+
+    public void onProgress(String id, ProgressStatus progressStatus) {
+        if (filesStatus.containsKey(id) && !progressStatus.equals(filesStatus.get(id).getStatus())) {
+            filesStatus.get(id).setStatus(progressStatus);
+            saveData();
+        }
+    }
+
+    public void onDownloadCompleted(String id, String fileName) {
+        FileStatus fs = filesStatus.get(id);
+        fs.setStatus(ProgressStatus.COMPLETED);
+        // FIXME extension
+        fs.setMetadata(Mp3Tagger.getTags(DOWNLOAD_FOLDER + File.separator + fs.getName() + ".mp3"));
+        saveData();
+    }
+
+    public void onTitleRetrieved(String id, String title) {
+        if (!filesStatus.containsKey(id)) {
+            filesStatus.put(id,
+                    new FileStatus() {{
+                        setId(id);
+                        setName(title);
+                        setStatus(ProgressStatus.INITIALIZING);
+                        setStartDate(new Date().getTime());
+                    }}
+            );
+            saveData();
+        }
+    }
+
+    public void onError(String id, Exception error) {
+        System.err.println("[AppService.downloadFileFromYT] " + error.getMessage());
+
+        if (filesStatus.containsKey(id)) {
+            System.err.println("[AppService.downloadFileFromYT] " + filesStatus.get(id));
+            filesStatus.get(id).setStatus(ProgressStatus.ERROR);
+            saveData();
+        }
+    }
+
+    // #endregion
+
 
     //#region Private methods
 

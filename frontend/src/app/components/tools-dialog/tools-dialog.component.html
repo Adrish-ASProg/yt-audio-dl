@@ -2,44 +2,41 @@
 
 <div class="content" mat-dialog-content>
 
-    <div class="tags-container">
-        <mat-accordion>
+    <mat-accordion>
+        <!--   Filename ==> Tags   -->
+        <mat-expansion-panel expanded>
 
-            <!--   Filename ==> Tags   -->
-            <mat-expansion-panel expanded>
+            <!-- Title -->
+            <mat-expansion-panel-header>
+                <mat-panel-title>Set metadata from filename</mat-panel-title>
+            </mat-expansion-panel-header>
 
-                <!-- Title -->
-                <mat-expansion-panel-header>
-                    <mat-panel-title>Set metadata from filename</mat-panel-title>
-                </mat-expansion-panel-header>
+            <div class="name-to-tags-content">
 
-                <div class="name-to-tags-content">
-
-                    <!-- Select Format -->
-                    <mat-form-field>
-                        <mat-label>Format</mat-label>
-                        <mat-select (ngModelChange)="updateTableResults($event)" [ngModel]="selectedFormat">
-                            <mat-option *ngFor="let format of formats" [value]="format">
-                                {{format.label}}
-                            </mat-option>
-                        </mat-select>
-                    </mat-form-field>
+                <!-- Select Format -->
+                <mat-form-field>
+                    <mat-label>Format</mat-label>
+                    <mat-select (ngModelChange)="updateTableResults($event)" [ngModel]="selectedFormat">
+                        <mat-option *ngFor="let format of formats" [value]="format">
+                            {{format.label}}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
 
 
-                    <!-- Example -->
-                    <span class="example-filename" ellipsis>E.g. <span>{{ exampleItem.name }}</span></span>
-                    <mat-grid-list class="example-grid" cols="4" rowHeight="16px">
-                        <mat-grid-tile>Artist</mat-grid-tile>
-                        <mat-grid-tile [colspan]="3"><span>{{exampleItem.metadata.artist}}</span></mat-grid-tile>
-                        <mat-grid-tile>Album</mat-grid-tile>
-                        <mat-grid-tile [colspan]="3"><span>{{exampleItem.metadata.album}}</span></mat-grid-tile>
-                        <mat-grid-tile>Title</mat-grid-tile>
-                        <mat-grid-tile [colspan]="3"><span>{{exampleItem.metadata.title}}</span></mat-grid-tile>
-                    </mat-grid-list>
-                </div>
-            </mat-expansion-panel>
-        </mat-accordion>
-    </div>
+                <!-- Example -->
+                <span class="example-filename" ellipsis>E.g. <span>{{ exampleItem.name }}</span></span>
+                <mat-grid-list class="example-grid" cols="4" rowHeight="16px">
+                    <mat-grid-tile>Artist</mat-grid-tile>
+                    <mat-grid-tile [colspan]="3"><span>{{exampleItem.metadata.artist}}</span></mat-grid-tile>
+                    <mat-grid-tile>Album</mat-grid-tile>
+                    <mat-grid-tile [colspan]="3"><span>{{exampleItem.metadata.album}}</span></mat-grid-tile>
+                    <mat-grid-tile>Title</mat-grid-tile>
+                    <mat-grid-tile [colspan]="3"><span>{{exampleItem.metadata.title}}</span></mat-grid-tile>
+                </mat-grid-list>
+            </div>
+        </mat-expansion-panel>
+    </mat-accordion>
 </div>
 
 <div mat-dialog-actions>

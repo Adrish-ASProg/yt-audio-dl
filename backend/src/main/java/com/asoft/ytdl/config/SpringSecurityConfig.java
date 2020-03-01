@@ -1,4 +1,4 @@
-package com.asoft.ytdl;
+package com.asoft.ytdl.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

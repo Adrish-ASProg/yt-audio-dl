@@ -1,5 +1,6 @@
-package com.asoft.ytdl.model;
+package com.asoft.ytdl.model.request;
 
+import com.asoft.ytdl.model.Mp3Metadata;
 import lombok.Getter;
 import lombok.Setter;
 

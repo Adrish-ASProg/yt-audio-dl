@@ -44,7 +44,11 @@ export class APIService {
 
     /** POST: download file */
     downloadFile(id: string): Observable<any> {
-        return this.http.get<any>(`${this.apiUrl}${this.downloadUrl}?id=${id}`, audioHttpOptions);
+        return this.http.post<any>(
+            `${this.apiUrl}${this.downloadUrl}`,
+            {id: id},
+            audioHttpOptions
+        );
     }
 
     /** POST: download files as zip */

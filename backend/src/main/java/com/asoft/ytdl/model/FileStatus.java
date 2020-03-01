@@ -1,6 +1,6 @@
 package com.asoft.ytdl.model;
 
-import com.asoft.ytdl.enums.ProgressStatus;
+import com.asoft.ytdl.constants.enums.ProgressStatus;
 import lombok.Getter;
 import lombok.Setter;
 

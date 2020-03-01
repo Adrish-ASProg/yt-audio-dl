@@ -1,13 +1,7 @@
-package com.asoft.ytdl.application;
+package com.asoft.ytdl.utils;
 
 import com.asoft.ytdl.model.Mp3Metadata;
-import com.mpatric.mp3agic.ID3v1;
-import com.mpatric.mp3agic.ID3v1Genres;
-import com.mpatric.mp3agic.ID3v2;
-import com.mpatric.mp3agic.InvalidDataException;
-import com.mpatric.mp3agic.Mp3File;
-import com.mpatric.mp3agic.NotSupportedException;
-import com.mpatric.mp3agic.UnsupportedTagException;
+import com.mpatric.mp3agic.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
