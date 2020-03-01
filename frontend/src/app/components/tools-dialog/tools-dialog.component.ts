@@ -11,11 +11,11 @@ interface Format {
 }
 
 @Component({
-    selector: 'app-post-processor-dialog',
-    templateUrl: './post-processor-dialog.component.html',
-    styleUrls: ['./post-processor-dialog.component.scss']
+    selector: 'app-tools-dialog',
+    templateUrl: './tools-dialog.component.html',
+    styleUrls: ['./tools-dialog.component.scss']
 })
-export class PostProcessorDialog {
+export class ToolsDialog {
 
     formats: Format[] = [
         {label: 'artist - title', pattern: {artist: 1, title: 2}, regex: "(.*?) - (.*)"},
@@ -28,7 +28,7 @@ export class PostProcessorDialog {
     resultItems: FileStatus[] = [];
     exampleItem: FileStatus;
 
-    constructor(private dialogRef: MatDialogRef<PostProcessorDialog>,
+    constructor(private dialogRef: MatDialogRef<ToolsDialog>,
                 @Inject(MAT_DIALOG_DATA) public data: { fileStatus: FileStatus[] }) {
 
         if (!data.fileStatus || data.fileStatus.length < 1) return;

@@ -1,93 +1,45 @@
-@import "src/variables";
-
 .content {
     display: flex;
     flex-direction: column;
     padding: 15px;
 
-
-    /* Request container (url input / audio switch / send button) */
+    /* Request container (url input / send button) */
     .request-container {
         display: flex;
         flex-direction: column;
-        justify-content: center;
         align-items: center;
-        flex: 1;
 
-        .url-button-container {
-            display: flex;
-            flex-direction: column;
+        .input-container {
             width: 100%;
-            align-items: center;
-
-            .url-container {
-                width: 100%;
-            }
-
-            mat-button-toggle-group {
-                margin-bottom: 15px;
-
-                ::ng-deep .mat-button-toggle-label-content {
-                    line-height: 36px;
-                }
-            }
         }
 
-        .request-controls {
-            display: flex;
-            align-items: center;
-
-            mat-slide-toggle {
-                margin-left: 15px;
-                margin-right: 15px;
-            }
-
-            button {
-                margin-left: 15px;
-                margin-right: 15px;
-            }
+        .convert-button {
+            margin-top: -8px;
         }
-    }
-
-    .server-status-container {
-        margin: 25px 0;
-        text-align: center;
     }
 
     .table-container {
-        margin-top: 50px;
+        margin-top: 15px;
 
         .control-buttons {
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-evenly;
+            padding: 0;
 
-            .download-button {
-                background-color: $success;
-                color: white;
+            ion-row {
+                width: 100%;
 
-                &:disabled {
-                    background-color: grey;
-                    color: #a8a8a8;
-                }
-            }
+                ion-col {
+                    text-align: center;
 
-            .processor-button {
-                background-color: $orange;
-                color: white;
+                    ion-button {
+                        font-size: 12px;
 
-                &:disabled {
-                    background-color: grey;
-                    color: #a8a8a8;
-                }
-            }
-
-            .delete-button {
-                background-color: $danger;
-                color: white;
-
-                &:disabled {
-                    background-color: grey;
-                    color: #a8a8a8;
+                        &.tools-button {
+                            --ion-color-contrast: #ffffff !important;
+                        }
+                    }
                 }
             }
         }

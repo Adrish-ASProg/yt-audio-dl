@@ -7,6 +7,11 @@ import {flatMap} from "rxjs/operators";
 import {FileStatus} from "../../model/filestatus.model";
 import {SettingsService} from "../settings/settings.service";
 import {AppManagerModule} from "./app-manager.module";
+import {Platform} from "@ionic/angular";
+import {FileTransferService} from "../file-transfer/file-transfer.service";
+import {HttpResponse} from "@angular/common/http";
+import {LoadingService} from "../loading/loading.service";
+import {MatSnackBar} from "@angular/material/snack-bar";
 
 @Injectable({providedIn: AppManagerModule})
 export class AppManager {
@@ -20,8 +25,12 @@ export class AppManager {
     isAutoUpdateRunning: boolean = false;
     autoUpdateObservable: Subscription;
 
-    constructor(private apiService: APIService,
-                private settingsService: SettingsService) {
+    constructor(private platform: Platform,
+                private apiService: APIService,
+                private snackBar: MatSnackBar,
+                private settingsService: SettingsService,
+                private loadingService: LoadingService,
+                private fileTransferService: FileTransferService) {
 
         // Send first update immediately
         this.sendUpdateRequest().subscribe(fs => this.onUpdateReceived(fs));
@@ -73,37 +82,52 @@ export class AppManager {
 
     //#region Send_xxx_Request
 
-    sendConvertRequest(request: string): void {
+    async sendConvertRequest(request: string) {
+        await this.loadingService.showDialog("Retrieving title(s)..");
         this.apiService.requestConvert(request)
             .subscribe(
-                () => this.sendUpdateRequest(),
+                () => {
+                    this.loadingService.dismissDialog();
+                    this.sendUpdateRequest();
+                },
                 response => {
+                    this.loadingService.dismissDialog();
                     console.error(response.error);
                     alert(response.error.message);
                 }
             );
     }
 
-    sendUpdateRequest(): Observable<FileStatus[]> { return this.apiService.getAllFileStatus(); }
-
-    sendDownloadRequest(id: string): void {
-        this.apiService.downloadFile(id)
-            .subscribe(
-                response => YTDLUtils.saveFileFromServerResponse(response),
-                response => YTDLUtils.parseErrorBlob(response).subscribe(e => alert(e.message))
-            );
+    sendUpdateRequest(): Observable<FileStatus[]> {
+        return this.apiService.getAllFileStatus();
     }
 
-    sendDownloadAsZipRequest(ids: string[], createPlaylist: boolean, filePath: string): void {
-        this.apiService.downloadFilesAsZip(ids, createPlaylist, filePath)
-            .subscribe(
-                response => {
-                    const blob = new Blob([response.body], {type: 'application/zip'});
-                    YTDLUtils.downloadBlobWithName(blob, 'yt-audio-dl.zip');
-                },
-                response => YTDLUtils.parseErrorBlob(response)
-                    .subscribe(e => alert(e.message))
-            );
+    async sendDownloadRequest(id: string) {
+        await this.loadingService.showDialog("Downloading file..");
+
+        this.apiService.downloadFile(id).subscribe(
+            async (response: HttpResponse<any>) => {
+                await this.loadingService.showDialog("Saving file as " + response.headers.get('FileName'));
+
+                this.handleBlobDownload(response.body, response.headers.get('FileName'), 'audio/mpeg')
+                    .then(_ => this.handleSaveSuccess(), error => this.handleSaveError(error));
+            },
+            error => this.handleDownloadError(error)
+        );
+    }
+
+    async sendDownloadAsZipRequest(ids: string[], createPlaylist: boolean, filePath: string) {
+        await this.loadingService.showDialog("Downloading file..");
+
+        this.apiService.downloadFilesAsZip(ids, createPlaylist, filePath).subscribe(
+            async (response: HttpResponse<any>) => {
+                await this.loadingService.showDialog("Saving file as yt-audio-dl.zip");
+
+                this.handleBlobDownload(response.body, 'yt-audio-dl.zip', 'application/zip')
+                    .then(_ => this.handleSaveSuccess(), error => this.handleSaveError(error));
+            },
+            error => this.handleDownloadError(error)
+        );
     }
 
     sendDeleteRequest(ids: string[]): void {
@@ -123,4 +147,33 @@ export class AppManager {
     }
 
     // #endregion
+
+    handleBlobDownload(blob: Blob, filename: string, mimeType: 'audio/mpeg' | 'application/zip'): Promise<any> {
+        // It is necessary to create a new blob object with mime-type explicitly set
+        // otherwise only Chrome works like it should
+        const newBlob = new Blob([blob], {type: mimeType});
+
+        if (this.platform.is('cordova')) {
+            return this.fileTransferService.writeBlobToStorage(newBlob, filename);
+        } else {
+            YTDLUtils.saveBlobToStorage(newBlob, filename);
+            return new Promise(r => r());
+        }
+    }
+
+    handleDownloadError(error) {
+        this.loadingService.dismissDialog();
+        alert(`Error ${error.status} when downloading file: ${error.statusText}`);
+        if (error.error instanceof Blob) YTDLUtils.parseErrorBlob(error.error).subscribe(e => alert(e.message));
+    }
+
+    handleSaveError(error) {
+        this.loadingService.dismissDialog();
+        alert(`Error ${error.status} when saving file: ${error.statusText}`);
+    }
+
+    handleSaveSuccess() {
+        this.loadingService.dismissDialog();
+        this.snackBar.open("File downloaded successfully", "Hide", {duration: 1500});
+    }
 }

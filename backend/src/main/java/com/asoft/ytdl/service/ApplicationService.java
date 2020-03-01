@@ -3,12 +3,7 @@ package com.asoft.ytdl.service;
 import com.asoft.ytdl.application.Mp3Tagger;
 import com.asoft.ytdl.enums.ProgressStatus;
 import com.asoft.ytdl.exception.UncompletedDownloadException;
-import com.asoft.ytdl.model.DLAsZipRequest;
-import com.asoft.ytdl.model.FileStatus;
-import com.asoft.ytdl.model.Mp3Metadata;
-import com.asoft.ytdl.model.TagRequest;
-import com.asoft.ytdl.model.XmlConfiguration;
-import com.asoft.ytdl.model.YTRequest;
+import com.asoft.ytdl.model.*;
 import com.asoft.ytdl.utils.FileUtils;
 import com.asoft.ytdl.utils.SettingsManager;
 import com.asoft.ytdl.utils.XMLManager;
@@ -20,20 +15,9 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -61,51 +45,44 @@ public class ApplicationService {
      * POST /ytdl
      **/
     public void downloadFileFromYT(YTRequest ytRequest) {
-        Thread downloadThread = new Thread(() -> {
-            YTDownloadManager dlManager = new YTDownloadManager();
-            dlManager.setProgressEvent((id, progressStatus) -> {
-                if (filesStatus.containsKey(id) && !progressStatus.equals(filesStatus.get(id).getStatus())) {
-                    filesStatus.get(id).setStatus(progressStatus);
-                    saveData();
-                }
-            });
-            dlManager.setDownloadCompletedEvent((id, fileName) -> {
-                FileStatus fs = filesStatus.get(id);
-                fs.setStatus(ProgressStatus.COMPLETED);
-                // FIXME extension
-                fs.setMetadata(Mp3Tagger.getTags(DOWNLOAD_FOLDER + File.separator + fs.getName() + ".mp3"));
+        YTDownloadManager dlManager = new YTDownloadManager();
+        dlManager.setProgressEvent((id, progressStatus) -> {
+            if (filesStatus.containsKey(id) && !progressStatus.equals(filesStatus.get(id).getStatus())) {
+                filesStatus.get(id).setStatus(progressStatus);
                 saveData();
-            });
-            dlManager.setTitleRetrievedEvent((id, title) -> {
-                if (!filesStatus.containsKey(id)) {
-                    filesStatus.put(id,
-                            new FileStatus() {{
-                                setId(id);
-                                setName(title);
-                                setStatus(ProgressStatus.INITIALIZING);
-                                setStartDate(new Date().getTime());
-                            }}
-                    );
-                    saveData();
-                }
-            });
-            dlManager.setErrorEvent((id, error) -> {
-                System.err.println("[AppService.downloadFileFromYT] " + error.getMessage());
-
-                if (filesStatus.containsKey(id)) {
-                    System.err.println("[AppService.downloadFileFromYT] " + filesStatus.get(id));
-                    filesStatus.get(id).setStatus(ProgressStatus.ERROR);
-                    saveData();
-                }
-            });
-            dlManager.setSkippedId(new ArrayList<>(filesStatus.keySet()));
-            dlManager.download(ytRequest.getUrl());
+            }
         });
-
-        downloadThread.setUncaughtExceptionHandler((thread, e) -> {
-            System.err.println("[AppService.downloadFileFromYT] UncaughtExceptionHandler: " + e.getMessage());
+        dlManager.setDownloadCompletedEvent((id, fileName) -> {
+            FileStatus fs = filesStatus.get(id);
+            fs.setStatus(ProgressStatus.COMPLETED);
+            // FIXME extension
+            fs.setMetadata(Mp3Tagger.getTags(DOWNLOAD_FOLDER + File.separator + fs.getName() + ".mp3"));
+            saveData();
         });
-        downloadThread.start();
+        dlManager.setTitleRetrievedEvent((id, title) -> {
+            if (!filesStatus.containsKey(id)) {
+                filesStatus.put(id,
+                        new FileStatus() {{
+                            setId(id);
+                            setName(title);
+                            setStatus(ProgressStatus.INITIALIZING);
+                            setStartDate(new Date().getTime());
+                        }}
+                );
+                saveData();
+            }
+        });
+        dlManager.setErrorEvent((id, error) -> {
+            System.err.println("[AppService.downloadFileFromYT] " + error.getMessage());
+
+            if (filesStatus.containsKey(id)) {
+                System.err.println("[AppService.downloadFileFromYT] " + filesStatus.get(id));
+                filesStatus.get(id).setStatus(ProgressStatus.ERROR);
+                saveData();
+            }
+        });
+        dlManager.setSkippedId(new ArrayList<>(filesStatus.keySet()));
+        dlManager.download(ytRequest.getUrl());
     }
 
     /**
@@ -160,6 +137,7 @@ public class ApplicationService {
 
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
 
+            int zippedFilesCount = 0;
             // Package files into zip
             for (Map.Entry<String, File> entry : filesToBeZipped.entrySet()) {
                 System.out.println("Zipping " + entry.getKey());
@@ -170,7 +148,7 @@ public class ApplicationService {
 
                 fileInputStream.close();
                 zipOutputStream.closeEntry();
-                System.out.println(entry.getKey() + " zipped");
+                System.out.printf("%s zipped (%d/%d)\n", entry.getKey(), ++zippedFilesCount, filesToBeZipped.size());
             }
 
             // Include playlist if needed

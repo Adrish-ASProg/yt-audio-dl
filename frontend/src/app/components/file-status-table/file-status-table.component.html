@@ -7,8 +7,8 @@
             <th *matHeaderCellDef class="checkbox-header-cell" mat-header-cell>
                 <div class="checkbox-container">
                     <mat-checkbox (change)="$event ? masterToggle() : null"
-                                  [checked]="selection.hasValue() && isAllSelected()"
-                                  [indeterminate]="selection.hasValue() && !isAllSelected()">
+                                  [checked]="selection.hasValue() && isEntirePageSelected()"
+                                  [indeterminate]="selection.hasValue() && !isEntirePageSelected()">
                     </mat-checkbox>
                 </div>
             </th>
@@ -16,6 +16,7 @@
                 <div class="checkbox-container">
                     <mat-checkbox (change)="$event ? selection.toggle(row) : null"
                                   (click)="$event.stopPropagation()"
+                                  [disabled]="row.status !== 'COMPLETED' && row.status !== 'ERROR'"
                                   [checked]="selection.isSelected(row)">
                     </mat-checkbox>
                 </div>
@@ -35,23 +36,21 @@
         <!-- Status Column -->
         <ng-container matColumnDef="status">
             <th *matHeaderCellDef class="status-header-cell" mat-header-cell mat-sort-header> Status</th>
-            <td *matCellDef="let element" mat-cell>
+            <td *matCellDef="let element" class="status-cell" mat-cell>
                 <!-- COMPLETED -->
-                <span *ngIf="element.status === 'COMPLETED'" class="span-file-status">
-                    <i class="material-icons success-icon">check_circle</i>
-                </span>
+                <ion-icon *ngIf="element.status === 'COMPLETED'" [matTooltip]="element.status" class="span-file-status"
+                          color="success" name="checkmark-circle-outline"></ion-icon>
 
                 <!-- LOADING -->
-                <div class="loading-spinner-container">
+                <div [matTooltip]="element.status" class="loading-spinner-container">
                     <span *ngIf="element.status !== 'COMPLETED' && element.status !== 'ERROR'" class="span-file-status">
                         <mat-spinner [diameter]="24" [strokeWidth]="2"></mat-spinner>
                     </span>
                 </div>
 
                 <!-- ERROR -->
-                <span *ngIf="element.status === 'ERROR'" class="span-file-status">
-                    <i class="material-icons error-icon">error</i>
-                </span>
+                <ion-icon *ngIf="element.status === 'ERROR'" [matTooltip]="element.status" class="span-file-status"
+                          color="danger" name="alert-circle-outline"></ion-icon>
             </td>
         </ng-container>
 
@@ -65,6 +64,6 @@
         <tr *matRowDef="let row; columns: displayedColumns;" mat-row></tr>
     </table>
 
-    <mat-paginator [length]="filesStatus.length" [pageSizeOptions]="[10, 25, 50, 100]" [pageSize]="25" [showFirstLastButtons]="true">
+    <mat-paginator (page)="setPageSize($event)" [length]="filesStatus.length" [pageSizeOptions]="[10, 25, 50, 100]" [pageSize]="pageSize" [showFirstLastButtons]="true">
     </mat-paginator>
 </div>

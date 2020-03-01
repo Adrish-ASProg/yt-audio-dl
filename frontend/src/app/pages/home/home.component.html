@@ -1,47 +1,56 @@
+<!-- Menu -->
+<mat-menu #mainMenu="matMenu">
+    <button [matMenuTriggerFor]="debugMenu" mat-menu-item>Debug</button>
+    <button (click)="refreshActionClicked()" mat-menu-item>Refresh</button>
+    <button (click)="settingsActionClicked()" mat-menu-item>Settings</button>
+</mat-menu>
+
+<!-- Debug Submenu -->
+<mat-menu #debugMenu="matMenu">
+    <button (click)="setUrl('bg')" mat-menu-item>Playlist Background</button>
+    <button (click)="setUrl('test')" mat-menu-item>Playlist Test</button>
+    <button (click)="setUrl('video')" mat-menu-item>Single Video</button>
+</mat-menu>
+
+
 <mat-progress-bar *ngIf="!appManager.isServerOn" color="warn" mode="indeterminate"></mat-progress-bar>
 <div class="content" role="main">
     <!--  Input / Button to make request -->
     <div class="request-container">
-        <div class="url-button-container">
-            <mat-form-field class="url-container">
-                <input [formControl]="urlFormControl" matInput placeholder="Video URL">
-                <mat-error *ngIf="urlFormControl.invalid">
-                    Please enter a valid url address
-                </mat-error>
-                <button (click)="convertButtonClicked()" [disabled]="this.urlFormControl.invalid" color="primary"
-                        mat-icon-button matSuffix>
-                    <i class="material-icons">send</i>
-                </button>
-            </mat-form-field>
-
-            <mat-button-toggle-group (change)="setUrl($event)" name="fontStyle">
-                <mat-button-toggle value="bg">Playlist BG</mat-button-toggle>
-                <mat-button-toggle [checked]="true" value="test">Playlist Test</mat-button-toggle>
-                <mat-button-toggle value="video">Video</mat-button-toggle>
-            </mat-button-toggle-group>
-        </div>
+        <mat-form-field class="input-container">
+            <input [formControl]="urlFormControl" matInput placeholder="Video URL">
+            <button (click)="urlFormControl.setValue('')" *ngIf="urlFormControl.value" aria-label="Clear" mat-button mat-icon-button matSuffix>
+                <mat-icon>close</mat-icon>
+            </button>
+        </mat-form-field>
+        <ion-button (click)="convertButtonClicked()" [disabled]="this.urlFormControl.invalid"
+                    class="convert-button" color="primary">Convert this video
+        </ion-button>
     </div>
 
     <div class="table-container">
-        <div class="control-buttons">
-            <!-- Download button -->
-            <button (click)="downloadButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
-                    class="download-button"
-                    mat-raised-button>Download
-            </button>
+        <!-- Buttons Download / Tools / Delete -->
+        <ion-grid class="control-buttons">
+            <ion-row>
+                <ion-col>
+                    <ion-button (click)="downloadButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
+                                color="success" size="small">Download
+                    </ion-button>
+                </ion-col>
 
-            <!-- Post-Processor button -->
-            <button (click)="postProcessorButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
-                    class="processor-button"
-                    mat-raised-button>Post-Processor
-            </button>
+                <ion-col>
+                    <ion-button (click)="postProcessorButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
+                                class="tools-button" color="warning" size="small">Tools
+                    </ion-button>
+                </ion-col>
 
-            <!-- Delete button -->
-            <button (click)="deleteButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
-                    class="delete-button"
-                    mat-raised-button>Delete
-            </button>
-        </div>
+                <ion-col>
+                    <ion-button (click)="deleteButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
+                                color="danger" size="small">Delete
+                    </ion-button>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
 
         <!--  Table files status -->
         <app-file-status-table #fileStatusTable

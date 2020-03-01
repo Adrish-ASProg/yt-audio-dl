@@ -16,7 +16,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import static com.asoft.ytdl.utils.SettingsManager.DOWNLOAD_FOLDER;
 
@@ -69,12 +68,12 @@ public class YTDownloadManager {
             executor.execute(() -> downloadFile(dlCommand, id, fileName, executor));
         }
 
-        try {
-            executor.awaitTermination(15, TimeUnit.MINUTES);
-            System.out.println("########## All files downloaded successfully ##########");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            executor.awaitTermination(15, TimeUnit.MINUTES);
+//            System.out.println("########## All files downloaded successfully ##########");
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
     }
 
     private void downloadFile(String dlCommand, String id, String fileName, ExecutorService executor) {
