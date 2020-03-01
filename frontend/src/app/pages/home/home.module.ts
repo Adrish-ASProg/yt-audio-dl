@@ -21,11 +21,9 @@ import {SettingsDialogModule} from "../../components/settings-dialog/settings-di
 import {MatButtonToggleModule} from "@angular/material/button-toggle";
 import {ToolsDialog} from "../../components/tools-dialog/tools-dialog.component";
 import {ToolsDialogModule} from "../../components/tools-dialog/tools-dialog.module";
-import {PlaylistDialogModule} from "../../components/playlist-dialog/playlist-dialog.module";
-import {PlaylistDialog} from "../../components/playlist-dialog/playlist-dialog.component";
 
 @NgModule({
-    entryComponents: [PlaylistDialog, TagEditorDialog, ToolsDialog, SettingsDialog],
+    entryComponents: [TagEditorDialog, ToolsDialog, SettingsDialog],
     declarations: [HomeComponent],
     imports: [
         BrowserModule,
@@ -35,7 +33,6 @@ import {PlaylistDialog} from "../../components/playlist-dialog/playlist-dialog.c
 
         SettingsServiceModule,
         FileStatusTableModule,
-        PlaylistDialogModule,
         TagEditorDialogModule,
         ToolsDialogModule,
         SettingsDialogModule,

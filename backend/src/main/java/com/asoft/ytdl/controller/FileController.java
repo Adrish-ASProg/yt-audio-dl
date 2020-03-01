@@ -4,10 +4,7 @@ import com.asoft.ytdl.exception.UncompletedDownloadException;
 import com.asoft.ytdl.exception.YTDLException;
 import com.asoft.ytdl.model.FileStatus;
 import com.asoft.ytdl.model.Mp3Metadata;
-import com.asoft.ytdl.model.request.DLFileAsZipRequest;
-import com.asoft.ytdl.model.request.DLFileRequest;
-import com.asoft.ytdl.model.request.DLFromYTRequest;
-import com.asoft.ytdl.model.request.TagRequest;
+import com.asoft.ytdl.model.request.*;
 import com.asoft.ytdl.service.ApplicationService;
 import com.mpatric.mp3agic.NotSupportedException;
 import org.apache.commons.validator.routines.UrlValidator;
@@ -49,6 +46,11 @@ public class FileController {
     @RequestMapping(value = "/dl-zip", method = RequestMethod.POST, produces = "application/zip")
     public void downloadAsZip(HttpServletResponse response, @RequestBody DLFileAsZipRequest request) {
         applicationService.downloadFiles(request, response);
+    }
+
+    @RequestMapping(value = "/dl-playlist", method = RequestMethod.POST, produces = "application/x-mpegURL")
+    public void downloadPlaylist(HttpServletResponse response, @RequestBody DLPlaylistRequest request) {
+        applicationService.downloadPlaylist(request, response);
     }
 
 

@@ -3,6 +3,7 @@
 <div class="content" mat-dialog-content>
 
     <mat-accordion>
+
         <!--   Filename ==> Tags   -->
         <mat-expansion-panel expanded>
 
@@ -12,7 +13,6 @@
             </mat-expansion-panel-header>
 
             <div class="name-to-tags-content">
-
                 <!-- Select Format -->
                 <mat-form-field>
                     <mat-label>Format</mat-label>
@@ -34,12 +34,38 @@
                     <mat-grid-tile>Title</mat-grid-tile>
                     <mat-grid-tile [colspan]="3"><span>{{exampleItem.metadata.title}}</span></mat-grid-tile>
                 </mat-grid-list>
+                <br>
+                <ion-button (click)="onApplyButtonClicked()" color="primary" size="small">Apply</ion-button>
+            </div>
+        </mat-expansion-panel>
+
+        <!--   Playlist creator   -->
+        <mat-expansion-panel expanded>
+
+            <!-- Title -->
+            <mat-expansion-panel-header>
+                <mat-panel-title>Playlist creator</mat-panel-title>
+            </mat-expansion-panel-header>
+
+            <div class="name-to-tags-content">
+                <!-- Input Mp3 path -->
+                <mat-form-field>
+                    <input [(ngModel)]="filePath" [matAutocomplete]="autocomplete"
+                           matInput placeholder="Mp3 path">
+                </mat-form-field>
+
+                <ion-button (click)="onDownloadPlaylistButtonClicked()" [disabled]="!filePath"
+                            class="convert-button" color="primary" size="small">Download playlist
+                </ion-button>
+
+                <mat-autocomplete #autocomplete="matAutocomplete">
+                    <mat-option *ngFor="let savedFolder of savedFolders" [value]="savedFolder">{{savedFolder}}</mat-option>
+                </mat-autocomplete>
             </div>
         </mat-expansion-panel>
     </mat-accordion>
 </div>
 
 <div mat-dialog-actions>
-    <button (click)="onValidButtonClicked()" cdkFocusInitial mat-button>Ok</button>
-    <button (click)="onCancelButtonClicked()" mat-button>Cancel</button>
+    <button (click)="onCloseButtonClicked()" mat-button>Close</button>
 </div>
