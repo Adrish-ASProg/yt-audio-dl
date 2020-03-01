@@ -1,5 +1,5 @@
 <!-- Menu -->
-<mat-menu #mainMenu="matMenu" >
+<mat-menu #mainMenu="matMenu">
     <button [matMenuTriggerFor]="debugMenu" mat-menu-item>Debug</button>
     <button (click)="refreshActionClicked()" mat-menu-item>Refresh</button>
     <button (click)="settingsActionClicked()" mat-menu-item>Settings</button>
@@ -19,31 +19,38 @@
     <div class="request-container">
         <mat-form-field class="input-container">
             <input [formControl]="urlFormControl" matInput placeholder="Video URL">
-            <mat-error *ngIf="urlFormControl.invalid">
-                Please enter a valid url address
-            </mat-error>
+            <button (click)="urlFormControl.setValue('')" *ngIf="urlFormControl.value" aria-label="Clear" mat-button mat-icon-button matSuffix>
+                <mat-icon>close</mat-icon>
+            </button>
         </mat-form-field>
-        <button (click)="convertButtonClicked()" [disabled]="this.urlFormControl.invalid" color="primary"
-                mat-icon-button matSuffix>
-            <i class="material-icons">send</i>
-        </button>
+        <ion-button (click)="convertButtonClicked()" [disabled]="this.urlFormControl.invalid"
+                    class="convert-button" color="primary">Convert this video
+        </ion-button>
     </div>
 
     <div class="table-container">
         <!-- Buttons Download / Post Processor / Delete -->
-        <div class="control-buttons">
-            <ion-button (click)="downloadButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
-                        color="success">Download
-            </ion-button>
+        <ion-grid class="control-buttons">
+            <ion-row>
+                <ion-col>
+                    <ion-button (click)="downloadButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
+                                color="success" size="small">Download
+                    </ion-button>
+                </ion-col>
 
-            <ion-button (click)="postProcessorButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
-                        class="processor-button" color="warning">Post-Processor
-            </ion-button>
+                <ion-col>
+                    <ion-button (click)="postProcessorButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
+                                class="processor-button" color="warning" size="small">Post-Processor
+                    </ion-button>
+                </ion-col>
 
-            <ion-button (click)="deleteButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
-                        color="danger">Delete
-            </ion-button>
-        </div>
+                <ion-col>
+                    <ion-button (click)="deleteButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
+                                color="danger" size="small">Delete
+                    </ion-button>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
 
         <!--  Table files status -->
         <app-file-status-table #fileStatusTable

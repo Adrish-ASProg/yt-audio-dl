@@ -8,6 +8,11 @@ import {MatButtonModule} from "@angular/material/button";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MatMenuModule} from "@angular/material/menu";
 import {BrowserModule} from "@angular/platform-browser";
+import {MatProgressBarModule} from "@angular/material/progress-bar";
+import {MatIconModule} from "@angular/material/icon";
+
+import {IonicModule} from "@ionic/angular";
+
 import {FileStatusTableModule} from "../../components/file-status-table/file-status-table.module";
 import {TagEditorDialogModule} from "../../components/tag-editor-dialog/tag-editor-dialog.module";
 import {SettingsServiceModule} from "../../services/settings/settings-service.module";
@@ -18,8 +23,6 @@ import {PostProcessorDialog} from "../../components/post-processor-dialog/post-p
 import {PostProcessorDialogModule} from "../../components/post-processor-dialog/post-processor-dialog.module";
 import {PlaylistDialogModule} from "../../components/playlist-dialog/playlist-dialog.module";
 import {PlaylistDialog} from "../../components/playlist-dialog/playlist-dialog.component";
-import {MatProgressBarModule} from "@angular/material/progress-bar";
-import {IonicModule} from "@ionic/angular";
 
 @NgModule({
     entryComponents: [PlaylistDialog, TagEditorDialog, PostProcessorDialog, SettingsDialog],
@@ -45,7 +48,8 @@ import {IonicModule} from "@ionic/angular";
         MatButtonModule,
         MatMenuModule,
         MatButtonToggleModule,
-        MatProgressBarModule
+        MatProgressBarModule,
+        MatIconModule
     ]
 })
 export class HomeModule {

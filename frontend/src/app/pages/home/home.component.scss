@@ -3,34 +3,44 @@
     flex-direction: column;
     padding: 15px;
 
-    /* Request container (url input / send button / debug buttons) */
+    /* Request container (url input / send button) */
     .request-container {
         display: flex;
+        flex-direction: column;
+        align-items: center;
 
         .input-container {
-            flex: 1;
+            width: 100%;
+        }
+
+        .convert-button {
+            margin-top: -8px;
         }
     }
 
-    .server-status-container {
-        margin: 25px 0;
-        text-align: center;
-    }
-
     .table-container {
-        margin-top: 10px;
+        margin-top: 15px;
 
         .control-buttons {
             display: flex;
             flex-wrap: wrap;
             justify-content: space-evenly;
+            padding: 0;
 
-            ion-button {
-                font-size: 12px;
-            }
+            ion-row {
+                width: 100%;
 
-            .processor-button {
-                --ion-color-contrast: #ffffff !important;
+                ion-col {
+                    text-align: center;
+
+                    ion-button {
+                        font-size: 12px;
+
+                        &.processor-button {
+                            --ion-color-contrast: #ffffff !important;
+                        }
+                    }
+                }
             }
         }
     }
