@@ -3,7 +3,7 @@
         <ion-title>Settings</ion-title>
         <ion-buttons slot="end">
             <button (click)="onCloseButtonClicked()" mat-icon-button>
-                <i class="material-icons">done</i>
+                <i class="material-icons">close</i>
             </button>
         </ion-buttons>
     </ion-toolbar>
@@ -40,5 +40,12 @@
                 <mat-option *ngFor="let savedFolder of savedFolders" [value]="savedFolder">{{savedFolder}}</mat-option>
             </mat-autocomplete>
         </ion-item>
+
+        <!-- Save button -->
+        <div class="save-button-container">
+            <ion-button (click)="onSaveButtonClicked()" class="convert-button" color="success" size="small">
+                Save settings
+            </ion-button>
+        </div>
     </ion-list>
 </ion-content>

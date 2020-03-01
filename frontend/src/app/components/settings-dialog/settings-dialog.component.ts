@@ -34,7 +34,7 @@ export class SettingsDialog {
         this.selectedFolder = this.savedFolders[this.savedFolders.length - 1];
     }
 
-    deleteFolder() {
+    deleteFolder(): void {
         if (!this.savedFolders.includes(this.selectedFolder)) return;
         this.savedFolders = this.savedFolders.filter(f => f !== this.selectedFolder);
         this.settings.setSavedFolders(this.savedFolders.join("|"));
@@ -44,6 +44,10 @@ export class SettingsDialog {
     // #endregion
 
     onCloseButtonClicked(): void {
+        this.modalController.dismiss();
+    }
+
+    onSaveButtonClicked(): void {
         this.settings.setServerAddress(this.serverAddress);
         this.settings.setRefreshRate(this.refreshRate * 1000);
         this.modalController.dismiss();
