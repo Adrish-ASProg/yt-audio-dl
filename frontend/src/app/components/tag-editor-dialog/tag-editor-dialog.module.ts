@@ -6,12 +6,15 @@ import {FormsModule} from "@angular/forms";
 import {MatInputModule} from "@angular/material/input";
 import {MatDialogModule} from "@angular/material/dialog";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
+import {IonicModule} from "@ionic/angular";
 
 @NgModule({
     declarations: [TagEditorDialog],
     imports: [
         BrowserAnimationsModule,
         FormsModule,
+
+        IonicModule,
 
         MatFormFieldModule,
         MatInputModule,

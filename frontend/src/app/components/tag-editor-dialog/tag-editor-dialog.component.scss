@@ -4,11 +4,20 @@
     }
 }
 
-.input-container {
-    display: grid;
-    grid-template-columns: auto auto;
-    grid-column-gap: 10px;
-    grid-row-gap: 10px;
+.dialog-content {
+    max-height: 250px;
+
+    .input-container {
+        padding: 0;
+
+        ion-col {
+            text-align: center;
+
+            mat-form-field {
+                width: 100%;
+            }
+        }
+    }
 }
 
 .mat-dialog-actions {
