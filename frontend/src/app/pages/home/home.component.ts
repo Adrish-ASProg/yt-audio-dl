@@ -12,6 +12,7 @@ import {ToolsDialog} from "../../components/tools-dialog/tools-dialog.component"
 import {ModalController, Platform} from "@ionic/angular";
 import {IntentService} from "../../services/intent/intent.service";
 import {MatMenu} from "@angular/material/menu";
+import {SettingsService} from "../../services/settings/settings.service";
 
 @Component({
     selector: 'app-home',
@@ -35,6 +36,7 @@ export class HomeComponent implements OnInit {
 
     constructor(private platform: Platform,
                 private intentService: IntentService,
+                private settingsService: SettingsService,
                 public appManager: AppManager,
                 private dialog: MatDialog,
                 private modalController: ModalController) {
@@ -44,6 +46,7 @@ export class HomeComponent implements OnInit {
     ngOnInit() {
         this.platform.ready().then(() => {
             this.urlFormControl.setValue(YT_URLS.Playlist_Test);
+            this.displayedColumns = this.settingsService.getDisplayedColumns().split("|");
 
             this.intentService.onIntentReceived = (url) => {
                 this.urlFormControl.setValue(url);
@@ -58,6 +61,16 @@ export class HomeComponent implements OnInit {
 
 
     //#region Menu
+
+    public updateDisplayedColumns(value: string) {
+        this.displayedColumns.includes(value)
+            ? this.displayedColumns = this.displayedColumns.filter(c => c !== value)
+            : this.displayedColumns.push(value);
+
+        this.settingsService.setDisplayedColumns(
+            this.displayedColumns.join('|')
+        );
+    }
 
     public refreshActionClicked() {
         this.fileStatusTable.resetSelection();

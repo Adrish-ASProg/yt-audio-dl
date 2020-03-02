@@ -13,12 +13,14 @@ import {MatIconModule} from "@angular/material/icon";
 
 import {IonicModule} from "@ionic/angular";
 
+import {MatButtonToggleModule} from "@angular/material/button-toggle";
+import {MatCheckboxModule} from "@angular/material/checkbox";
+
 import {FileStatusTableModule} from "../../components/file-status-table/file-status-table.module";
 import {TagEditorDialogModule} from "../../components/tag-editor-dialog/tag-editor-dialog.module";
 import {SettingsServiceModule} from "../../services/settings/settings-service.module";
 import {SettingsDialog} from "../../components/settings-dialog/settings-dialog.component";
 import {SettingsDialogModule} from "../../components/settings-dialog/settings-dialog.module";
-import {MatButtonToggleModule} from "@angular/material/button-toggle";
 import {ToolsDialog} from "../../components/tools-dialog/tools-dialog.component";
 import {ToolsDialogModule} from "../../components/tools-dialog/tools-dialog.module";
 
@@ -46,7 +48,8 @@ import {ToolsDialogModule} from "../../components/tools-dialog/tools-dialog.modu
         MatMenuModule,
         MatButtonToggleModule,
         MatProgressBarModule,
-        MatIconModule
+        MatIconModule,
+        MatCheckboxModule
     ]
 })
 export class HomeModule {
