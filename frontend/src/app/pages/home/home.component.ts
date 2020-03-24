@@ -21,6 +21,9 @@ import {SettingsService} from "../../services/settings/settings.service";
 })
 export class HomeComponent implements OnInit {
 
+    @ViewChild('fileInput', {static: false}) fileInput: any;
+    selectedFiles: any[] = [];
+
     @ViewChild("mainMenu", {read: MatMenu, static: false})
     public menu: MatMenu;
 
@@ -62,6 +65,10 @@ export class HomeComponent implements OnInit {
 
     //#region Menu
 
+    public uploadActionClicked() {
+        this.fileInput.nativeElement.click();
+    }
+
     public updateDisplayedColumns(value: string) {
         this.displayedColumns.includes(value)
             ? this.displayedColumns = this.displayedColumns.filter(c => c !== value)
@@ -83,6 +90,18 @@ export class HomeComponent implements OnInit {
 
     // #endregion
 
+    //#region Upload
+
+    /** After file loaded **/
+    onFileChange(event) {
+        if (event.target.files.length > 0) {
+            this.selectedFiles = [];
+            for (const file of event.target.files) this.selectedFiles.push(file);
+            if (this.selectedFiles.length > 0) this.appManager.sendUploadRequest(this.selectedFiles, true);
+        }
+    }
+
+    // #endregion
 
     //#region Buttons
 

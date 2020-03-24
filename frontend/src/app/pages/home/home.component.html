@@ -1,5 +1,6 @@
 <!-- Menu -->
 <mat-menu #mainMenu="matMenu">
+    <button (click)="uploadActionClicked()" mat-menu-item>Upload playlist</button>
     <button [matMenuTriggerFor]="tableColumnMenu" mat-menu-item>Table columns</button>
     <button [matMenuTriggerFor]="debugMenu" mat-menu-item>Debug</button>
     <button (click)="refreshActionClicked()" mat-menu-item>Refresh</button>
@@ -64,5 +65,8 @@
                                (fileNameClicked)="openTagEditorDialog($event)"
                                [displayedColumns]="displayedColumns" [filesStatus]="appManager.filesStatus">
         </app-file-status-table>
+
+        <!-- Form upload playlist -->
+        <input #fileInput (change)="onFileChange($event)" hidden multiple="multiple" name="file" type="file"/>
     </div>
 </div>

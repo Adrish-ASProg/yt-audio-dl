@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static com.asoft.ytdl.utils.SettingsManager.DOWNLOAD_FOLDER;
+import static com.asoft.ytdl.utils.XMLManager.DOWNLOAD_FOLDER;
 
 
 @Setter
@@ -51,7 +51,7 @@ public class YTDownloadManager {
 
         System.out.println(String.format("Starting download of %d files..\n", fileNames.size()));
 
-        final ExecutorService executor = Executors.newFixedThreadPool(12);
+        final ExecutorService executor = Executors.newFixedThreadPool(5);
         for (int i = 0; i < fileNames.keySet().size(); i++) {
             // Prepare download
             String id = (new ArrayList<>(fileNames.keySet())).get(i);

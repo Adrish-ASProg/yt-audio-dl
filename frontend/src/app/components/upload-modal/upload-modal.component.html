@@ -1,0 +1,62 @@
+<ion-header>
+    <ion-toolbar>
+
+        <ion-buttons slot="start">
+            <ion-back-button (click)="closeModal()" defaultHref></ion-back-button>
+        </ion-buttons>
+
+        <ion-title>Last transfers</ion-title>
+
+        <ion-buttons slot="end">
+            <ion-button (click)="clearTransfers()" icon-only>
+                <ion-icon name="trash"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+
+<div class="container">
+
+    <!-- Text if no pending transfers -->
+    <div *ngIf="!transferService.processing && transferService.pendingTransfers.length === 0">
+        <p>No pending transfers</p>
+    </div>
+
+
+    <!-- Loading spinner -->
+    <div *ngIf="transferService.processing" class="spinner-container flex-col">
+        <ion-spinner name="dots"></ion-spinner>
+        <p>{{ transferService.message }}</p>
+    </div>
+
+    <hr *ngIf="transferService.processing">
+
+    <!-- Transfer items -->
+    <ion-item-sliding *ngFor="let transfer of transferService.pendingTransfers">
+        <ion-item (click)="showInfo(transfer)" class="ion-activatable">
+            <!--            <ion-ripple-effect></ion-ripple-effect>-->
+
+            <div class="progress-bar-container">
+                <!-- Label / Progression % -->
+                <div class="progress-bar-header">
+                    <div class="progress-bar-header-label">{{ transfer.label }}</div>
+                    <div class="progress-bar-header-progress">{{ transfer.progress || 0 }}%</div>
+                </div>
+
+                <!-- Progress bar -->
+                <ion-progress-bar [color]="progressBarClass(transfer)"
+                                  [value]="transfer.progress ? transfer.progress / 100 : undefined"></ion-progress-bar>
+
+                <div *ngIf="transfer.error" class="transfer-error">{{ transfer.error }}</div>
+            </div>
+        </ion-item>
+
+        <!-- Delete slide option -->
+        <ion-item-options side="end">
+            <ion-item-option (click)="removeTransfer(transfer)" color="danger" expandable>
+                Delete
+            </ion-item-option>
+        </ion-item-options>
+    </ion-item-sliding>
+
+</div>

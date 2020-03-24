@@ -7,24 +7,54 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
-
-import static com.asoft.ytdl.utils.SettingsManager.DOWNLOAD_FOLDER;
+import java.io.IOException;
 
 public class XMLManager {
 
-    private static String directory = DOWNLOAD_FOLDER + File.separator;
-    private static String configFilePath = directory + "metadata.xml";
+    public final static String DOWNLOAD_FOLDER = "downloaded";
+    public final static String CONFIG_FILE = DOWNLOAD_FOLDER + File.separator + "metadata.xml";
+
+    public static void initialize() {
+        // Create download folder
+        if (!new File(DOWNLOAD_FOLDER).exists()) {
+            boolean result = new File(DOWNLOAD_FOLDER).mkdir();
+            if (!result) {
+                System.err.println("Unable to create download directory. Exiting..");
+                System.exit(1);
+            }
+        }
+
+        // Create config file metadata.xml
+        if (!new File(CONFIG_FILE).exists()) {
+            boolean result = false;
+
+            try {
+                result = new File(CONFIG_FILE).createNewFile();
+                XMLManager.write(new XmlConfiguration());
+            } catch (IOException e) {
+                e.printStackTrace();
+                result = false;
+            }
+
+            if (!result) {
+                System.err.println("Unable to create configuration file. Exiting..");
+                System.exit(1);
+            }
+        }
+    }
 
     public static XmlConfiguration read() {
+        var configuration = new XmlConfiguration();
+
+        if (!new File(CONFIG_FILE).exists()) return configuration;
+
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(XmlConfiguration.class);
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-            return (XmlConfiguration) jaxbUnmarshaller.unmarshal(new File(configFilePath));
-        } catch (JAXBException e) {
-            e.printStackTrace();
-        }
+            configuration = (XmlConfiguration) jaxbUnmarshaller.unmarshal(new File(CONFIG_FILE));
+        } catch (Exception e) { e.printStackTrace(); }
 
-        return null;
+        return configuration;
     }
 
     public static void write(XmlConfiguration config) {
@@ -32,9 +62,10 @@ public class XMLManager {
             JAXBContext jaxbContext = JAXBContext.newInstance(XmlConfiguration.class);
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
             jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-            jaxbMarshaller.marshal(config, new File(configFilePath));
+            jaxbMarshaller.marshal(config, new File(CONFIG_FILE));
         } catch (JAXBException e) {
             e.printStackTrace();
+            System.err.println("Unable to save configuration file");
         }
     }
 }

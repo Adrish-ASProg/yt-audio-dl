@@ -26,12 +26,27 @@ const playlistHttpOptions = {
     observe: 'response' as 'body'
 };
 
+
+export class UploadData {
+    fileName: string;
+    formData: FormData;
+    onFinishedCallback: (result) => void;
+
+    constructor(fileName, formData, callback?) {
+        this.fileName = fileName;
+        this.formData = formData;
+        if (callback) this.onFinishedCallback = callback;
+    }
+}
+
+
 @Injectable({providedIn: APIModule})
 export class APIService {
 
     constructor(private http: HttpClient,
                 private settings: SettingsService) {}
 
+    private uploadUrl: string = "/upload";
     private convertUrl: string = "/ytdl";
     private statusUrl: string = "/status/all";
     private downloadUrl: string = "/dl";
@@ -41,6 +56,11 @@ export class APIService {
     private deleteUrl: string = "/delete";
 
     get apiUrl() { return this.settings.getServerAddress();}
+
+
+    uploadFile(formData) {
+        return this.http.post<{ id: string }>(`${this.apiUrl}${this.uploadUrl}`, formData, {reportProgress: true, observe: 'events'});
+    }
 
     /** POST: process new file */
     requestConvert(url: string): Observable<{ id: string }> {

@@ -12,5 +12,8 @@ import java.util.List;
 @XmlRootElement
 @NoArgsConstructor
 public class XmlConfiguration {
+    String audioFolder = "E:\\Adri\\Downloads";
+    String playlistFolder = "E:\\Adri\\Downloads";
+    String outputFolder = "E:\\Adri\\Downloads";
     List<FileStatus> filesData;
 }

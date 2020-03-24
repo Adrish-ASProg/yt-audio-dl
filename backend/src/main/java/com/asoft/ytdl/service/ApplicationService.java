@@ -2,6 +2,7 @@ package com.asoft.ytdl.service;
 
 import com.asoft.ytdl.constants.enums.ProgressStatus;
 import com.asoft.ytdl.constants.interfaces.DownloadFromYTEvents;
+import com.asoft.ytdl.exception.BadRequestException;
 import com.asoft.ytdl.exception.UncompletedDownloadException;
 import com.asoft.ytdl.model.FileStatus;
 import com.asoft.ytdl.model.Mp3Metadata;
@@ -9,11 +10,16 @@ import com.asoft.ytdl.model.XmlConfiguration;
 import com.asoft.ytdl.model.request.DLFileAsZipRequest;
 import com.asoft.ytdl.model.request.DLPlaylistRequest;
 import com.asoft.ytdl.model.request.TagRequest;
+import com.asoft.ytdl.ui.MainFrame;
 import com.asoft.ytdl.utils.*;
 import com.mpatric.mp3agic.NotSupportedException;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -25,15 +31,17 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static com.asoft.ytdl.utils.FileUtils.getFile;
-import static com.asoft.ytdl.utils.SettingsManager.DOWNLOAD_FOLDER;
+import static com.asoft.ytdl.utils.XMLManager.DOWNLOAD_FOLDER;
 
 @Service
 public class ApplicationService implements DownloadFromYTEvents {
 
     private Map<String, FileStatus> filesStatus = new HashMap<>();
 
+    @Autowired
+    MainFrame mainFrame;
+
     ApplicationService() {
-        SettingsManager.initialize();
         var config = XMLManager.read();
         if (config != null && config.getFilesData() != null) {
             filesStatus = config.getFilesData().stream().collect(Collectors.toMap(FileStatus::getId, Function.identity()));
@@ -41,6 +49,51 @@ public class ApplicationService implements DownloadFromYTEvents {
     }
 
     //#region Requests handler
+
+    /**
+     * POST /upload
+     */
+    public String uploadFile(MultipartFile file, boolean handleMissingFiles) throws BadRequestException, IOException {
+        JSONObject response = new JSONObject();
+
+        // Null or empty file
+        if (file == null || file.isEmpty()) throw new BadRequestException("FileObject is null or empty");
+
+        String fileName = file.getOriginalFilename();
+        boolean fileIsSong = fileName.toLowerCase().endsWith(".mp3");
+        boolean fileIsPlaylist = fileName.toLowerCase().endsWith(".m3u8");
+
+        // Extension check
+        if (!fileIsSong && !fileIsPlaylist) throw new BadRequestException("Bad file format, only mp3 and m3u8 are allowed");
+
+        // Save file
+        final XmlConfiguration config = XMLManager.read();
+        String destinationFolder = fileIsPlaylist ? config.getPlaylistFolder() : config.getAudioFolder();
+        destinationFolder += File.separator;
+        String saveError = FileUtils.saveFile(file, destinationFolder, file.getOriginalFilename(), true);
+
+        // Error during save
+        if (!saveError.equals("")) throw new BadRequestException(saveError);
+
+        response.put("status", "success");
+        response.put("message", "File saved successfully");
+
+        // Retrieve missing files if provided file is a playlist
+        if (handleMissingFiles && file.getOriginalFilename().toLowerCase().endsWith(".m3u8")) {
+
+            // Replace path in playlist
+            String filePath = destinationFolder + file.getOriginalFilename();
+
+            // Retrieve missing files
+            var missingFiles = new JSONArray(PlaylistUtils.processPlaylist(filePath, config.getOutputFolder()));
+            response.put("status", "success");
+            response.put("missingFiles", missingFiles);
+        }
+
+        mainFrame.log("File " + fileName + " saved");
+
+        return response.toString();
+    }
 
     /**
      * POST /ytdl

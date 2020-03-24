@@ -7,6 +7,9 @@
             <ion-title>{{ projectTitle }}</ion-title>
 
             <ion-buttons *ngIf="menu" slot="end">
+                <ion-button (click)="utilsService.showTransferModal()" icon-only>
+                    <ion-icon name="download"></ion-icon>
+                </ion-button>
                 <ion-button [mat-menu-trigger-for]="menu">
                     <ion-icon ios="ellipsis-vertical" md="ellipsis-vertical" slot="icon-only"></ion-icon>
                 </ion-button>

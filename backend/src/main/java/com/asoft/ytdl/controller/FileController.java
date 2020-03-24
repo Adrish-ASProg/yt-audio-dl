@@ -1,7 +1,7 @@
 package com.asoft.ytdl.controller;
 
+import com.asoft.ytdl.exception.BadRequestException;
 import com.asoft.ytdl.exception.UncompletedDownloadException;
-import com.asoft.ytdl.exception.YTDLException;
 import com.asoft.ytdl.model.FileStatus;
 import com.asoft.ytdl.model.Mp3Metadata;
 import com.asoft.ytdl.model.request.*;
@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileNotFoundException;
@@ -25,16 +26,23 @@ public class FileController {
     @Autowired
     ApplicationService applicationService;
 
+    @RequestMapping(value = "/upload", method = RequestMethod.POST)
+    public ResponseEntity<String> upload(@RequestParam(value = "handleMissingFiles", required = false) Boolean handleMissingFiles,
+                                         @RequestParam(value = "file") MultipartFile file) throws BadRequestException, IOException {
+
+        var result = applicationService.uploadFile(file, Boolean.TRUE.equals(handleMissingFiles));
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
 
     @RequestMapping(value = "/ytdl", method = RequestMethod.POST)
-    public ResponseEntity<Void> downloadFromYT(@RequestBody DLFromYTRequest request) throws YTDLException {
+    public ResponseEntity<Void> downloadFromYT(@RequestBody DLFromYTRequest request) throws BadRequestException {
         String url = request.getUrl();
-        if (url == null || !new UrlValidator(new String[]{"http", "https"}).isValid(url)) throw new YTDLException("Invalid URL");
+        if (url == null || !new UrlValidator(new String[]{"http", "https"}).isValid(url)) throw new BadRequestException("Invalid URL");
 
         applicationService.downloadFileFromYT(url);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
-
 
     @RequestMapping(value = "/dl", method = RequestMethod.POST, produces = "audio/mpeg")
     public @ResponseBody

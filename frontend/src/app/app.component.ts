@@ -6,6 +6,7 @@ import {StatusBar} from '@ionic-native/status-bar/ngx';
 
 import {AndroidPermissions} from '@ionic-native/android-permissions/ngx';
 import {MatMenu} from "@angular/material/menu";
+import {UtilsService} from "./services/utils/utils.service";
 
 @Component({
     selector: 'app-root',
@@ -22,6 +23,7 @@ export class AppComponent {
     constructor(private platform: Platform,
                 private splashScreen: SplashScreen,
                 private statusBar: StatusBar,
+                private utilsService: UtilsService,
                 private androidPermissions: AndroidPermissions) {
         this.initializeApp();
     }

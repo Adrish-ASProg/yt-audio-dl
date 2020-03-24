@@ -1,17 +1,20 @@
 import {Injectable} from '@angular/core';
 import {YTDLUtils} from "../../utils/ytdl-utils";
 import {Mp3Metadata} from "../../model/mp3metadata.model";
-import {APIService} from "../api/api.service";
+import {APIService, UploadData} from "../api/api.service";
 import {interval, Observable, Subject, Subscription} from "rxjs";
 import {flatMap} from "rxjs/operators";
 import {FileStatus} from "../../model/filestatus.model";
 import {SettingsService} from "../settings/settings.service";
 import {AppManagerModule} from "./app-manager.module";
-import {Platform} from "@ionic/angular";
+import {ModalController, Platform} from "@ionic/angular";
 import {FileTransferService} from "../file-transfer/file-transfer.service";
-import {HttpResponse} from "@angular/common/http";
+import {HttpErrorResponse, HttpEvent, HttpEventType, HttpResponse} from "@angular/common/http";
 import {LoadingService} from "../loading/loading.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
+import {File} from '@ionic-native/file/ngx';
+import {TransferItem, TransferService, TransferStatus} from "../transfer/transfer.service";
+import {UtilsService} from "../utils/utils.service";
 
 @Injectable({providedIn: AppManagerModule})
 export class AppManager {
@@ -25,11 +28,15 @@ export class AppManager {
     isAutoUpdateRunning: boolean = false;
     autoUpdateObservable: Subscription;
 
-    constructor(private platform: Platform,
-                private apiService: APIService,
+    constructor(private file: File,
+                private platform: Platform,
                 private snackBar: MatSnackBar,
-                private settingsService: SettingsService,
+                private apiService: APIService,
+                private utilsService: UtilsService,
                 private loadingService: LoadingService,
+                private settingsService: SettingsService,
+                private transferService: TransferService,
+                private modalController: ModalController,
                 private fileTransferService: FileTransferService) {
 
         // Send first update immediately
@@ -81,6 +88,11 @@ export class AppManager {
 
 
     //#region Send_xxx_Request
+
+    public async sendUploadRequest(files: any[], handleMissingFiles: boolean) {
+        this.utilsService.showTransferModal()
+            .then(_ => files.forEach(file => this.uploadFile(file.name, file, handleMissingFiles)));
+    }
 
     async sendConvertRequest(request: string) {
         await this.loadingService.showDialog("Retrieving title(s)..");
@@ -148,6 +160,9 @@ export class AppManager {
 
     // #endregion
 
+
+    //#region YT-dl
+
     handleBlobDownload(blob: Blob, filename: string, mimeType: 'audio/mpeg' | 'application/zip'): Promise<any> {
         // It is necessary to create a new blob object with mime-type explicitly set
         // otherwise only Chrome works like it should
@@ -176,4 +191,97 @@ export class AppManager {
         this.loadingService.dismissDialog();
         this.snackBar.open("File downloaded successfully", "Hide", {duration: 1500});
     }
+
+    // #endregion
+
+
+    //#region Playlist
+
+    private uploadFile(fileName: string, blob: Blob, handleMissingFiles: boolean = false) {
+        const formData: FormData = new FormData();
+        formData.append('file', blob, fileName);
+        formData.append('handleMissingFiles', `${handleMissingFiles}`);
+
+        const callback = handleMissingFiles ? result => this.handleMissingFilesResponse(result.body) : undefined;
+        const uploadData = new UploadData(fileName, formData, callback);
+        this.createTransferAndUpload(uploadData);
+    }
+
+
+    // Handle missing files by uploading them if needed
+    private handleMissingFilesResponse(response) {
+        if (!response || !response.missingFiles || !(response.missingFiles.length > 0)) return;
+
+        if (!this.platform.is('cordova')) {
+            console.error("Unable to read file from filesystem on non-cordova platform");
+            this.utilsService.showToast("Unable to read file from filesystem on non-cordova platform");
+            return;
+        }
+
+        let processedFiles: number = 0;
+        response.missingFiles.forEach(missingFile => {
+            this.transferService.showMessage(`Reading missing files.. (${processedFiles} / ${response.missingFiles.length})`);
+
+            const temp = missingFile.split('/');
+            const fileName = temp.pop();
+            const filePath = `file://${temp.join('/')}/`;
+
+            // Read files
+            this.file.readAsArrayBuffer(filePath, fileName)
+                .then(fileArrayBuffer => {
+                    // Read OK
+                    if (fileArrayBuffer != void 0 && fileArrayBuffer.byteLength > 0)
+                        this.uploadFile(fileName, new Blob([fileArrayBuffer], {type: 'audio/mpeg'}));
+
+                    // Read KO
+                    else this.transferService.addErroredTransfer(fileName, 'Empty file');
+                })
+                .catch(reason => {
+                    console.error('Failed to read file ' + missingFile, reason);
+                    this.transferService.addErroredTransfer(fileName, 'Unable to find file or to get filesystem access');
+                })
+                .finally(() => {
+                    this.transferService.showMessage(`Reading missing files.. (${++processedFiles} / ${response.missingFiles.length})`);
+                    if (processedFiles === response.missingFiles.length) this.transferService.hideMessage();
+                });
+        });
+    }
+
+
+    private createTransferAndUpload(uploadData: UploadData): void {
+        // Create TransferItem
+        const pendingTransfer = new TransferItem(`Uploading ${uploadData.fileName}`, TransferStatus.PENDING, undefined);
+        this.transferService.addTransfer(pendingTransfer);
+
+        const onUploadSuccess = (event: HttpEvent<any>) => {
+            pendingTransfer.setLabel(`${uploadData.fileName}`);
+
+            switch (event.type) {
+
+                case HttpEventType.UploadProgress:
+                    pendingTransfer.setProgress(Math.round(100 * event.loaded / event.total));
+                    break;
+
+                case HttpEventType.Response:
+                    pendingTransfer.setCompleted();
+                    if (uploadData.onFinishedCallback)
+                        uploadData.onFinishedCallback({type: HttpEventType.Response, status: event.status, body: event.body});
+                    break;
+
+                default:
+                    return {type: event.type};
+            }
+        };
+        const onUploadError = (error: HttpErrorResponse) => {
+            pendingTransfer.setError(
+                (error.statusText === 'Unknown Error' || error.error == void 0) ? 'Unknown Error' : error.error
+            );
+
+            console.error(`Error uploading ${uploadData.fileName}`, error);
+        };
+
+        this.apiService.uploadFile(uploadData.formData).subscribe(next => onUploadSuccess(next), error => onUploadError(error));
+    }
+
+    // #endregion
 }
