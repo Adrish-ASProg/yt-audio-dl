@@ -1,13 +1,21 @@
+import {MatSortModule} from "@angular/material/sort";
+import {MatTableModule} from "@angular/material/table";
+import {BrowserModule} from "@angular/platform-browser";
+import {MatButtonModule} from "@angular/material/button";
+import {MatTooltipModule} from "@angular/material/tooltip";
+import {MatCheckboxModule} from "@angular/material/checkbox";
+import {MatSnackBarModule} from "@angular/material/snack-bar";
+import {MatPaginatorModule} from "@angular/material/paginator";
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
+import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
+
+import {IonicModule} from "@ionic/angular";
 
 import {FileStatusTableComponent} from './file-status-table.component';
-import {MatTableModule} from "@angular/material/table";
-import {MatCheckboxModule} from "@angular/material/checkbox";
-import {MatPaginatorModule} from "@angular/material/paginator";
-import {MatSortModule} from "@angular/material/sort";
-import {MatIconModule} from "@angular/material/icon";
-import {MatButtonModule} from "@angular/material/button";
-import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
+import {SettingsServiceModule} from "../../services/settings/settings-service.module";
+
+import {EllipsisModule} from "ngx-ellipsis";
 
 describe('FileStatusTableComponent', () => {
     let component: FileStatusTableComponent;
@@ -17,14 +25,23 @@ describe('FileStatusTableComponent', () => {
         TestBed.configureTestingModule({
             declarations: [FileStatusTableComponent],
             imports: [
+                BrowserModule,
                 BrowserAnimationsModule,
+
+                IonicModule,
+
+                SettingsServiceModule,
 
                 MatTableModule,
                 MatCheckboxModule,
                 MatPaginatorModule,
                 MatSortModule,
-                MatIconModule,
-                MatButtonModule
+                MatButtonModule,
+                MatSnackBarModule,
+                MatProgressSpinnerModule,
+
+                EllipsisModule,
+                MatTooltipModule
             ],
         })
             .compileComponents();
