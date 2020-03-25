@@ -23,6 +23,7 @@ import {SettingsDialog} from "../../components/settings-dialog/settings-dialog.c
 import {SettingsDialogModule} from "../../components/settings-dialog/settings-dialog.module";
 import {ToolsDialog} from "../../components/tools-dialog/tools-dialog.component";
 import {ToolsDialogModule} from "../../components/tools-dialog/tools-dialog.module";
+import {MatTabsModule} from "@angular/material/tabs";
 
 @NgModule({
     entryComponents: [TagEditorDialog, ToolsDialog, SettingsDialog],
@@ -49,7 +50,8 @@ import {ToolsDialogModule} from "../../components/tools-dialog/tools-dialog.modu
         MatButtonToggleModule,
         MatProgressBarModule,
         MatIconModule,
-        MatCheckboxModule
+        MatCheckboxModule,
+        MatTabsModule
     ]
 })
 export class HomeModule {

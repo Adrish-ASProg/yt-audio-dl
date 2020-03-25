@@ -1,6 +1,5 @@
 <!-- Menu -->
 <mat-menu #mainMenu="matMenu">
-    <button (click)="uploadActionClicked()" mat-menu-item>Upload playlist</button>
     <button [matMenuTriggerFor]="tableColumnMenu" mat-menu-item>Table columns</button>
     <button [matMenuTriggerFor]="debugMenu" mat-menu-item>Debug</button>
     <button (click)="refreshActionClicked()" mat-menu-item>Refresh</button>
@@ -22,51 +21,73 @@
 
 
 <mat-progress-bar *ngIf="!appManager.isServerOn" color="warn" mode="indeterminate"></mat-progress-bar>
-<div class="content" role="main">
-    <!--  Input / Button to make request -->
-    <div class="request-container">
-        <mat-form-field class="input-container">
-            <input [formControl]="urlFormControl" matInput placeholder="Video URL">
-            <button (click)="urlFormControl.setValue('')" *ngIf="urlFormControl.value" aria-label="Clear" mat-button mat-icon-button matSuffix>
-                <mat-icon>close</mat-icon>
-            </button>
-        </mat-form-field>
-        <ion-button (click)="convertButtonClicked()" [disabled]="this.urlFormControl.invalid"
-                    class="convert-button" color="primary">Convert Video(s)
-        </ion-button>
-    </div>
+<mat-tab-group class="content" mat-align-tabs="center" mat-stretch-tabs>
+    <!-- Tab download -->
+    <mat-tab label="Download">
+        <!--  Input / Button to make request -->
+        <div class="request-container">
+            <mat-form-field class="input-container">
+                <input [formControl]="urlFormControl" matInput placeholder="Video URL">
+                <button (click)="urlFormControl.setValue('')" *ngIf="urlFormControl.value" aria-label="Clear" mat-button mat-icon-button matSuffix>
+                    <mat-icon>close</mat-icon>
+                </button>
+            </mat-form-field>
+            <ion-button (click)="convertButtonClicked()" [disabled]="this.urlFormControl.invalid"
+                        class="convert-button" color="primary">Convert Video(s)
+            </ion-button>
+        </div>
 
-    <div class="table-container">
-        <!-- Buttons Download / Tools / Delete -->
-        <ion-grid class="control-buttons">
-            <ion-row>
-                <ion-col>
-                    <ion-button (click)="downloadButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
-                                color="success" size="small">Download
-                    </ion-button>
-                </ion-col>
+        <div class="table-container">
+            <!-- Buttons Download / Tools / Delete -->
+            <ion-grid class="control-buttons">
+                <ion-row>
+                    <ion-col>
+                        <ion-button (click)="downloadButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
+                                    color="success" size="small">Download
+                        </ion-button>
+                    </ion-col>
 
-                <ion-col>
-                    <ion-button (click)="postProcessorButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
-                                class="tools-button" color="warning" size="small">Tools
-                    </ion-button>
-                </ion-col>
+                    <ion-col>
+                        <ion-button (click)="postProcessorButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
+                                    class="tools-button" color="warning" size="small">Tools
+                        </ion-button>
+                    </ion-col>
 
-                <ion-col>
-                    <ion-button (click)="deleteButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
-                                color="danger" size="small">Delete
-                    </ion-button>
-                </ion-col>
-            </ion-row>
-        </ion-grid>
+                    <ion-col>
+                        <ion-button (click)="deleteButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
+                                    color="danger" size="small">Delete
+                        </ion-button>
+                    </ion-col>
+                </ion-row>
+            </ion-grid>
 
-        <!--  Table files status -->
-        <app-file-status-table #fileStatusTable
-                               (fileNameClicked)="openTagEditorDialog($event)"
-                               [displayedColumns]="displayedColumns" [filesStatus]="appManager.filesStatus">
-        </app-file-status-table>
+            <!--  Table files status -->
+            <app-file-status-table #fileStatusTable
+                                   (fileNameClicked)="openTagEditorDialog($event)"
+                                   [displayedColumns]="displayedColumns" [filesStatus]="appManager.filesStatus">
+            </app-file-status-table>
 
-        <!-- Form upload playlist -->
-        <input #fileInput (change)="onFileChange($event)" hidden multiple="multiple" name="file" type="file"/>
-    </div>
-</div>
+            <!-- Form upload playlist -->
+            <input #fileInput (change)="onFileChange($event)" hidden multiple="multiple" name="file" type="file"/>
+        </div>
+    </mat-tab>
+
+
+    <!-- Tab upload playlist -->
+    <mat-tab label="Upload">
+        <div class="tab-upload-content">
+
+            <div class="upload-buttons-container">
+                <ion-button (click)="uploadActionClicked()" color="primary" size="small">Select playlist</ion-button>
+                <ion-button (click)="appManager.sendUploadRequest(selectedFiles, true)" [disabled]="selectedFiles.length != 1" color="success"
+                            size="small">Upload
+                </ion-button>
+            </div>
+
+            <mat-form-field appearance="outline">
+                <mat-label>Playlist content</mat-label>
+                <textarea [(ngModel)]="playlistContent" [ngClass]="{'expanded': selectedFiles.length == 1}" matInput readonly wrap="soft"></textarea>
+            </mat-form-field>
+        </div>
+    </mat-tab>
+</mat-tab-group>

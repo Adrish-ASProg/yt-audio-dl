@@ -1,13 +1,11 @@
 .content {
-    display: flex;
-    flex-direction: column;
-    padding: 15px;
 
     /* Request container (url input / send button) */
     .request-container {
         display: flex;
         flex-direction: column;
         align-items: center;
+        padding: 8px 15px 0;
 
         .input-container {
             width: 100%;
@@ -39,6 +37,52 @@
                         &.tools-button {
                             --ion-color-contrast: #ffffff !important;
                         }
+                    }
+                }
+            }
+        }
+    }
+
+
+    // Tab upload playlist
+    .tab-upload-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0 15px;
+
+        .upload-buttons-container {
+            display: flex;
+            justify-content: space-evenly;
+            width: 100%;
+        }
+
+        ion-button {
+            margin: 15px 0;
+        }
+
+        mat-form-field {
+            width: 100%;
+            min-width: 100px;
+            max-width: 1200px;
+
+            textarea {
+                white-space: pre;
+                overflow-wrap: normal;
+                max-height: 500px;
+                height: 100px;
+
+                &.expanded {
+                    height: 500px;
+                }
+            }
+
+            @media only screen and (max-height: 750px) {
+                textarea {
+                    max-height: 350px;
+
+                    &.expanded {
+                        height: 350px;
                     }
                 }
             }

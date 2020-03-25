@@ -13,6 +13,7 @@ import {ModalController, Platform} from "@ionic/angular";
 import {IntentService} from "../../services/intent/intent.service";
 import {MatMenu} from "@angular/material/menu";
 import {SettingsService} from "../../services/settings/settings.service";
+import {UtilsService} from "../../services/utils/utils.service";
 
 @Component({
     selector: 'app-home',
@@ -37,9 +38,12 @@ export class HomeComponent implements OnInit {
         Validators.pattern("^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$")
     ]);
 
+    playlistContent: string | ArrayBuffer = "";
+
     constructor(private platform: Platform,
                 private intentService: IntentService,
                 private settingsService: SettingsService,
+                public utilsService: UtilsService,
                 public appManager: AppManager,
                 private dialog: MatDialog,
                 private modalController: ModalController) {
@@ -94,11 +98,20 @@ export class HomeComponent implements OnInit {
 
     /** After file loaded **/
     onFileChange(event) {
-        if (event.target.files.length > 0) {
-            this.selectedFiles = [];
-            for (const file of event.target.files) this.selectedFiles.push(file);
-            if (this.selectedFiles.length > 0) this.appManager.sendUploadRequest(this.selectedFiles, true);
+        if (event.target.files.length != 1 ||
+            !event.target.files[0].type ||
+            event.target.files[0].type != 'application/x-mpegurl') {
+            this.utilsService.showToast("Invalid file, only m3u8 files allowed");
+            return;
         }
+
+        this.selectedFiles = [];
+        for (const file of event.target.files) this.selectedFiles.push(file);
+
+        const reader = new FileReader();
+        reader.onload = () => this.playlistContent = reader.result;
+        reader.onerror = e => this.utilsService.showToast('Error when reading file: ' + e);
+        reader.readAsText(event.target.files[0]);
     }
 
     // #endregion
