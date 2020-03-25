@@ -194,7 +194,10 @@ export class HomeComponent implements OnInit {
     }
 
     private async openSettingsDialog(): Promise<void> {
-        const modal = await this.modalController.create({component: SettingsDialog});
+        const modal = await this.modalController.create({
+            component: SettingsDialog,
+            cssClass: 'settings-dialog'
+        });
         modal.onDidDismiss().then(_ => this.appManager.getSettings());
         return modal.present();
     }

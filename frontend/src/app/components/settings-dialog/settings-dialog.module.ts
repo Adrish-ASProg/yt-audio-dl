@@ -7,6 +7,7 @@ import {IonicModule} from "@ionic/angular";
 import {MatInputModule} from "@angular/material/input";
 import {MatButtonModule} from "@angular/material/button";
 import {MatAutocompleteModule} from "@angular/material/autocomplete";
+import {MatIconModule} from "@angular/material/icon";
 
 @NgModule({
     declarations: [SettingsDialog],
@@ -19,6 +20,7 @@ import {MatAutocompleteModule} from "@angular/material/autocomplete";
         MatInputModule,
         MatButtonModule,
         MatAutocompleteModule,
+        MatIconModule
     ]
 })
 export class SettingsDialogModule {}

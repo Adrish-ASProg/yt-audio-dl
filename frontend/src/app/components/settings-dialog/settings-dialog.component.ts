@@ -43,6 +43,8 @@ export class SettingsDialog {
 
     // #endregion
 
+    //#region Buttons
+
     onCloseButtonClicked(): void {
         this.modalController.dismiss();
     }
@@ -52,4 +54,6 @@ export class SettingsDialog {
         this.settings.setRefreshRate(this.refreshRate * 1000);
         this.modalController.dismiss();
     }
+
+    // #endregion
 }
