@@ -8,7 +8,10 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "serve": "ionic serve --external --port=8100\n"
+    "serve": "ionic serve --external --port=8100\n",
+    "run-android": "ionic cordova run android",
+    "run-android-prod": "ionic cordova run android --prod",
+    "run-android-livereload": "ionic cordova run android --livereload"
   },
   "private": true,
   "dependencies": {
