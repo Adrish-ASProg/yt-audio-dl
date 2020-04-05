@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static com.asoft.ytdl.utils.XMLManager.DOWNLOAD_FOLDER;
-
 
 @Setter
 @RequiredArgsConstructor
@@ -27,7 +25,7 @@ public class YTDownloadManager {
     /**
      * Téléchargement de vidéo / playlist YouTube au format mp3
      */
-    public void download(String url) {
+    public void download(String url, File destinationFolder) {
         // Retrieve file(s) name(s)
         final LinkedHashMap<String, String> fileNames = getVideoTitles(url);
 
@@ -56,7 +54,7 @@ public class YTDownloadManager {
             // Prepare download
             String id = (new ArrayList<>(fileNames.keySet())).get(i);
             String fileName = fileNames.get(id);
-            String destination = DOWNLOAD_FOLDER + File.separator + fileName + ".%(ext)s";
+            String destination = destinationFolder.getAbsolutePath() + File.separator + fileName + ".%(ext)s";
 
             String dlCommand = String.format("youtube-dl -o \"%s\" --no-playlist --extract-audio --audio-format mp3 --playlist-items %d %s", destination, i + 1, url);
             executor.execute(() -> downloadFile(dlCommand, id, fileName, executor));

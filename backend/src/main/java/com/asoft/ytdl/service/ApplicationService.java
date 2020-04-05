@@ -31,21 +31,18 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static com.asoft.ytdl.utils.FileUtils.getFile;
-import static com.asoft.ytdl.utils.XMLManager.DOWNLOAD_FOLDER;
 
 @Service
 public class ApplicationService implements DownloadFromYTEvents {
 
-    private Map<String, FileStatus> filesStatus = new HashMap<>();
-
     @Autowired
     MainFrame mainFrame;
+    private XmlConfiguration config;
+    private Map<String, FileStatus> filesStatus;
 
     ApplicationService() {
-        var config = XMLManager.read();
-        if (config != null && config.getFilesData() != null) {
-            filesStatus = config.getFilesData().stream().collect(Collectors.toMap(FileStatus::getId, Function.identity()));
-        }
+        config = XMLManager.read();
+        filesStatus = getExistingFiles();
     }
 
     //#region Requests handler
@@ -60,14 +57,13 @@ public class ApplicationService implements DownloadFromYTEvents {
         if (file == null || file.isEmpty()) throw new BadRequestException("FileObject is null or empty");
 
         String fileName = file.getOriginalFilename();
-        boolean fileIsSong = fileName.toLowerCase().endsWith(".mp3");
-        boolean fileIsPlaylist = fileName.toLowerCase().endsWith(".m3u8");
+        boolean fileIsSong = fileName != null && fileName.toLowerCase().endsWith(".mp3");
+        boolean fileIsPlaylist = fileName != null && fileName.toLowerCase().endsWith(".m3u8");
 
         // Extension check
         if (!fileIsSong && !fileIsPlaylist) throw new BadRequestException("Bad file format, only mp3 and m3u8 are allowed");
 
         // Save file
-        final XmlConfiguration config = XMLManager.read();
         String destinationFolder = fileIsPlaylist ? config.getPlaylistFolder() : config.getAudioFolder();
         destinationFolder += File.separator;
         String saveError = FileUtils.saveFile(file, destinationFolder, file.getOriginalFilename(), true);
@@ -101,7 +97,7 @@ public class ApplicationService implements DownloadFromYTEvents {
     public void downloadFileFromYT(String url) {
         YTDownloadManager dlManager = new YTDownloadManager(this);
         dlManager.setSkippedId(new ArrayList<>(filesStatus.keySet()));
-        dlManager.download(url);
+        dlManager.download(url, new File(config.getAudioFolder()));
     }
 
     /**
@@ -118,8 +114,7 @@ public class ApplicationService implements DownloadFromYTEvents {
         }
 
         try {
-            // FIXME extension
-            File file = getFile(DOWNLOAD_FOLDER + File.separator + fileStatus.getName() + ".mp3");
+            File file = getFile(fileStatus.getAbsolutePath());
             InputStream in = new FileInputStream(file);
             response.setContentType("audio/mpeg");
             response.setHeader("Content-Disposition", "attachment; filename=" + file.getName());
@@ -149,8 +144,7 @@ public class ApplicationService implements DownloadFromYTEvents {
                 .filter(filesStatus::containsKey)
                 .map(filesStatus::get)
                 .filter(fs -> ProgressStatus.COMPLETED.equals(fs.getStatus()))
-                // FIXME extension
-                .map(fileStatus -> new File(DOWNLOAD_FOLDER + File.separator + fileStatus.getName() + ".mp3"))
+                .map(fileStatus -> new File(fileStatus.getAbsolutePath()))
                 .filter(File::exists)
                 .forEach(file -> filesToBeZipped.put(file.getName(), file));
 
@@ -196,8 +190,7 @@ public class ApplicationService implements DownloadFromYTEvents {
                 .filter(filesStatus::containsKey)
                 .map(filesStatus::get)
                 .filter(fs -> ProgressStatus.COMPLETED.equals(fs.getStatus()))
-                // FIXME extension
-                .map(fileStatus -> new File(DOWNLOAD_FOLDER + File.separator + fileStatus.getName() + ".mp3"))
+                .map(fileStatus -> new File(fileStatus.getAbsolutePath()))
                 .filter(File::exists)
                 .map(File::getName)
                 .map(fileName -> request.getFilePath() + fileName)
@@ -227,21 +220,19 @@ public class ApplicationService implements DownloadFromYTEvents {
         checkFileIsPresent(tag.getId());
         FileStatus fs = filesStatus.get(tag.getId());
 
-        String directory = DOWNLOAD_FOLDER + File.separator;
-        String fileName = directory + fs.getName() + ".mp3";
-        String newFileName = directory + tag.getName() + ".mp3";
+        String fileName = fs.getAbsolutePath();
+        String newFileName = config.getAudioFolder() + File.separator + tag.getName() + ".mp3";
 
         // Set tags in file
-        Mp3Tagger.setTags(fileName, tag.getMetadata());
-        fs.setMetadata(Mp3Tagger.getTags(fileName));
+        Mp3Tagger.setTags(new File(fileName), tag.getMetadata());
+        fs.setMetadata(Mp3Tagger.getTags(new File(fileName)));
 
         // Rename file if needed
         if (!Objects.equals(fileName, newFileName)
-                && FileUtils.renameFile(new File(fileName), newFileName))
+                && FileUtils.renameFile(new File(fileName), newFileName)) {
             fs.setName(tag.getName());
-
-        saveData();
-
+            fs.setAbsolutePath(newFileName);
+        }
         return fs.getMetadata();
     }
 
@@ -271,7 +262,7 @@ public class ApplicationService implements DownloadFromYTEvents {
             FileStatus fs = filesStatus.get(id);
 
             // Retrieve filename
-            File f = FileUtils.getFile(DOWNLOAD_FOLDER + File.separator + fs.getName() + ".mp3");
+            File f = FileUtils.getFile(fs.getAbsolutePath());
 
             // Status completed -> Rm from memory / rm from disk
             if (ProgressStatus.COMPLETED.equals(fs.getStatus())) {
@@ -286,8 +277,6 @@ public class ApplicationService implements DownloadFromYTEvents {
             }
         }
 
-        saveData();
-
         return allFilesDeleted;
     }
 
@@ -299,7 +288,6 @@ public class ApplicationService implements DownloadFromYTEvents {
     public void onProgress(String id, ProgressStatus progressStatus) {
         if (filesStatus.containsKey(id) && !progressStatus.equals(filesStatus.get(id).getStatus())) {
             filesStatus.get(id).setStatus(progressStatus);
-            saveData();
         }
     }
 
@@ -307,8 +295,8 @@ public class ApplicationService implements DownloadFromYTEvents {
         FileStatus fs = filesStatus.get(id);
         fs.setStatus(ProgressStatus.COMPLETED);
         // FIXME extension
-        fs.setMetadata(Mp3Tagger.getTags(DOWNLOAD_FOLDER + File.separator + fs.getName() + ".mp3"));
-        saveData();
+        File file = new File(config.getAudioFolder() + File.separator + fs.getName() + ".mp3");
+        fs.setMetadata(Mp3Tagger.getTags(file));
     }
 
     public void onTitleRetrieved(String id, String title) {
@@ -319,9 +307,9 @@ public class ApplicationService implements DownloadFromYTEvents {
                         setName(title);
                         setStatus(ProgressStatus.INITIALIZING);
                         setStartDate(new Date().getTime());
+                        setAbsolutePath(config.getAudioFolder() + File.separator + title + ".mp3");
                     }}
             );
-            saveData();
         }
     }
 
@@ -331,7 +319,6 @@ public class ApplicationService implements DownloadFromYTEvents {
         if (filesStatus.containsKey(id)) {
             System.err.println("[AppService.downloadFileFromYT] " + filesStatus.get(id));
             filesStatus.get(id).setStatus(ProgressStatus.ERROR);
-            saveData();
         }
     }
 
@@ -340,17 +327,27 @@ public class ApplicationService implements DownloadFromYTEvents {
 
     //#region Private methods
 
-    private void saveData() {
-        var config = new XmlConfiguration();
-        config.setFilesData(new ArrayList<>(filesStatus.values()));
-        XMLManager.write(config);
-    }
-
     private void checkFileIsPresent(String id) throws FileNotFoundException {
         // ID not found
         if (!filesStatus.containsKey(id)) {
             throw new FileNotFoundException("Unable to find file with id « " + id + " »");
         }
+    }
+
+    private Map<String, FileStatus> getExistingFiles() {
+        System.out.println("Retrieving files..");
+        return FileUtils.getAllFilesInDirectory(new File(config.getAudioFolder()))
+                .stream()
+                .filter(f -> f.getName().endsWith(".mp3"))
+                .map(f -> new FileStatus() {{
+                    setId(UUID.randomUUID().toString());
+                    setStatus(ProgressStatus.COMPLETED);
+                    setName(f.getName().replace(".mp3", ""));
+                    setMetadata(Mp3Tagger.getTags(f));
+                    setAbsolutePath(f.getAbsolutePath());
+                    setStartDate(FileUtils.getCreationDate(f));
+                }})
+                .collect(Collectors.toMap(FileStatus::getId, Function.identity()));
     }
 
     // #endregion

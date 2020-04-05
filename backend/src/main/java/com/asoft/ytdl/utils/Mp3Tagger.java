@@ -12,17 +12,17 @@ public class Mp3Tagger {
     private static final String RETAG_EXTENSION = ".retag";
     private static final String BACKUP_EXTENSION = ".bak";
 
-    public static void setTags(String filePath, Mp3Metadata tags) throws IOException, NotSupportedException {
+    public static void setTags(File file, Mp3Metadata tags) throws IOException, NotSupportedException {
         // File not found
-        if (!new File(filePath).exists()) {
-            throw new FileNotFoundException("[Mp3Tagger.setTags] Unable to find file " + filePath);
+        if (!file.exists()) {
+            throw new FileNotFoundException("[Mp3Tagger.setTags] Unable to find file " + file.getAbsolutePath());
         }
 
-        Mp3File mp3File = getMp3File(filePath);
+        Mp3File mp3File = getMp3File(file.getAbsolutePath());
         if (mp3File == null) return;
 
         if (!mp3File.hasId3v1Tag() && !mp3File.hasId3v2Tag()) {
-            System.err.println("Unable to set tags: No Id3v1/Id3v2 tags found in file " + filePath);
+            System.err.println("Unable to set tags: No Id3v1/Id3v2 tags found in file " + file.getAbsolutePath());
             return;
         }
 
@@ -48,19 +48,19 @@ public class Mp3Tagger {
 
         mp3File.save(mp3File.getFilename() + RETAG_EXTENSION);
         renameFiles(mp3File.getFilename());
-        System.out.println("Successfully set tags: " + tags + " in file " + filePath);
+        System.out.println("Successfully set tags: " + tags + " in file " + file.getAbsolutePath());
     }
 
-    public static Mp3Metadata getTags(String filePath) {
+    public static Mp3Metadata getTags(File file) {
         Mp3Metadata metadata = new Mp3Metadata();
 
         // File not found
-        if (!new File(filePath).exists()) {
+        if (!file.exists()) {
             // throw new FileNotFoundException("Unable to find file " + filePath);
-            System.err.println("[Mp3Tagger.getTags] Unable to find file " + filePath);
+            System.err.println("[Mp3Tagger.getTags] Unable to find file " + file.getAbsolutePath());
         }
 
-        Mp3File mp3File = getMp3File(filePath);
+        Mp3File mp3File = getMp3File(file.getAbsolutePath());
         if (mp3File == null) return metadata;
 
         if (mp3File.hasId3v2Tag()) {

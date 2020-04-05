@@ -11,19 +11,9 @@ import java.io.IOException;
 
 public class XMLManager {
 
-    public final static String DOWNLOAD_FOLDER = "downloaded";
-    public final static String CONFIG_FILE = DOWNLOAD_FOLDER + File.separator + "metadata.xml";
+    public final static String CONFIG_FILE = "settings.xml";
 
     public static void initialize() {
-        // Create download folder
-        if (!new File(DOWNLOAD_FOLDER).exists()) {
-            boolean result = new File(DOWNLOAD_FOLDER).mkdir();
-            if (!result) {
-                System.err.println("Unable to create download directory. Exiting..");
-                System.exit(1);
-            }
-        }
-
         // Create config file metadata.xml
         if (!new File(CONFIG_FILE).exists()) {
             boolean result = false;
