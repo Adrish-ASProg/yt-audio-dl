@@ -35,8 +35,9 @@ import static com.asoft.ytdl.utils.FileUtils.getFile;
 @Service
 public class ApplicationService implements DownloadFromYTEvents {
 
-    @Autowired
+    @Autowired(required = false)
     MainFrame mainFrame;
+
     private XmlConfiguration config;
     private Map<String, FileStatus> filesStatus;
 
@@ -86,7 +87,7 @@ public class ApplicationService implements DownloadFromYTEvents {
             response.put("missingFiles", missingFiles);
         }
 
-        mainFrame.log("File " + fileName + " saved");
+        if (mainFrame != null) mainFrame.log("File " + fileName + " saved");
 
         return response.toString();
     }
