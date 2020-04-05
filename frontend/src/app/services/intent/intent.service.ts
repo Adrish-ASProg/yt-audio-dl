@@ -15,7 +15,7 @@ export class IntentService {
         window['plugins'].intentShim.onIntent(intent => this.processIntent(intent));
 
         // Intent which launched application
-        window['plugins'].intentShim.getIntent(intent => this.processIntent(intent));
+        window['plugins'].intentShim.getIntent(intent => this.processIntent(intent), () => {});
     }
 
     processIntent(intent) {
