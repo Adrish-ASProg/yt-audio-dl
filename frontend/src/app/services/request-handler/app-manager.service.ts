@@ -51,6 +51,7 @@ export class AppManager {
     }
 
     runAutomaticUpdate() {
+        this.sendUpdateRequest().subscribe(filesStatus => this.onUpdateReceived(filesStatus));
         if (this.autoUpdateObservable) this.autoUpdateObservable.unsubscribe();
 
         // Send update request at <refreshRate> interval
@@ -154,8 +155,8 @@ export class AppManager {
                 })
     }
 
-    sendTagRequest(id: string, name: string, metadata: Mp3Metadata): void {
-        this.apiService.setTags(id, name, metadata).subscribe();
+    sendTagRequest(id: string, name: string, metadata: Mp3Metadata): Observable<Mp3Metadata> {
+        return this.apiService.setTags(id, name, metadata);
     }
 
     // #endregion

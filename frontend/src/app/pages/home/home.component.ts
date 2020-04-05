@@ -14,6 +14,7 @@ import {IntentService} from "../../services/intent/intent.service";
 import {MatMenu} from "@angular/material/menu";
 import {SettingsService} from "../../services/settings/settings.service";
 import {UtilsService} from "../../services/utils/utils.service";
+import {forkJoin} from "rxjs";
 
 @Component({
     selector: 'app-home',
@@ -61,8 +62,7 @@ export class HomeComponent implements OnInit {
             };
             this.intentService.init();
 
-            this.appManager.onFilesStatusUpdated
-                .subscribe((fs: FileStatus[]) => this.fileStatusTable.refreshDataTable(fs));
+            this.appManager.onFilesStatusUpdated.subscribe(fs => this.refreshTable(fs));
         });
     }
 
@@ -192,7 +192,8 @@ export class HomeComponent implements OnInit {
         const dialogRef = this.dialog.open(TagEditorDialog, {data: YTDLUtils.copyObject(event)});
         dialogRef.afterClosed().subscribe(result => {
             if (!result) return;
-            this.appManager.sendTagRequest(result.id, result.name, result.metadata);
+            this.appManager.sendTagRequest(result.id, result.name, result.metadata)
+                .subscribe(() => this.refresh());
         });
     }
 
@@ -200,9 +201,8 @@ export class HomeComponent implements OnInit {
         const dialogRef = this.dialog.open(ToolsDialog, {data: {fileStatus: selectedItems}});
         dialogRef.afterClosed().subscribe((result: FileStatus[]) => {
             if (!result) return;
-
-            result.forEach(fs => this.appManager.sendTagRequest(fs.id, fs.name, fs.metadata));
-            this.appManager.sendUpdateRequest().subscribe(fs => this.fileStatusTable.refreshDataTable(fs));
+            forkJoin(result.map(fs => this.appManager.sendTagRequest(fs.id, fs.name, fs.metadata)))
+                .subscribe(() => this.refresh());
         });
     }
 
@@ -213,5 +213,14 @@ export class HomeComponent implements OnInit {
         });
         modal.onDidDismiss().then(_ => this.appManager.getSettings());
         return modal.present();
+    }
+
+    private refresh() {
+        this.appManager.sendUpdateRequest().subscribe(fs => this.refreshTable(fs));
+    }
+
+    private refreshTable(fs?: FileStatus[]): void {
+        if (!fs) fs = this.appManager.filesStatus;
+        this.fileStatusTable.refreshDataTable(fs);
     }
 }
