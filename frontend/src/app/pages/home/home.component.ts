@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
 import {TagEditorDialog} from "../../components/tag-editor-dialog/tag-editor-dialog.component";
 import {YTDLUtils} from "../../utils/ytdl-utils";
 import {MatDialog} from "@angular/material/dialog";
@@ -14,17 +14,20 @@ import {IntentService} from "../../services/intent/intent.service";
 import {MatMenu} from "@angular/material/menu";
 import {SettingsService} from "../../services/settings/settings.service";
 import {UtilsService} from "../../services/utils/utils.service";
-import {forkJoin} from "rxjs";
+import {forkJoin, fromEvent} from "rxjs";
+import {debounceTime, tap} from "rxjs/operators";
 
 @Component({
     selector: 'app-home',
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.scss']
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, AfterViewInit {
 
     @ViewChild('fileInput', {static: false}) fileInput: any;
     selectedFiles: any[] = [];
+
+    @ViewChild('filterInput', {static: false}) filterInput: any;
 
     @ViewChild("mainMenu", {read: MatMenu, static: false})
     public menu: MatMenu;
@@ -64,6 +67,12 @@ export class HomeComponent implements OnInit {
 
             this.appManager.onFilesStatusUpdated.subscribe(fs => this.refreshTable(fs));
         });
+    }
+
+    ngAfterViewInit() {
+        fromEvent(this.filterInput.nativeElement, 'keyup')
+            .pipe(debounceTime(400), tap(e => this.refreshTable()))
+            .subscribe();
     }
 
 
@@ -221,6 +230,8 @@ export class HomeComponent implements OnInit {
 
     private refreshTable(fs?: FileStatus[]): void {
         if (!fs) fs = this.appManager.filesStatus;
-        this.fileStatusTable.refreshDataTable(fs);
+        this.fileStatusTable.refreshDataTable(
+            fs.filter(f => f.name.includes(this.filterInput.nativeElement.value))
+        );
     }
 }

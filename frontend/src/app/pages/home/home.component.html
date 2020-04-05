@@ -61,6 +61,14 @@
                 </ion-row>
             </ion-grid>
 
+
+            <!-- Input filter -->
+            <div class="filter-input-container">
+                <mat-form-field>
+                    <input #filterInput matInput placeholder="Filter results">
+                </mat-form-field>
+            </div>
+
             <!--  Table files status -->
             <app-file-status-table #fileStatusTable
                                    (fileNameClicked)="openTagEditorDialog($event)"
