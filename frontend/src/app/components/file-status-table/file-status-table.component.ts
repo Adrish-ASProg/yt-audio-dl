@@ -30,7 +30,7 @@ export class FileStatusTableComponent implements OnInit, AfterViewInit {
 
     dataSource: FileStatusDataSource;
 
-    private selection: SelectionModel<FileStatus> = new SelectionModel<FileStatus>(true, []);
+    selection: SelectionModel<FileStatus> = new SelectionModel<FileStatus>(true, []);
 
     constructor(private snackBar: MatSnackBar,
                 private apiService: APIService,

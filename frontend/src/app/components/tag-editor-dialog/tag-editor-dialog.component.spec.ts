@@ -1,9 +1,8 @@
 import {FormsModule} from "@angular/forms";
-import {MatDialogModule} from "@angular/material";
+import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from "@angular/material/dialog";
 import {MatInputModule} from "@angular/material/input";
 import {MatButtonModule} from "@angular/material/button";
 import {MatFormFieldModule} from "@angular/material/form-field";
-import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
 import {async, ComponentFixture, TestBed} from '@angular/core/testing';
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 

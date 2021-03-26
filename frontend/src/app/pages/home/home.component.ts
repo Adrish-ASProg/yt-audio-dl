@@ -24,16 +24,16 @@ import {debounceTime, tap} from "rxjs/operators";
 })
 export class HomeComponent implements OnInit, AfterViewInit {
 
-    @ViewChild('fileInput', {static: false}) fileInput: any;
+    @ViewChild('fileInput') fileInput: any;
     selectedFiles: any[] = [];
 
-    @ViewChild('filterInput', {static: false}) filterInput: any;
+    @ViewChild('filterInput') filterInput: any;
     filterInputValue: string = "";
 
-    @ViewChild("mainMenu", {read: MatMenu, static: false})
+    @ViewChild('mainMenu')
     public menu: MatMenu;
 
-    @ViewChild(FileStatusTableComponent, {static: false})
+    @ViewChild(FileStatusTableComponent)
     fileStatusTable: FileStatusTableComponent;
 
     displayedColumns: string[] = ['select', 'name', 'status', 'startDate'];
