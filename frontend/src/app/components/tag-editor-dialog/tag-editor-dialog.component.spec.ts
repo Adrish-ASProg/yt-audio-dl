@@ -3,7 +3,7 @@ import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from "@angular/material/
 import {MatInputModule} from "@angular/material/input";
 import {MatButtonModule} from "@angular/material/button";
 import {MatFormFieldModule} from "@angular/material/form-field";
-import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 
 import {IonicModule} from "@ionic/angular";
@@ -14,7 +14,7 @@ describe('TagEditorDialogComponent', () => {
     let component: TagEditorDialog;
     let fixture: ComponentFixture<TagEditorDialog>;
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             declarations: [TagEditorDialog],
             imports: [

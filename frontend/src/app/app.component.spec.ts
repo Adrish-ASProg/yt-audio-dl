@@ -1,5 +1,5 @@
 import {MatIconModule} from "@angular/material/icon";
-import {async, TestBed} from '@angular/core/testing';
+import {TestBed, waitForAsync} from '@angular/core/testing';
 import {MatMenuModule} from "@angular/material/menu";
 import {BrowserModule} from "@angular/platform-browser";
 import {MatButtonModule} from "@angular/material/button";
@@ -17,7 +17,7 @@ import {HomeModule} from "./pages/home/home.module";
 import {AppRoutingModule} from "./app-routing.module";
 
 describe('AppComponent', () => {
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             imports: [
                 RouterTestingModule,

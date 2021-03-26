@@ -6,7 +6,7 @@ import {MatTooltipModule} from "@angular/material/tooltip";
 import {MatCheckboxModule} from "@angular/material/checkbox";
 import {MatSnackBarModule} from "@angular/material/snack-bar";
 import {MatPaginatorModule} from "@angular/material/paginator";
-import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 
@@ -21,7 +21,7 @@ describe('FileStatusTableComponent', () => {
     let component: FileStatusTableComponent;
     let fixture: ComponentFixture<FileStatusTableComponent>;
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             declarations: [FileStatusTableComponent],
             imports: [
