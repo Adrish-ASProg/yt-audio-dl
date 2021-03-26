@@ -9,10 +9,17 @@ import com.asoft.ytdl.model.Mp3Metadata;
 import com.asoft.ytdl.model.XmlConfiguration;
 import com.asoft.ytdl.model.request.DLFileAsZipRequest;
 import com.asoft.ytdl.model.request.DLPlaylistRequest;
+import com.asoft.ytdl.model.request.FileStatusRequest;
+import com.asoft.ytdl.model.request.FileStatusResponse;
 import com.asoft.ytdl.model.request.TagRequest;
 import com.asoft.ytdl.ui.MainFrame;
-import com.asoft.ytdl.utils.*;
+import com.asoft.ytdl.utils.FileUtils;
+import com.asoft.ytdl.utils.Mp3Tagger;
+import com.asoft.ytdl.utils.PlaylistUtils;
+import com.asoft.ytdl.utils.XMLManager;
+import com.asoft.ytdl.utils.YTDownloadManager;
 import com.mpatric.mp3agic.NotSupportedException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -23,8 +30,19 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -242,6 +260,26 @@ public class ApplicationService implements DownloadFromYTEvents {
      **/
     public Collection<FileStatus> getAllFilesStatus() {
         return this.filesStatus.values();
+    }
+
+    /**
+     * POST /status/
+     **/
+    public FileStatusResponse getFilesStatus(final FileStatusRequest request) {
+        var filteredList = this.filesStatus.values().stream()
+                .sorted(request.sortingModeComparator())
+                .filter(fs -> StringUtils.containsIgnoreCase(fs.getName(), request.getFilter()))
+                .collect(Collectors.toList());
+
+        var paginatedList = filteredList.stream()
+                .skip((long) request.getPageIndex() * request.getPageSize())
+                .limit(request.getPageSize())
+                .collect(Collectors.toList());
+
+        return FileStatusResponse.builder()
+                .filesStatus(paginatedList)
+                .totalLength(filteredList.size())
+                .build();
     }
 
     /**

@@ -4,14 +4,25 @@ import com.asoft.ytdl.exception.BadRequestException;
 import com.asoft.ytdl.exception.UncompletedDownloadException;
 import com.asoft.ytdl.model.FileStatus;
 import com.asoft.ytdl.model.Mp3Metadata;
-import com.asoft.ytdl.model.request.*;
+import com.asoft.ytdl.model.request.DLFileAsZipRequest;
+import com.asoft.ytdl.model.request.DLFileRequest;
+import com.asoft.ytdl.model.request.DLFromYTRequest;
+import com.asoft.ytdl.model.request.DLPlaylistRequest;
+import com.asoft.ytdl.model.request.FileStatusRequest;
+import com.asoft.ytdl.model.request.FileStatusResponse;
+import com.asoft.ytdl.model.request.TagRequest;
 import com.asoft.ytdl.service.ApplicationService;
 import com.mpatric.mp3agic.NotSupportedException;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -65,6 +76,11 @@ public class FileController {
     @RequestMapping(value = "/status/all", method = RequestMethod.GET)
     public ResponseEntity<Collection<FileStatus>> statusAll() {
         return new ResponseEntity<>(applicationService.getAllFilesStatus(), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/status", method = RequestMethod.POST)
+    public ResponseEntity<FileStatusResponse> status(@RequestBody FileStatusRequest request) {
+        return new ResponseEntity<>(applicationService.getFilesStatus(request), HttpStatus.OK);
     }
 
 
