@@ -2,7 +2,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-
     <artifactId>yt-audio-dl-backend</artifactId>
     <version>0.0.2-SNAPSHOT</version>
     <name>yt-audio-dl-backend</name>
@@ -15,6 +14,13 @@
     </parent>
 
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/com.intellij/forms_rt -->
+        <dependency>
+            <groupId>com.intellij</groupId>
+            <artifactId>forms_rt</artifactId>
+            <version>7.0.3</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
@@ -96,7 +102,6 @@
         </dependency>
 
 
-
         <!-- https://mvnrepository.com/artifact/org.json/json -->
         <dependency>
             <groupId>org.json</groupId>
@@ -120,6 +125,7 @@
     </dependencies>
 
     <build>
+        <finalName>yt-audio-dl</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
