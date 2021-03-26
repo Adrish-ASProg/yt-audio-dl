@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>yt-audio-dl-frontend</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.3-SNAPSHOT</version>
     <name>yt-audio-dl-frontend</name>
     <description>YouTube audio downloader - frontend</description>
 
     <parent>
         <groupId>com.asoft</groupId>
         <artifactId>yt-audio-dl</artifactId>
-        <version>0.0.2-SNAPSHOT</version>
+        <version>0.0.3-SNAPSHOT</version>
     </parent>
 
     <build>
@@ -18,11 +18,11 @@
             <plugin>
                 <groupId>com.github.eirslett</groupId>
                 <artifactId>frontend-maven-plugin</artifactId>
-                <version>1.9.1</version>
+                <version>1.11.3</version>
                 <configuration>
                     <workingDirectory>./</workingDirectory>
-                    <nodeVersion>v10.16.0</nodeVersion>
-                    <npmVersion>6.10.2</npmVersion>
+                    <nodeVersion>v15.4.0</nodeVersion>
+                    <npmVersion>7.7.5</npmVersion>
                 </configuration>
                 <executions>
                     <execution>

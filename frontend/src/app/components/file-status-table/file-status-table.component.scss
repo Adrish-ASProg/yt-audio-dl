@@ -1,9 +1,16 @@
-@import "src/variables";
+.status-container {
+    position: relative;
+}
+
+.spinner-container {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
 
 /* Files status table */
 table {
     width: 100%;
-    margin-top: 15px;
     padding: 0 10px;
 
     ::ng-deep th.checkbox-header-cell,
@@ -49,17 +56,12 @@ table {
             max-height: 34px;
         }
 
-        .span-file-status {
-            display: block;
+        &.status-cell {
             text-align: center;
-            font-size: 12px;
+            line-height: 0;
 
-            .success-icon {
-                color: $success;
-            }
-
-            .error-icon {
-                color: $danger;
+            .span-file-status {
+                font-size: 28px;
             }
         }
 

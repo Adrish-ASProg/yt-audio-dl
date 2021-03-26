@@ -1,0 +1,72 @@
+<div class="title" mat-dialog-title>Tools</div>
+
+<div class="content" mat-dialog-content>
+
+    <mat-accordion>
+
+        <!--   Filename ==> Tags   -->
+        <mat-expansion-panel expanded>
+
+            <!-- Title -->
+            <mat-expansion-panel-header>
+                <mat-panel-title>Set metadata from filename</mat-panel-title>
+            </mat-expansion-panel-header>
+
+            <div class="name-to-tags-content">
+
+                <!-- Select Format -->
+                <mat-form-field>
+                    <mat-label>Format</mat-label>
+                    <mat-select (ngModelChange)="updateTableResults($event)" [ngModel]="selectedFormat">
+                        <mat-option *ngFor="let format of formats" [value]="format">
+                            {{format.label}}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+
+                <!-- Example -->
+                <span class="example-filename" ellipsis>E.g. <span>{{ exampleItem.name }}</span></span>
+                <mat-grid-list class="example-grid" cols="4" rowHeight="16px">
+                    <mat-grid-tile>Artist</mat-grid-tile>
+                    <mat-grid-tile [colspan]="3"><span>{{exampleItem.metadata.artist}}</span></mat-grid-tile>
+                    <mat-grid-tile>Album</mat-grid-tile>
+                    <mat-grid-tile [colspan]="3"><span>{{exampleItem.metadata.album}}</span></mat-grid-tile>
+                    <mat-grid-tile>Title</mat-grid-tile>
+                    <mat-grid-tile [colspan]="3"><span>{{exampleItem.metadata.title}}</span></mat-grid-tile>
+                </mat-grid-list>
+                <br>
+                <ion-button (click)="onApplyButtonClicked()" color="primary" size="small">Apply</ion-button>
+            </div>
+        </mat-expansion-panel>
+
+        <!--   Playlist creator   -->
+        <mat-expansion-panel>
+
+            <!-- Title -->
+            <mat-expansion-panel-header>
+                <mat-panel-title>Playlist creator</mat-panel-title>
+            </mat-expansion-panel-header>
+
+            <div class="name-to-tags-content">
+                <!-- Input Mp3 path -->
+                <mat-form-field>
+                    <input [(ngModel)]="filePath" [matAutocomplete]="autocomplete"
+                           matInput placeholder="Mp3 path">
+                </mat-form-field>
+
+                <ion-button (click)="onDownloadPlaylistButtonClicked()" [disabled]="!filePath"
+                            class="convert-button" color="primary" size="small">Download playlist
+                </ion-button>
+
+                <mat-autocomplete #autocomplete="matAutocomplete">
+                    <mat-option *ngFor="let savedFolder of savedFolders" [value]="savedFolder">{{savedFolder}}</mat-option>
+                </mat-autocomplete>
+            </div>
+        </mat-expansion-panel>
+    </mat-accordion>
+</div>
+
+<div mat-dialog-actions>
+    <button (click)="onCloseButtonClicked()" mat-button>Close</button>
+</div>

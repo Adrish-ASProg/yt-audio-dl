@@ -1,24 +1,27 @@
-import {async, ComponentFixture, TestBed} from '@angular/core/testing';
+import {FormsModule} from "@angular/forms";
+import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from "@angular/material/dialog";
+import {MatInputModule} from "@angular/material/input";
+import {MatButtonModule} from "@angular/material/button";
+import {MatFormFieldModule} from "@angular/material/form-field";
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
+
+import {IonicModule} from "@ionic/angular";
 
 import {TagEditorDialog} from './tag-editor-dialog.component';
-import {MatFormFieldModule} from "@angular/material/form-field";
-import {FormsModule} from "@angular/forms";
-import {MatInputModule} from "@angular/material/input";
-import {MatDialogModule} from "@angular/material";
-import {MatButtonModule} from "@angular/material/button";
-import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
-import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 
 describe('TagEditorDialogComponent', () => {
     let component: TagEditorDialog;
     let fixture: ComponentFixture<TagEditorDialog>;
 
-    beforeEach(async(() => {
+    beforeEach(waitForAsync(() => {
         TestBed.configureTestingModule({
             declarations: [TagEditorDialog],
             imports: [
                 BrowserAnimationsModule,
                 FormsModule,
+
+                IonicModule,
 
                 MatFormFieldModule,
                 MatInputModule,

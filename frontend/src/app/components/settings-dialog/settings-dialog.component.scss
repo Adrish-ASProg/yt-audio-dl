@@ -1,35 +1,39 @@
-.title-container {
-}
-
-.content {
-    .refresh-rate-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    mat-divider {
-        margin: 20px 0;
-    }
-
-    .playlist-folders-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-items: center;
-
-        .url-container {
-            width: 200px;
-        }
-
-        .select-folder-container {
-            display: flex;
-            align-items: center;
-            width: 200px;
-        }
+// Big screens, avoid dialog fullscreen
+@media only screen and (min-height: 600px) and (min-width: 400px) {
+    ::ng-deep .settings-dialog .modal-wrapper {
+        width: 350px;
+        height: 460px;
+        border-radius: 2px;
+        box-shadow: 0 28px 48px rgba(0,0,0,0.4);
+        -webkit-box-shadow: 0 28px 48px rgba(0,0,0,0.4);
     }
 }
 
-.mat-dialog-actions {
-    justify-content: flex-end;
+.settings-item {
+    padding: 10px 10px 0;
+
+    .settings-item-title {
+        display: block;
+        font-size: 14px;
+        color: #808080;
+    }
+
+    mat-form-field,
+    ion-range {
+        width: 100%;
+    }
+
+    ion-range {
+        padding: 0;
+    }
+}
+
+hr {
+    margin: 0;
+    background-color: #cacaca;
+}
+
+.save-button-container {
+    margin-top: 30px;
+    text-align: center;
 }

@@ -1,23 +1,37 @@
+<div class="title" mat-dialog-title>Edit tags</div>
+
 <div class="title-container">
     <mat-form-field>
         <input [(ngModel)]="data.name" matInput placeholder="Filename">
     </mat-form-field>
 </div>
-<div mat-dialog-content>
-    <div class="input-container">
-        <mat-form-field>
-            <input [(ngModel)]="data.metadata.title" matInput placeholder="Title">
-        </mat-form-field>
-        <mat-form-field>
-            <input [(ngModel)]="data.metadata.album" matInput placeholder="Album">
-        </mat-form-field>
-        <mat-form-field>
-            <input [(ngModel)]="data.metadata.artist" matInput placeholder="Artist">
-        </mat-form-field>
-        <mat-form-field>
-            <input [(ngModel)]="data.metadata.genre" matInput placeholder="Genre">
-        </mat-form-field>
-    </div>
+<div class="dialog-content" mat-dialog-content>
+    <ion-grid class="input-container">
+        <ion-row>
+            <ion-col>
+                <mat-form-field>
+                    <input [(ngModel)]="data.metadata.title" matInput placeholder="Title">
+                </mat-form-field>
+            </ion-col>
+            <ion-col>
+                <mat-form-field>
+                    <input [(ngModel)]="data.metadata.album" matInput placeholder="Album">
+                </mat-form-field>
+            </ion-col>
+        </ion-row>
+        <ion-row>
+            <ion-col>
+                <mat-form-field>
+                    <input [(ngModel)]="data.metadata.artist" matInput placeholder="Artist">
+                </mat-form-field>
+            </ion-col>
+            <ion-col>
+                <mat-form-field>
+                    <input [(ngModel)]="data.metadata.genre" matInput placeholder="Genre">
+                </mat-form-field>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
 
 </div>
 <div mat-dialog-actions>

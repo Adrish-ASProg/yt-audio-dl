@@ -1,31 +1,39 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
 import {TagEditorDialog} from "../../components/tag-editor-dialog/tag-editor-dialog.component";
 import {YTDLUtils} from "../../utils/ytdl-utils";
-import {ActivatedRoute} from "@angular/router";
-import {MatDialog, MatDialogRef} from "@angular/material/dialog";
+import {MatDialog} from "@angular/material/dialog";
 import {FileStatusTableComponent} from "../../components/file-status-table/file-status-table.component";
 import {FileStatus} from "../../model/filestatus.model";
 import {FormControl, Validators} from "@angular/forms";
 import {SettingsDialog} from "../../components/settings-dialog/settings-dialog.component";
-import {SettingsService} from "../../services/settings/settings.service";
 import {YT_URLS} from "../../utils/ytdl-constants";
 import {AppManager} from "../../services/request-handler/app-manager.service";
-import {PostProcessorDialog} from "../../components/post-processor-dialog/post-processor-dialog.component";
-import {PlaylistDialog} from "../../components/playlist-dialog/playlist-dialog.component";
+import {ToolsDialog} from "../../components/tools-dialog/tools-dialog.component";
+import {ModalController, Platform} from "@ionic/angular";
+import {IntentService} from "../../services/intent/intent.service";
+import {MatMenu} from "@angular/material/menu";
+import {SettingsService} from "../../services/settings/settings.service";
+import {UtilsService} from "../../services/utils/utils.service";
+import {forkJoin, fromEvent} from "rxjs";
+import {debounceTime, tap} from "rxjs/operators";
 
 @Component({
     selector: 'app-home',
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.scss']
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, AfterViewInit {
 
-    menu: any = [
-        {label: "Refresh", action: () => this.refreshActionClicked()},
-        {label: "Settings", action: () => this.settingsActionClicked()}
-    ];
+    @ViewChild('fileInput') fileInput: any;
+    selectedFiles: any[] = [];
 
-    @ViewChild(FileStatusTableComponent, {static: false})
+    @ViewChild('filterInput') filterInput: any;
+    filterInputValue: string = "";
+
+    @ViewChild('mainMenu')
+    public menu: MatMenu;
+
+    @ViewChild(FileStatusTableComponent)
     fileStatusTable: FileStatusTableComponent;
 
     displayedColumns: string[] = ['select', 'name', 'status', 'startDate'];
@@ -35,41 +43,52 @@ export class HomeComponent implements OnInit {
         Validators.pattern("^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$")
     ]);
 
-    constructor(private route: ActivatedRoute,
-                public appManager: AppManager,
+    playlistContent: string | ArrayBuffer = "";
+
+    constructor(private platform: Platform,
+                private intentService: IntentService,
                 private settingsService: SettingsService,
-                private dialog: MatDialog) {}
+                public utilsService: UtilsService,
+                public appManager: AppManager,
+                private dialog: MatDialog,
+                private modalController: ModalController) {
+    }
 
 
     ngOnInit() {
-        this.urlFormControl.setValue(YT_URLS.Playlist_Test);
+        this.platform.ready().then(() => {
+            this.urlFormControl.setValue(YT_URLS.Playlist_Test);
+            this.displayedColumns = this.settingsService.getDisplayedColumns().split("|");
 
-        this.appManager.onFilesStatusUpdated
-            .subscribe((fs: FileStatus[]) => { this.fileStatusTable.refreshDataTable(fs); });
+            this.intentService.onIntentReceived = (url) => {
+                this.urlFormControl.setValue(url);
+                this.appManager.sendConvertRequest(this.urlFormControl.value);
+            };
+            this.intentService.init();
+        });
+    }
 
-        if (this.route.queryParams) {
-            this.route.queryParams.subscribe(params => {
-                const videoId = params["videoId"];
-                if (videoId == void 0) return;
-
-                if (videoId.length === 11) {
-                    this.urlFormControl.setValue(`https://www.youtube.com/watch?v=${videoId}`);
-                    this.appManager.sendConvertRequest(this.urlFormControl.value);
-                }
-            });
-        }
+    ngAfterViewInit() {
+        fromEvent(this.filterInput.nativeElement, 'keyup')
+            .pipe(debounceTime(500), tap(e => this.refresh()))
+            .subscribe();
     }
 
 
     //#region Menu
 
-    public getMenu() {
-        return this.menu;
+    public uploadActionClicked() {
+        this.fileInput.nativeElement.click();
     }
 
-    public refreshActionClicked() {
-        this.fileStatusTable.resetSelection();
-        this.appManager.runAutomaticUpdate();
+    public updateDisplayedColumns(value: string) {
+        this.displayedColumns.includes(value)
+            ? this.displayedColumns = this.displayedColumns.filter(c => c !== value)
+            : this.displayedColumns.push(value);
+
+        this.settingsService.setDisplayedColumns(
+            this.displayedColumns.join('|')
+        );
     }
 
     public settingsActionClicked() {
@@ -78,35 +97,56 @@ export class HomeComponent implements OnInit {
 
     // #endregion
 
+    //#region Upload
+
+    /** After file loaded **/
+    onFileChange(event) {
+        if (event.target.files.length != 1 ||
+            !event.target.files[0].type ||
+            event.target.files[0].type != 'application/x-mpegurl') {
+            this.utilsService.showToast("Invalid file, only m3u8 files allowed");
+            return;
+        }
+
+        this.selectedFiles = [];
+        for (const file of event.target.files) this.selectedFiles.push(file);
+
+        const reader = new FileReader();
+        reader.onload = () => this.playlistContent = reader.result;
+        reader.onerror = e => this.utilsService.showToast('Error when reading file: ' + e);
+        reader.readAsText(event.target.files[0]);
+    }
+
+    // #endregion
 
     //#region Buttons
 
     public convertButtonClicked() {
         if (this.urlFormControl.invalid) return;
-        this.appManager.sendConvertRequest(this.urlFormControl.value);
+
+        this.appManager.sendConvertRequest(this.urlFormControl.value)
+            .subscribe(() => this.refresh(),
+                response => {
+                    console.error(response.error);
+                    alert(response.error.message);
+                });
     }
 
     public downloadButtonClicked() {
-        const selectedItems: FileStatus[] = this.fileStatusTable.getSelected();
+        const selectedItems: FileStatus[] = this.fileStatusTable.getSelected().filter(fs => fs.status == "COMPLETED");
 
         if (selectedItems.length < 1) {
-            alert("No files selected");
+            alert("No files selected. Files should be in « COMPLETED » status to be downloaded");
             return;
         }
 
-        const ids: string[] = selectedItems.filter(fs => fs.status == "COMPLETED").map(fs => fs.id);
+        const ids: string[] = selectedItems.map(fs => fs.id);
 
         // Download only one file
         if (ids.length == 1) this.appManager.sendDownloadRequest(ids[0]);
 
-        // Download file as zip (+ eventually playlist)
-        else {
-            const dialogRef = this.openPlaylistDialog();
-            dialogRef.afterClosed().subscribe(result => {
-                if (!result) return;
-                this.appManager.sendDownloadAsZipRequest(ids, result.createPlaylist, result.filePath);
-            });
-        }
+        // Download file as zip
+        else this.appManager.sendDownloadAsZipRequest(ids);
     }
 
     public postProcessorButtonClicked() {
@@ -134,14 +174,22 @@ export class HomeComponent implements OnInit {
 
         if (!confirm(confirmMsg)) return;
 
-        this.appManager.sendDeleteRequest(selectedItems.map(fileStatus => fileStatus.id));
-        this.fileStatusTable.resetSelection();
+        this.appManager.sendDeleteRequest(selectedItems.map(fileStatus => fileStatus.id))
+            .subscribe(
+                (result: boolean) => {
+                    if (!result) alert("An error occurred while trying to delete files, some files may not have been deleted");
+                },
+                error => {
+                    alert("An error occurred while trying to delete files:\n" + error.error.message);
+                    console.error(error);
+                },
+                () => this.refresh());
     }
 
     // #endregion
 
     setUrl(event) {
-        switch (event.value) {
+        switch (event) {
             case "bg":
                 this.urlFormControl.setValue(YT_URLS.Playlist_Background);
                 break;
@@ -161,28 +209,29 @@ export class HomeComponent implements OnInit {
         const dialogRef = this.dialog.open(TagEditorDialog, {data: YTDLUtils.copyObject(event)});
         dialogRef.afterClosed().subscribe(result => {
             if (!result) return;
-            this.appManager.sendTagRequest(result.id, result.name, result.metadata);
+            this.appManager.sendTagRequest(result.id, result.name, result.metadata)
+                .subscribe(() => this.refresh());
         });
     }
 
     private openPostProcessorDialog(selectedItems: FileStatus[]): void {
-        const dialogRef = this.dialog.open(PostProcessorDialog, {data: {fileStatus: selectedItems}});
+        const dialogRef = this.dialog.open(ToolsDialog, {data: {fileStatus: selectedItems}});
         dialogRef.afterClosed().subscribe((result: FileStatus[]) => {
             if (!result) return;
-
-            result.forEach(fs => this.appManager.sendTagRequest(fs.id, fs.name, fs.metadata));
-            this.appManager.sendUpdateRequest().subscribe(fs => this.fileStatusTable.refreshDataTable(fs));
+            forkJoin(result.map(fs => this.appManager.sendTagRequest(fs.id, fs.name, fs.metadata)))
+                .subscribe(() => this.refresh());
         });
     }
 
-    private openSettingsDialog(): void {
-        const dialogRef = this.dialog.open(SettingsDialog, {width: "300px"});
-        dialogRef.afterClosed().subscribe(result => {
-            if (result) this.appManager.getSettings();
+    private async openSettingsDialog(): Promise<void> {
+        const modal = await this.modalController.create({
+            component: SettingsDialog,
+            cssClass: 'settings-dialog'
         });
+        return modal.present();
     }
 
-    private openPlaylistDialog(): MatDialogRef<PlaylistDialog, any> {
-        return this.dialog.open(PlaylistDialog, {width: "300px"});
+    public refresh() {
+        this.fileStatusTable.refreshTableData();
     }
 }

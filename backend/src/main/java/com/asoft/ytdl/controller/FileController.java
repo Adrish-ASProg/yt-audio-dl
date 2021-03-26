@@ -1,12 +1,16 @@
 package com.asoft.ytdl.controller;
 
+import com.asoft.ytdl.exception.BadRequestException;
 import com.asoft.ytdl.exception.UncompletedDownloadException;
-import com.asoft.ytdl.exception.YTDLException;
-import com.asoft.ytdl.model.DLAsZipRequest;
 import com.asoft.ytdl.model.FileStatus;
 import com.asoft.ytdl.model.Mp3Metadata;
-import com.asoft.ytdl.model.TagRequest;
-import com.asoft.ytdl.model.YTRequest;
+import com.asoft.ytdl.model.request.DLFileAsZipRequest;
+import com.asoft.ytdl.model.request.DLFileRequest;
+import com.asoft.ytdl.model.request.DLFromYTRequest;
+import com.asoft.ytdl.model.request.DLPlaylistRequest;
+import com.asoft.ytdl.model.request.FileStatusRequest;
+import com.asoft.ytdl.model.request.FileStatusResponse;
+import com.asoft.ytdl.model.request.TagRequest;
 import com.asoft.ytdl.service.ApplicationService;
 import com.mpatric.mp3agic.NotSupportedException;
 import org.apache.commons.validator.routines.UrlValidator;
@@ -19,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileNotFoundException;
@@ -32,37 +37,50 @@ public class FileController {
     @Autowired
     ApplicationService applicationService;
 
+    @RequestMapping(value = "/upload", method = RequestMethod.POST)
+    public ResponseEntity<String> upload(@RequestParam(value = "handleMissingFiles", required = false) Boolean handleMissingFiles,
+                                         @RequestParam(value = "file") MultipartFile file) throws BadRequestException, IOException {
+
+        var result = applicationService.uploadFile(file, Boolean.TRUE.equals(handleMissingFiles));
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
 
     @RequestMapping(value = "/ytdl", method = RequestMethod.POST)
-    public ResponseEntity<Void> downloadFromYT(@RequestBody YTRequest ytRequest) throws YTDLException {
-        if (ytRequest.getUrl() == null || !new UrlValidator(new String[]{"http", "https"}).isValid(ytRequest.getUrl()))
-            throw new YTDLException("Invalid URL");
-        applicationService.downloadFileFromYT(ytRequest);
+    public ResponseEntity<Void> downloadFromYT(@RequestBody DLFromYTRequest request) throws BadRequestException {
+        String url = request.getUrl();
+        if (url == null || !new UrlValidator(new String[]{"http", "https"}).isValid(url)) throw new BadRequestException("Invalid URL");
+
+        applicationService.downloadFileFromYT(url);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
-
-    @RequestMapping(value = "/dl", method = RequestMethod.GET, produces = "audio/mpeg")
+    @RequestMapping(value = "/dl", method = RequestMethod.POST, produces = "audio/mpeg")
     public @ResponseBody
-    void download(HttpServletResponse response, @RequestParam(value = "id") String id)
+    void download(HttpServletResponse response, @RequestBody DLFileRequest request)
             throws FileNotFoundException, UncompletedDownloadException {
-        applicationService.downloadFile(id, response);
+        applicationService.downloadFile(request.getId(), response);
     }
 
     @RequestMapping(value = "/dl-zip", method = RequestMethod.POST, produces = "application/zip")
-    public void downloadAsZip(HttpServletResponse response, @RequestBody DLAsZipRequest request) {
+    public void downloadAsZip(HttpServletResponse response, @RequestBody DLFileAsZipRequest request) {
         applicationService.downloadFiles(request, response);
     }
 
-
-    @RequestMapping(value = "/status", method = RequestMethod.GET)
-    public ResponseEntity<FileStatus> status(@RequestParam(value = "id") String id) throws FileNotFoundException {
-        return new ResponseEntity<>(applicationService.getFileStatus(id), HttpStatus.OK);
+    @RequestMapping(value = "/dl-playlist", method = RequestMethod.POST, produces = "application/x-mpegURL")
+    public void downloadPlaylist(HttpServletResponse response, @RequestBody DLPlaylistRequest request) {
+        applicationService.downloadPlaylist(request, response);
     }
+
 
     @RequestMapping(value = "/status/all", method = RequestMethod.GET)
     public ResponseEntity<Collection<FileStatus>> statusAll() {
         return new ResponseEntity<>(applicationService.getAllFilesStatus(), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/status", method = RequestMethod.POST)
+    public ResponseEntity<FileStatusResponse> status(@RequestBody FileStatusRequest request) {
+        return new ResponseEntity<>(applicationService.getFilesStatus(request), HttpStatus.OK);
     }
 
 

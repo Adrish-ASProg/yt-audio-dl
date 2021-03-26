@@ -1,9 +1,10 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {Observable} from "rxjs";
-import {FileStatus} from "../../model/filestatus.model";
 import {Mp3Metadata} from "../../model/mp3metadata.model";
 import {APIModule} from "./api.module";
+import {SettingsService} from "../settings/settings.service";
+import {FileStatusResponse} from "../../model/filestatus-response.model";
 
 
 const jsonHttpOptions = {
@@ -11,7 +12,6 @@ const jsonHttpOptions = {
 };
 
 const audioHttpOptions = {
-    headers: new HttpHeaders({'Content-Type': 'audio/mpeg'}),
     responseType: 'blob' as 'json',
     observe: 'response' as 'body'
 };
@@ -21,18 +21,49 @@ const zipHttpOptions = {
     observe: 'response' as 'body'
 };
 
+const playlistHttpOptions = {
+    responseType: 'text' as 'json',
+    observe: 'response' as 'body'
+};
+
+
+export class UploadData {
+    fileName: string;
+    formData: FormData;
+    onFinishedCallback: (result) => void;
+
+    constructor(fileName, formData, callback?) {
+        this.fileName = fileName;
+        this.formData = formData;
+        if (callback) this.onFinishedCallback = callback;
+    }
+}
+
+
 @Injectable({providedIn: APIModule})
 export class APIService {
 
-    private apiUrl: string = `http://${window.location.hostname}:8080`;
+    constructor(private http: HttpClient,
+                private settings: SettingsService) {
+    }
+
+    private uploadUrl: string = "/upload";
     private convertUrl: string = "/ytdl";
-    private statusUrl: string = "/status/all";
+    private statusUrl: string = "/status";
     private downloadUrl: string = "/dl";
     private downloadAsZipUrl: string = "/dl-zip";
+    private downloadPlaylistUrl: string = "/dl-playlist";
     private setTagsUrl: string = "/tags";
     private deleteUrl: string = "/delete";
 
-    constructor(private http: HttpClient) {}
+    get apiUrl() {
+        return this.settings.getServerAddress();
+    }
+
+    /** POST: upload file */
+    uploadFile(formData) {
+        return this.http.post<{ id: string }>(`${this.apiUrl}${this.uploadUrl}`, formData, {reportProgress: true, observe: 'events'});
+    }
 
     /** POST: process new file */
     requestConvert(url: string): Observable<{ id: string }> {
@@ -41,15 +72,28 @@ export class APIService {
 
     /** POST: download file */
     downloadFile(id: string): Observable<any> {
-        return this.http.get<any>(`${this.apiUrl}${this.downloadUrl}?id=${id}`, audioHttpOptions);
+        return this.http.post<any>(
+            `${this.apiUrl}${this.downloadUrl}`,
+            {id: id},
+            audioHttpOptions
+        );
     }
 
     /** POST: download files as zip */
-    downloadFilesAsZip(ids: string[], createPlaylist: boolean, filePath: string): Observable<any> {
+    downloadFilesAsZip(ids: string[]): Observable<any> {
         return this.http.post<any>(
             `${this.apiUrl}${this.downloadAsZipUrl}`,
-            {ids: ids, createPlaylist: createPlaylist, filePath: filePath},
+            {ids: ids},
             zipHttpOptions
+        );
+    }
+
+    /** POST: download playlist */
+    downloadPlaylist(ids: string[], filePath: string): Observable<any> {
+        return this.http.post<any>(
+            `${this.apiUrl}${this.downloadPlaylistUrl}`,
+            {ids, filePath},
+            playlistHttpOptions
         );
     }
 
@@ -62,9 +106,10 @@ export class APIService {
         );
     }
 
-    /** GET: get all files status */
-    getAllFileStatus(): Observable<FileStatus[]> {
-        return this.http.get<FileStatus[]>(`${this.apiUrl}${this.statusUrl}`, jsonHttpOptions);
+    /** GET: get files status */
+    getFileStatus(filter = "", sort = {}, pageIndex = 0, pageSize = 10): Observable<FileStatusResponse> {
+        const params = {filter, sort, pageIndex, pageSize};
+        return this.http.post<FileStatusResponse>(`${this.apiUrl}${this.statusUrl}`, params, jsonHttpOptions);
     }
 
     /** DELETE: delete files */

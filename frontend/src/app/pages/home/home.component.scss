@@ -1,93 +1,97 @@
-@import "src/variables";
-
 .content {
-    display: flex;
-    flex-direction: column;
-    padding: 15px;
 
-
-    /* Request container (url input / audio switch / send button) */
+    /* Request container (url input / send button) */
     .request-container {
         display: flex;
         flex-direction: column;
-        justify-content: center;
         align-items: center;
-        flex: 1;
+        padding: 8px 15px 0;
 
-        .url-button-container {
-            display: flex;
-            flex-direction: column;
+        .input-container {
             width: 100%;
-            align-items: center;
-
-            .url-container {
-                width: 100%;
-            }
-
-            mat-button-toggle-group {
-                margin-bottom: 15px;
-
-                ::ng-deep .mat-button-toggle-label-content {
-                    line-height: 36px;
-                }
-            }
         }
 
-        .request-controls {
-            display: flex;
-            align-items: center;
-
-            mat-slide-toggle {
-                margin-left: 15px;
-                margin-right: 15px;
-            }
-
-            button {
-                margin-left: 15px;
-                margin-right: 15px;
-            }
+        .convert-button {
+            margin-top: -8px;
         }
-    }
-
-    .server-status-container {
-        margin: 25px 0;
-        text-align: center;
     }
 
     .table-container {
-        margin-top: 50px;
+        margin-top: 15px;
 
         .control-buttons {
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-evenly;
+            padding: 0;
 
-            .download-button {
-                background-color: $success;
-                color: white;
+            ion-row {
+                width: 100%;
 
-                &:disabled {
-                    background-color: grey;
-                    color: #a8a8a8;
+                ion-col {
+                    text-align: center;
+
+                    ion-button {
+                        font-size: 12px;
+
+                        &.tools-button {
+                            --ion-color-contrast: #ffffff !important;
+                        }
+                    }
+                }
+            }
+        }
+
+        .filter-input-container {
+            padding: 0 15px;
+
+            mat-form-field {
+                width: 100%;
+            }
+        }
+    }
+
+
+    // Tab upload playlist
+    .tab-upload-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0 15px;
+
+        .upload-buttons-container {
+            display: flex;
+            justify-content: space-evenly;
+            width: 100%;
+        }
+
+        ion-button {
+            margin: 15px 0;
+        }
+
+        mat-form-field {
+            width: 100%;
+            min-width: 100px;
+            max-width: 1200px;
+
+            textarea {
+                white-space: pre;
+                overflow-wrap: normal;
+                max-height: 500px;
+                height: 100px;
+
+                &.expanded {
+                    height: 500px;
                 }
             }
 
-            .processor-button {
-                background-color: $orange;
-                color: white;
+            @media only screen and (max-height: 750px) {
+                textarea {
+                    max-height: 350px;
 
-                &:disabled {
-                    background-color: grey;
-                    color: #a8a8a8;
-                }
-            }
-
-            .delete-button {
-                background-color: $danger;
-                color: white;
-
-                &:disabled {
-                    background-color: grey;
-                    color: #a8a8a8;
+                    &.expanded {
+                        height: 350px;
+                    }
                 }
             }
         }
