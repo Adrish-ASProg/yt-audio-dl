@@ -33,7 +33,7 @@
     "@ionic-native/web-intent": "^5.21.6",
     "@ionic/angular": "5.6.3",
     "com-darryncampbell-cordova-plugin-intent": "^2.0.0",
-    "cordova-android": "''9.0.0",
+    "cordova-android": "9.0.0",
     "cordova-plugin-android-permissions": "^1.0.2",
     "cordova-plugin-androidx-adapter": "^1.1.0",
     "cordova-plugin-file": "^6.0.2",
