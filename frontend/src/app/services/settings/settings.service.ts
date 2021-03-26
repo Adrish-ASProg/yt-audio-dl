@@ -20,7 +20,7 @@ class Option {
 export class SettingsService {
 
     options: Option[] = [
-        {name: OptionsKeys.API_ADDRESS, value: "http://192.168.1.1:8080", defaultValue: "http://192.168.1.1:8080"},
+        {name: OptionsKeys.API_ADDRESS, value: "http://192.168.0.1:8080", defaultValue: "http://192.168.0.1:8080"},
         {name: OptionsKeys.DISPLAYED_COLUMNS, value: "select|name|status|startDate", defaultValue: "select|name|status|startDate"},
         {name: OptionsKeys.PAGE_SIZE, value: "10", defaultValue: "10"},
         {name: OptionsKeys.REFRESH_RATE, value: 1500, defaultValue: 1500},

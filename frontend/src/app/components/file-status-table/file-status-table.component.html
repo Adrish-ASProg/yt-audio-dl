@@ -1,6 +1,6 @@
 <div class="status-container">
     <!-- Table -->
-    <table [dataSource]="dataSource" class="mat-elevation-z8" mat-table matSort matSortActive="startDate" matSortDirection="desc">
+    <table [dataSource]="dataSource" class="mat-elevation-z8" mat-table matSort matSortActive="startDate" matSortDirection="desc" matSortDisableClear>
 
         <!-- Checkbox Column -->
         <ng-container matColumnDef="select">
@@ -57,7 +57,7 @@
         <!-- Date Column -->
         <ng-container matColumnDef="startDate">
             <th *matHeaderCellDef class="date-header-cell" mat-header-cell mat-sort-header> Date</th>
-            <td *matCellDef="let element" class="date-cell" mat-cell> {{element.startDate | date:"dd/MM - HH:mm"}} </td>
+            <td *matCellDef="let element" class="date-cell" mat-cell> {{element.startDate | date:"dd/MM/yy - HH:mm"}} </td>
         </ng-container>
 
         <tr *matHeaderRowDef="displayedColumns" mat-header-row></tr>

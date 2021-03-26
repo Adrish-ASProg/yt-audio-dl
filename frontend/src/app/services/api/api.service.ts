@@ -1,10 +1,10 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {Observable} from "rxjs";
-import {FileStatus} from "../../model/filestatus.model";
 import {Mp3Metadata} from "../../model/mp3metadata.model";
 import {APIModule} from "./api.module";
 import {SettingsService} from "../settings/settings.service";
+import {FileStatusResponse} from "../../model/filestatus-response.model";
 
 
 const jsonHttpOptions = {
@@ -44,7 +44,8 @@ export class UploadData {
 export class APIService {
 
     constructor(private http: HttpClient,
-                private settings: SettingsService) {}
+                private settings: SettingsService) {
+    }
 
     private uploadUrl: string = "/upload";
     private convertUrl: string = "/ytdl";
@@ -55,9 +56,11 @@ export class APIService {
     private setTagsUrl: string = "/tags";
     private deleteUrl: string = "/delete";
 
-    get apiUrl() { return this.settings.getServerAddress();}
+    get apiUrl() {
+        return this.settings.getServerAddress();
+    }
 
-
+    /** POST: upload file */
     uploadFile(formData) {
         return this.http.post<{ id: string }>(`${this.apiUrl}${this.uploadUrl}`, formData, {reportProgress: true, observe: 'events'});
     }
