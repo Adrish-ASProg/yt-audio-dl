@@ -6,10 +6,11 @@ export class LoadingService {
 
     loadingDialog: HTMLIonLoadingElement;
 
-    constructor(private loadingController: LoadingController) {}
+    constructor(private loadingController: LoadingController) {
+    }
 
     async showDialog(message: string) {
-        this.dismissDialog();
+        await this.dismissDialog();
         this.loadingDialog = await this.loadingController.create({message});
         await this.loadingDialog.present();
     }

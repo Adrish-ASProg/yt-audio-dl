@@ -1,4 +1,10 @@
 <div class="status-container">
+
+    <!-- Spinner Loading -->
+    <div *ngIf="dataSource.loading$ | async" class="spinner-container">
+        <mat-spinner diameter="20" strokeWidth="1"></mat-spinner>
+    </div>
+
     <!-- Table -->
     <table [dataSource]="dataSource" class="mat-elevation-z8" mat-table matSort matSortActive="startDate" matSortDirection="desc" matSortDisableClear>
 
@@ -64,6 +70,6 @@
         <tr *matRowDef="let row; columns: displayedColumns;" mat-row></tr>
     </table>
 
-    <mat-paginator (page)="setPageSize($event)" [length]="filesStatus.length" [pageSizeOptions]="[10, 25, 50, 100]" [pageSize]="pageSize" [showFirstLastButtons]="true">
+    <mat-paginator [length]="dataSource.totalLength" [pageSizeOptions]="[5, 10, 25, 50]" [pageSize]="10" [showFirstLastButtons]="true">
     </mat-paginator>
 </div>

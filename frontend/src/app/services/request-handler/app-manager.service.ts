@@ -2,12 +2,9 @@ import {Injectable} from '@angular/core';
 import {YTDLUtils} from "../../utils/ytdl-utils";
 import {Mp3Metadata} from "../../model/mp3metadata.model";
 import {APIService, UploadData} from "../api/api.service";
-import {interval, Observable, Subject, Subscription} from "rxjs";
-import {flatMap} from "rxjs/operators";
-import {FileStatus} from "../../model/filestatus.model";
-import {SettingsService} from "../settings/settings.service";
+import {Observable} from "rxjs";
 import {AppManagerModule} from "./app-manager.module";
-import {ModalController, Platform} from "@ionic/angular";
+import {Platform} from "@ionic/angular";
 import {FileTransferService} from "../file-transfer/file-transfer.service";
 import {HttpErrorResponse, HttpEvent, HttpEventType, HttpResponse} from "@angular/common/http";
 import {LoadingService} from "../loading/loading.service";
@@ -15,18 +12,10 @@ import {MatSnackBar} from "@angular/material/snack-bar";
 import {File} from '@ionic-native/file/ngx';
 import {TransferItem, TransferService, TransferStatus} from "../transfer/transfer.service";
 import {UtilsService} from "../utils/utils.service";
+import {RequestWithLoader} from "../utils/request-wrapper.util";
 
 @Injectable({providedIn: AppManagerModule})
 export class AppManager {
-
-    filesStatus: FileStatus[] = [];
-    onFilesStatusUpdated: Subject<FileStatus[]> = new Subject<FileStatus[]>();
-
-    refreshRate: number = 3000;
-    isServerOn: boolean = false;
-
-    isAutoUpdateRunning: boolean = false;
-    autoUpdateObservable: Subscription;
 
     constructor(private file: File,
                 private platform: Platform,
@@ -34,57 +23,8 @@ export class AppManager {
                 private apiService: APIService,
                 private utilsService: UtilsService,
                 private loadingService: LoadingService,
-                private settingsService: SettingsService,
                 private transferService: TransferService,
-                private modalController: ModalController,
                 private fileTransferService: FileTransferService) {
-
-        // Send first update immediately
-        this.sendUpdateRequest().subscribe(fs => this.onUpdateReceived(fs));
-
-        this.getSettings();
-    }
-
-    getSettings(): void {
-        this.refreshRate = this.settingsService.getRefreshRate();
-        this.runAutomaticUpdate();
-    }
-
-    runAutomaticUpdate() {
-        this.sendUpdateRequest().subscribe(filesStatus => this.onUpdateReceived(filesStatus));
-        if (this.autoUpdateObservable) this.autoUpdateObservable.unsubscribe();
-
-        // Send update request at <refreshRate> interval
-        this.autoUpdateObservable = interval(this.refreshRate)
-            .pipe(flatMap(() => this.sendUpdateRequest()))
-            .subscribe(filesStatus => this.onUpdateReceived(filesStatus),
-                response => {
-                    this.isServerOn = false;
-                    console.error("Unable to retrieve files status from server, stopping automatic updates.", response.error);
-                    if (response.error != void 0 && response.error.message != void 0)
-                        alert(response.error.message);
-                });
-
-    }
-
-    onUpdateReceived(filesStatus: FileStatus[]): void {
-        this.isServerOn = true;
-
-        // Remove old file status
-        this.filesStatus = this.filesStatus.filter(fs => filesStatus.find(f => f.id === fs.id));
-
-        // Add / Edit each filestatus rather than replace them (deal with reference issues)
-        filesStatus.forEach(fs => {
-            const oldFileStatus = this.filesStatus.find(f => f.id === fs.id);
-            if (oldFileStatus) {
-                oldFileStatus.name = fs.name;
-                oldFileStatus.metadata = fs.metadata;
-                oldFileStatus.startDate = fs.startDate;
-                oldFileStatus.status = fs.status;
-            } else this.filesStatus.push(fs);
-        });
-
-        this.onFilesStatusUpdated.next(this.filesStatus);
     }
 
 
@@ -95,24 +35,9 @@ export class AppManager {
             .then(_ => files.forEach(file => this.uploadFile(file.name, file, handleMissingFiles)));
     }
 
-    async sendConvertRequest(request: string) {
-        await this.loadingService.showDialog("Retrieving title(s)..");
-        this.apiService.requestConvert(request)
-            .subscribe(
-                () => {
-                    this.loadingService.dismissDialog();
-                    this.sendUpdateRequest();
-                },
-                response => {
-                    this.loadingService.dismissDialog();
-                    console.error(response.error);
-                    alert(response.error.message);
-                }
-            );
-    }
-
-    sendUpdateRequest(): Observable<FileStatus[]> {
-        return this.apiService.getAllFileStatus();
+    sendConvertRequest(params: string) {
+        const request = this.apiService.requestConvert(params);
+        return this.wrapRequestWithLoading(request, "Retrieving title(s)..");
     }
 
     async sendDownloadRequest(id: string) {
@@ -143,16 +68,9 @@ export class AppManager {
         );
     }
 
-    sendDeleteRequest(ids: string[]): void {
-        this.apiService.deleteFiles(ids)
-            .subscribe(
-                (result: boolean) => {
-                    if (!result) alert("An error occurred while trying to delete files, some files may not have been deleted");
-                },
-                error => {
-                    alert("An error occurred while trying to delete files");
-                    console.error(error);
-                })
+    sendDeleteRequest(ids: string[]): Observable<boolean> {
+        const request = this.apiService.deleteFiles(ids);
+        return this.wrapRequestWithLoading(request, "Deleting file(s)..");
     }
 
     sendTagRequest(id: string, name: string, metadata: Mp3Metadata): Observable<Mp3Metadata> {
@@ -285,4 +203,10 @@ export class AppManager {
     }
 
     // #endregion
+
+    private wrapRequestWithLoading(request: Observable<any>, loadingMessage: string): Observable<any> {
+        const wrappedRequest = new RequestWithLoader(request, this.loadingService, loadingMessage);
+        return wrappedRequest.getObservable();
+    }
+
 }

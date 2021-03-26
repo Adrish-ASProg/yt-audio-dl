@@ -28,6 +28,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
     selectedFiles: any[] = [];
 
     @ViewChild('filterInput', {static: false}) filterInput: any;
+    filterInputValue: string = "";
 
     @ViewChild("mainMenu", {read: MatMenu, static: false})
     public menu: MatMenu;
@@ -64,14 +65,12 @@ export class HomeComponent implements OnInit, AfterViewInit {
                 this.appManager.sendConvertRequest(this.urlFormControl.value);
             };
             this.intentService.init();
-
-            this.appManager.onFilesStatusUpdated.subscribe(fs => this.refreshTable(fs));
         });
     }
 
     ngAfterViewInit() {
         fromEvent(this.filterInput.nativeElement, 'keyup')
-            .pipe(debounceTime(400), tap(e => this.refreshTable()))
+            .pipe(debounceTime(500), tap(e => this.refresh()))
             .subscribe();
     }
 
@@ -90,11 +89,6 @@ export class HomeComponent implements OnInit, AfterViewInit {
         this.settingsService.setDisplayedColumns(
             this.displayedColumns.join('|')
         );
-    }
-
-    public refreshActionClicked() {
-        this.fileStatusTable.resetSelection();
-        this.appManager.runAutomaticUpdate();
     }
 
     public settingsActionClicked() {
@@ -129,7 +123,13 @@ export class HomeComponent implements OnInit, AfterViewInit {
 
     public convertButtonClicked() {
         if (this.urlFormControl.invalid) return;
-        this.appManager.sendConvertRequest(this.urlFormControl.value);
+
+        this.appManager.sendConvertRequest(this.urlFormControl.value)
+            .subscribe(() => this.refresh(),
+                response => {
+                    console.error(response.error);
+                    alert(response.error.message);
+                });
     }
 
     public downloadButtonClicked() {
@@ -174,8 +174,16 @@ export class HomeComponent implements OnInit, AfterViewInit {
 
         if (!confirm(confirmMsg)) return;
 
-        this.appManager.sendDeleteRequest(selectedItems.map(fileStatus => fileStatus.id));
-        this.fileStatusTable.resetSelection();
+        this.appManager.sendDeleteRequest(selectedItems.map(fileStatus => fileStatus.id))
+            .subscribe(
+                (result: boolean) => {
+                    if (!result) alert("An error occurred while trying to delete files, some files may not have been deleted");
+                },
+                error => {
+                    alert("An error occurred while trying to delete files:\n" + error.error.message);
+                    console.error(error);
+                },
+                () => this.refresh());
     }
 
     // #endregion
@@ -220,18 +228,10 @@ export class HomeComponent implements OnInit, AfterViewInit {
             component: SettingsDialog,
             cssClass: 'settings-dialog'
         });
-        modal.onDidDismiss().then(_ => this.appManager.getSettings());
         return modal.present();
     }
 
-    private refresh() {
-        this.appManager.sendUpdateRequest().subscribe(fs => this.refreshTable(fs));
-    }
-
-    private refreshTable(fs?: FileStatus[]): void {
-        if (!fs) fs = this.appManager.filesStatus;
-        this.fileStatusTable.refreshDataTable(
-            fs.filter(f => f.name.includes(this.filterInput.nativeElement.value))
-        );
+    public refresh() {
+        this.fileStatusTable.refreshTableData();
     }
 }

@@ -1,3 +1,13 @@
+.status-container {
+    position: relative;
+}
+
+.spinner-container {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+
 /* Files status table */
 table {
     width: 100%;

@@ -49,7 +49,7 @@ export class APIService {
 
     private uploadUrl: string = "/upload";
     private convertUrl: string = "/ytdl";
-    private statusUrl: string = "/status/all";
+    private statusUrl: string = "/status";
     private downloadUrl: string = "/dl";
     private downloadAsZipUrl: string = "/dl-zip";
     private downloadPlaylistUrl: string = "/dl-playlist";
@@ -106,9 +106,10 @@ export class APIService {
         );
     }
 
-    /** GET: get all files status */
-    getAllFileStatus(): Observable<FileStatus[]> {
-        return this.http.get<FileStatus[]>(`${this.apiUrl}${this.statusUrl}`, jsonHttpOptions);
+    /** GET: get files status */
+    getFileStatus(filter = "", sort = {}, pageIndex = 0, pageSize = 10): Observable<FileStatusResponse> {
+        const params = {filter, sort, pageIndex, pageSize};
+        return this.http.post<FileStatusResponse>(`${this.apiUrl}${this.statusUrl}`, params, jsonHttpOptions);
     }
 
     /** DELETE: delete files */

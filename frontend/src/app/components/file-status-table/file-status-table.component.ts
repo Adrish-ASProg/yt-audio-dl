@@ -1,63 +1,84 @@
-import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {MatTableDataSource} from "@angular/material/table";
-import {MatPaginator, PageEvent} from "@angular/material/paginator";
+import {AfterViewInit, Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {MatTable} from "@angular/material/table";
+import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
 import {SelectionModel} from "@angular/cdk/collections";
 import {MatSnackBar} from "@angular/material/snack-bar";
 
 import {SettingsService} from "../../services/settings/settings.service";
 import {FileStatus} from "../../model/filestatus.model";
+import {merge} from "rxjs";
+import {tap} from "rxjs/operators";
+import {FileStatusDataSource} from "../../model/filestatus-datasource.model";
+import {APIService} from "../../services/api/api.service";
 
 @Component({
     selector: 'app-file-status-table',
     templateUrl: './file-status-table.component.html',
     styleUrls: ['./file-status-table.component.scss']
 })
-export class FileStatusTableComponent {
+export class FileStatusTableComponent implements OnInit, AfterViewInit {
 
     @Output("fileNameClicked") fileNameClicked = new EventEmitter();
 
     @Input() displayedColumns: string[] = [];
+    @Input() filter: string = "";
 
+    @ViewChild(MatTable, {static: true}) table: MatTable<any>;
     @ViewChild(MatPaginator, {static: true}) paginator: MatPaginator;
     @ViewChild(MatSort, {static: true}) sort: MatSort;
-    dataSource = new MatTableDataSource<FileStatus>(this.filesStatus);
 
-    private _filesStatus: FileStatus[] = [];
-    public selection: SelectionModel<FileStatus> = new SelectionModel<FileStatus>(true, []);
+    dataSource: FileStatusDataSource;
 
-    get filesStatus(): FileStatus[] {
-        return this._filesStatus;
-    }
+    private selection: SelectionModel<FileStatus> = new SelectionModel<FileStatus>(true, []);
 
-    @Input()
-    set filesStatus(filesStatus: FileStatus[]) {
-        this._filesStatus = filesStatus;
+    constructor(private snackBar: MatSnackBar,
+                private apiService: APIService,
+                private settingsService: SettingsService) {
 
-        this.dataSource = new MatTableDataSource(this.filesStatus);
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
+        this.pageSize = settingsService.getPageSize();
     }
 
     pageSize: number = 10;
 
-    constructor(private snackBar: MatSnackBar,
-                private settingsService: SettingsService) {
-        this.pageSize = settingsService.getPageSize();
+    ngOnInit() {
+        this.dataSource = new FileStatusDataSource(this.apiService);
+        this.refreshTableData();
     }
 
-    setPageSize(event: PageEvent) {
-        this.settingsService.setPageSize(event.pageSize);
-        this.pageSize = event.pageSize;
+    ngAfterViewInit() {
+        // reset the paginator after sorting
+        this.sort.sortChange.subscribe(() => this.paginator.pageIndex = 0);
+
+        merge(this.sort.sortChange, this.paginator.page)
+            .pipe(tap(() => this.refreshTableData()))
+            .subscribe();
+    }
+
+    public refreshTableData() {
+        this.resetSelection();
+
+        this.dataSource.loadFileStatus(
+            this.filter,
+            this.getSortingMode(),
+            this.paginator.pageIndex,
+            this.paginator.pageSize);
+    }
+
+    public getSortingMode(): any {
+        return {
+            type: this.camelToSnakeCase((this.sort.active || "startDate")).toUpperCase(),
+            direction: (this.sort.direction || "desc").toUpperCase()
+        };
+    }
+
+    getPageData() {
+        return this.dataSource.data;
     }
 
     showSnackbar(e: MouseEvent, filename: string) {
         e.stopPropagation();
         this.snackBar.open(filename, "Hide", {duration: 2000});
-    }
-
-    refreshDataTable(data: FileStatus[]) {
-        this.dataSource.data = data;
     }
 
     //#region Selection
@@ -70,9 +91,7 @@ export class FileStatusTableComponent {
         this.selection.clear();
     }
 
-    getPageData() {
-        return this.dataSource._pageData(this.dataSource._orderData(this.dataSource.filteredData));
-    }
+    private camelToSnakeCase = str => (str || "").replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
 
     isEntirePageSelected() {
         return this.getPageData()

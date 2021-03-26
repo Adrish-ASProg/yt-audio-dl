@@ -6,7 +6,6 @@ enum OptionsKeys {
     API_ADDRESS = "API_ADDRESS",
     DISPLAYED_COLUMNS = "DISPLAYED_COLUMNS",
     PAGE_SIZE = "PAGE_SIZE",
-    REFRESH_RATE = "REFRESH_RATE",
     SAVED_FOLDERS = "SAVED_FOLDERS"
 }
 
@@ -23,7 +22,6 @@ export class SettingsService {
         {name: OptionsKeys.API_ADDRESS, value: "http://192.168.0.1:8080", defaultValue: "http://192.168.0.1:8080"},
         {name: OptionsKeys.DISPLAYED_COLUMNS, value: "select|name|status|startDate", defaultValue: "select|name|status|startDate"},
         {name: OptionsKeys.PAGE_SIZE, value: "10", defaultValue: "10"},
-        {name: OptionsKeys.REFRESH_RATE, value: 1500, defaultValue: 1500},
         {name: OptionsKeys.SAVED_FOLDERS, value: "", defaultValue: ""}
     ];
 
@@ -64,26 +62,6 @@ export class SettingsService {
         // TODO Check
         this.setOption(OptionsKeys.API_ADDRESS, value);
         console.debug("Api address set to " + value);
-        return true;
-    }
-
-    getRefreshRate(): number {
-        return this.getOption(OptionsKeys.REFRESH_RATE);
-    }
-
-    setRefreshRate(value: number): boolean {
-        if (isNaN(value)) {
-            console.error("Unable to set refresh rate: Not a Number. Provided value: ", value);
-            return false;
-        }
-
-        if (value < 500 || value > 300000) {
-            console.error("Unable to set refresh rate: Value should be between 500ms and 5mn. Provided value: ", value);
-            return false;
-        }
-
-        this.setOption(OptionsKeys.REFRESH_RATE, value);
-        console.debug("Refresh rate value set to " + value);
         return true;
     }
 

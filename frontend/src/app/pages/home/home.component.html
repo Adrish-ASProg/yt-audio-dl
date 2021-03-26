@@ -2,7 +2,7 @@
 <mat-menu #mainMenu="matMenu">
     <button [matMenuTriggerFor]="tableColumnMenu" mat-menu-item>Table columns</button>
     <button [matMenuTriggerFor]="debugMenu" mat-menu-item>Debug</button>
-    <button (click)="refreshActionClicked()" mat-menu-item>Refresh</button>
+    <button (click)="refresh()" mat-menu-item>Refresh</button>
     <button (click)="settingsActionClicked()" mat-menu-item>Settings</button>
 </mat-menu>
 
@@ -20,7 +20,6 @@
 </mat-menu>
 
 
-<mat-progress-bar *ngIf="!appManager.isServerOn" color="warn" mode="indeterminate"></mat-progress-bar>
 <mat-tab-group class="content" mat-align-tabs="center" mat-stretch-tabs>
     <!-- Tab download -->
     <mat-tab label="Download">
@@ -58,6 +57,11 @@
                                     color="danger" size="small">Delete
                         </ion-button>
                     </ion-col>
+                    <ion-col>
+                        <ion-button (click)="refresh()" color="primary" size="small">
+                            Refresh
+                        </ion-button>
+                    </ion-col>
                 </ion-row>
             </ion-grid>
 
@@ -65,14 +69,15 @@
             <!-- Input filter -->
             <div class="filter-input-container">
                 <mat-form-field>
-                    <input #filterInput matInput placeholder="Filter results">
+                    <input #filterInput [(ngModel)]="filterInputValue" matInput placeholder="Filter results">
                 </mat-form-field>
             </div>
 
             <!--  Table files status -->
             <app-file-status-table #fileStatusTable
                                    (fileNameClicked)="openTagEditorDialog($event)"
-                                   [displayedColumns]="displayedColumns" [filesStatus]="appManager.filesStatus">
+                                   [displayedColumns]="displayedColumns"
+                                   [filter]="filterInputValue">
             </app-file-status-table>
 
             <!-- Form upload playlist -->
