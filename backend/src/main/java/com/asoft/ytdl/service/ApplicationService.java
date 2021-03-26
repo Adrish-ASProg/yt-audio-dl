@@ -302,14 +302,13 @@ public class ApplicationService implements DownloadFromYTEvents {
 
     public void onTitleRetrieved(String id, String title) {
         if (!filesStatus.containsKey(id)) {
-            filesStatus.put(id,
-                    new FileStatus() {{
-                        setId(id);
-                        setName(title);
-                        setStatus(ProgressStatus.INITIALIZING);
-                        setStartDate(new Date().getTime());
-                        setAbsolutePath(config.getAudioFolder() + File.separator + title + ".mp3");
-                    }}
+            filesStatus.put(id, FileStatus.builder()
+                    .id(id)
+                    .name(title)
+                    .status(ProgressStatus.INITIALIZING)
+                    .startDate(new Date().getTime())
+                    .absolutePath(config.getAudioFolder() + File.separator + title + ".mp3")
+                    .build()
             );
         }
     }
@@ -336,18 +335,20 @@ public class ApplicationService implements DownloadFromYTEvents {
     }
 
     private Map<String, FileStatus> getExistingFiles() {
+
         System.out.println("Retrieving files..");
+
         return FileUtils.getAllFilesInDirectory(new File(config.getAudioFolder()))
                 .stream()
                 .filter(f -> f.getName().endsWith(".mp3"))
-                .map(f -> new FileStatus() {{
-                    setId(UUID.randomUUID().toString());
-                    setStatus(ProgressStatus.COMPLETED);
-                    setName(f.getName().replace(".mp3", ""));
-                    setMetadata(Mp3Tagger.getTags(f));
-                    setAbsolutePath(f.getAbsolutePath());
-                    setStartDate(FileUtils.getCreationDate(f));
-                }})
+                .map(f -> FileStatus.builder()
+                        .id(UUID.randomUUID().toString())
+                        .status(ProgressStatus.COMPLETED)
+                        .name(f.getName().replace(".mp3", ""))
+                        .metadata(Mp3Tagger.getTags(f))
+                        .startDate(FileUtils.getCreationDate(f))
+                        .absolutePath(f.getAbsolutePath())
+                        .build())
                 .collect(Collectors.toMap(FileStatus::getId, Function.identity()));
     }
 

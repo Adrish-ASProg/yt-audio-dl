@@ -17,11 +17,12 @@ import java.util.stream.Stream;
 
 public class FileUtils {
 
-    public static String normalizePath(String path) {
+    public static String normalizePath(final String path) {
         return Paths.get(path).toString();
     }
 
-    public static String normalizePath(String path, boolean addSeparator) {
+    public static String normalizePath(final String path,
+                                       final boolean addSeparator) {
         return addSeparator
                 ? normalizePath(path) + File.separator
                 : normalizePath(path);
@@ -37,15 +38,19 @@ public class FileUtils {
      * @return Une chaine vide si aucune erreur,
      * le message de l'erreur sinon
      */
-    public static String saveFile(MultipartFile file, String destDir, String fileName, Boolean overwrite) {
-        File destDirFile = new File(destDir);
+    public static String saveFile(final MultipartFile file,
+                                  final String destDir,
+                                  final String fileName,
+                                  final Boolean overwrite) {
+
+        var destDirFile = new File(destDir);
 
         try {
             // Création dossier(s) si n'existe pas
             if (!destDirFile.exists() && !destDirFile.mkdirs()) return "Impossible de créer le dossier de destination";
 
 
-            File resultFile = new File(destDir + fileName);
+            var resultFile = new File(destDir + fileName);
             // Le fichier existe déjà
             if (resultFile.exists()) {
                 // Pas d'écrasement du fichier
@@ -66,18 +71,19 @@ public class FileUtils {
         return "";
     }
 
-    public static File getFile(String filePath) throws FileNotFoundException {
-        File file = new File(filePath);
+    public static File getFile(final String filePath) throws FileNotFoundException {
+        var file = new File(filePath);
         if (!file.exists()) {
             throw new FileNotFoundException("file with path: " + file.getAbsolutePath() + " was not found.");
         }
         return file;
     }
 
-    public static boolean renameFile(File oldFile, String newName) throws IOException {
+    public static boolean renameFile(final File oldFile,
+                                     final String newName) throws IOException {
         if (oldFile == null || !oldFile.exists()) return false;
 
-        File newFile = new File(newName);
+        var newFile = new File(newName);
 
         if (newFile.exists()) throw new IOException("File exists");
 
@@ -86,12 +92,12 @@ public class FileUtils {
         return oldFile.renameTo(newFile);
     }
 
-    public static boolean deleteFile(File file) {
+    public static boolean deleteFile(final File file) {
         if (file == null) return false;
         System.out.println("deleting file " + file.getAbsolutePath());
 
         // Récupération des fichiers dans le dossier
-        File[] contents = file.listFiles();
+        var contents = file.listFiles();
 
         // Si au moins un fichier est présent
         if (contents != null) {
@@ -107,9 +113,9 @@ public class FileUtils {
 
 
 
-    public static Long getCreationDate(File file) {
+    public static Long getCreationDate(final File file) {
         try {
-            FileTime creationTime = (FileTime) Files.getAttribute(file.toPath(), "creationTime");
+            var creationTime = (FileTime) Files.getAttribute(file.toPath(), "creationTime");
             return creationTime.to(TimeUnit.MILLISECONDS);
         } catch (IOException e) {
             e.printStackTrace();
@@ -117,8 +123,8 @@ public class FileUtils {
         }
     }
 
-    public static List<File> getAllFilesInDirectory(File file) {
-        try (Stream<Path> walk = Files.walk(file.toPath())) {
+    public static List<File> getAllFilesInDirectory(final File directory) {
+        try (Stream<Path> walk = Files.walk(directory.toPath())) {
             return walk.filter(Files::isRegularFile)
                     .map(Path::toString)
                     .map(File::new)
