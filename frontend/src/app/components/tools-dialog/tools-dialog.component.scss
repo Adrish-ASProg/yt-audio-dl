@@ -18,18 +18,6 @@ mat-expansion-panel {
         flex-direction: column;
         margin: 0 10px;
 
-
-        .example-filename {
-            height: 40px;
-            margin-top: 5px;
-            font-size: 12px;
-            text-align: center;
-
-            span {
-                font-weight: bold;
-            }
-        }
-
         .example-grid {
             margin-top: 10px;
             font-size: 12px;
@@ -45,6 +33,16 @@ mat-expansion-panel {
     }
 }
 
+.example-filename {
+    height: 40px;
+    margin-top: 5px;
+    font-size: 12px;
+    text-align: center;
+
+    span {
+        font-weight: bold;
+    }
+}
 
 .mat-dialog-actions {
     justify-content: flex-end;

@@ -45,15 +45,18 @@
 
             <!-- Title -->
             <mat-expansion-panel-header>
-                <mat-panel-title>Playlist creator</mat-panel-title>
+                <mat-panel-title>Create a playlist</mat-panel-title>
             </mat-expansion-panel-header>
 
             <div class="name-to-tags-content">
                 <!-- Input Mp3 path -->
                 <mat-form-field>
                     <input [(ngModel)]="filePath" [matAutocomplete]="autocomplete"
-                           matInput placeholder="Mp3 path">
+                           matInput placeholder="Directory to prepend">
                 </mat-form-field>
+                <span class="ellipsis example-filename">
+                    {{ (filePath + exampleItem.name) }}
+                </span>
 
                 <ion-button (click)="onDownloadPlaylistButtonClicked()" [disabled]="!filePath"
                             class="convert-button" color="primary" size="small">Download playlist
