@@ -8,39 +8,14 @@
             </button>
         </mat-form-field>
         <ion-button (click)="convertButtonClicked()" [disabled]="this.urlFormControl.invalid"
-                    class="convert-button" color="primary">Convert Video(s)
+                    class="convert-button" size="small">
+            <ion-icon name="send" slot="icon-only"></ion-icon>
         </ion-button>
     </div>
 
+    <hr/>
+
     <div class="table-container">
-        <!-- Buttons Download / Tools / Delete -->
-        <ion-grid class="control-buttons">
-            <ion-row>
-                <ion-col>
-                    <ion-button (click)="downloadButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
-                                color="success" size="small">Download
-                    </ion-button>
-                </ion-col>
-
-                <ion-col>
-                    <ion-button (click)="postProcessorButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
-                                class="tools-button" color="warning" size="small">Tools
-                    </ion-button>
-                </ion-col>
-
-                <ion-col>
-                    <ion-button (click)="deleteButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
-                                color="danger" size="small">Delete
-                    </ion-button>
-                </ion-col>
-                <ion-col>
-                    <ion-button (click)="refresh()" color="primary" size="small">
-                        Refresh
-                    </ion-button>
-                </ion-col>
-            </ion-row>
-        </ion-grid>
-
 
         <!-- Input filter -->
         <div class="filter-input-container">

@@ -130,6 +130,10 @@ export class DownloadTab implements OnInit, AfterViewInit {
 
     // #endregion
 
+    public hasFileSelected(): boolean {
+        return this.fileStatusTable.getSelected()?.length > 0;
+    }
+
     public setUrl(url: string) {
         this.urlFormControl.setValue(url);
     }

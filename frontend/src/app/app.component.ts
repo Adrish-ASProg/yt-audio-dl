@@ -5,8 +5,6 @@ import {SplashScreen} from '@ionic-native/splash-screen/ngx';
 import {StatusBar} from '@ionic-native/status-bar/ngx';
 
 import {AndroidPermissions} from '@ionic-native/android-permissions/ngx';
-import {MatMenu} from "@angular/material/menu";
-import {UtilsService} from "./services/utils/utils.service";
 
 @Component({
     selector: 'app-root',
@@ -15,16 +13,10 @@ import {UtilsService} from "./services/utils/utils.service";
 })
 export class AppComponent {
 
-    // Toolbar
-    projectTitle: string = 'YT-Audio-DL';
-
-    menu: MatMenu;
-
-    constructor(private platform: Platform,
+    constructor(private androidPermissions: AndroidPermissions,
+                private platform: Platform,
                 private splashScreen: SplashScreen,
-                private statusBar: StatusBar,
-                public utilsService: UtilsService,
-                private androidPermissions: AndroidPermissions) {
+                private statusBar: StatusBar) {
         this.initializeApp();
     }
 
@@ -40,9 +32,5 @@ export class AppComponent {
                 err => this.androidPermissions.requestPermission(this.androidPermissions.PERMISSION.WRITE_EXTERNAL_STORAGE)
             );
         });
-    }
-
-    public onRouterOutletActivate(component: any) {
-        this.menu = component.menu || undefined;
     }
 }

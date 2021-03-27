@@ -9,6 +9,7 @@ import {timer} from "rxjs";
 import {take} from "rxjs/operators";
 import {MatTabGroup} from "@angular/material/tabs";
 import {DownloadTab} from "../../tabs/download/download.tab";
+import {UtilsService} from "../../services/utils/utils.service";
 
 @Component({
     selector: 'app-home',
@@ -28,9 +29,42 @@ export class HomeComponent implements AfterViewInit {
 
     displayedColumns: string[] = ['select', 'name', 'status', 'startDate'];
 
+    _toolbarButtonsNoFilesSelected: any[] = [
+        {
+            icon: "download",
+            action: () => this.utilsService.showTransferModal()
+        },
+        {
+            icon: "refresh",
+            action: () => this.downloadTab.refresh()
+        }
+    ];
+
+    _toolbarButtonsFilesSelected: any[] = [
+        {
+            icon: "cloud-download-outline",
+            action: () => this.downloadTab.downloadButtonClicked()
+        },
+        {
+            icon: "settings-outline",
+            action: () => this.downloadTab.postProcessorButtonClicked()
+        },
+        {
+            icon: "trash-outline",
+            action: () => this.downloadTab.deleteButtonClicked()
+        }
+    ];
+
     constructor(public appManager: AppManager,
                 private modalController: ModalController,
-                private settingsService: SettingsService,) {
+                private settingsService: SettingsService,
+                private utilsService: UtilsService) {
+    }
+
+    get toolbarButtons() {
+        return this.downloadTab?.hasFileSelected()
+            ? this._toolbarButtonsFilesSelected
+            : this._toolbarButtonsNoFilesSelected;
     }
 
     ngAfterViewInit() {
@@ -58,8 +92,6 @@ export class HomeComponent implements AfterViewInit {
     public settingsActionClicked() {
         this.openSettingsDialog();
     }
-
-    // #endregion
 
     setUrl(event) {
         let value;
@@ -89,4 +121,6 @@ export class HomeComponent implements AfterViewInit {
         });
         return modal.present();
     }
+
+    // #endregion
 }

@@ -11,6 +11,7 @@ import {SettingsDialogModule} from "../../components/settings-dialog/settings-di
 import {MatTabsModule} from "@angular/material/tabs";
 import {DownloadTabModule} from "../../tabs/download/download.tab.module";
 import {UploadTabModule} from "../../tabs/upload/upload.tab.module";
+import {IonicModule} from "@ionic/angular";
 
 @NgModule({
     entryComponents: [SettingsDialog],
@@ -18,6 +19,7 @@ import {UploadTabModule} from "../../tabs/upload/upload.tab.module";
     imports: [
         BrowserModule,
         BrowserAnimationsModule,
+        IonicModule,
 
         SettingsServiceModule,
         SettingsDialogModule,
