@@ -2,7 +2,6 @@
 <mat-menu #mainMenu="matMenu">
     <button [matMenuTriggerFor]="tableColumnMenu" mat-menu-item>Table columns</button>
     <button [matMenuTriggerFor]="debugMenu" mat-menu-item>Debug</button>
-    <button (click)="refresh()" mat-menu-item>Refresh</button>
     <button (click)="settingsActionClicked()" mat-menu-item>Settings</button>
 </mat-menu>
 
@@ -23,65 +22,8 @@
 <mat-tab-group class="content" mat-align-tabs="center" mat-stretch-tabs>
     <!-- Tab download -->
     <mat-tab label="Download">
-        <!--  Input / Button to make request -->
-        <div class="request-container">
-            <mat-form-field class="input-container">
-                <input [formControl]="urlFormControl" matInput placeholder="Video URL">
-                <button (click)="urlFormControl.setValue('')" *ngIf="urlFormControl.value" aria-label="Clear" mat-button mat-icon-button matSuffix>
-                    <mat-icon>close</mat-icon>
-                </button>
-            </mat-form-field>
-            <ion-button (click)="convertButtonClicked()" [disabled]="this.urlFormControl.invalid"
-                        class="convert-button" color="primary">Convert Video(s)
-            </ion-button>
-        </div>
-
-        <div class="table-container">
-            <!-- Buttons Download / Tools / Delete -->
-            <ion-grid class="control-buttons">
-                <ion-row>
-                    <ion-col>
-                        <ion-button (click)="downloadButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
-                                    color="success" size="small">Download
-                        </ion-button>
-                    </ion-col>
-
-                    <ion-col>
-                        <ion-button (click)="postProcessorButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
-                                    class="tools-button" color="warning" size="small">Tools
-                        </ion-button>
-                    </ion-col>
-
-                    <ion-col>
-                        <ion-button (click)="deleteButtonClicked()" [disabled]="!!!fileStatusTable.getSelected()?.length"
-                                    color="danger" size="small">Delete
-                        </ion-button>
-                    </ion-col>
-                    <ion-col>
-                        <ion-button (click)="refresh()" color="primary" size="small">
-                            Refresh
-                        </ion-button>
-                    </ion-col>
-                </ion-row>
-            </ion-grid>
-
-
-            <!-- Input filter -->
-            <div class="filter-input-container">
-                <mat-form-field>
-                    <input #filterInput [(ngModel)]="filterInputValue" matInput placeholder="Filter results">
-                </mat-form-field>
-            </div>
-
-            <!--  Table files status -->
-            <app-file-status-table #fileStatusTable
-                                   (fileNameClicked)="openTagEditorDialog($event)"
-                                   [displayedColumns]="displayedColumns"
-                                   [filter]="filterInputValue">
-            </app-file-status-table>
-        </div>
+        <app-download-tab [displayedColumns]="displayedColumns"></app-download-tab>
     </mat-tab>
-
 
     <!-- Tab upload playlist -->
     <mat-tab label="Upload">
