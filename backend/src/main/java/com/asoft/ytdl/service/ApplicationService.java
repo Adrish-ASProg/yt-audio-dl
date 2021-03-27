@@ -105,7 +105,7 @@ public class ApplicationService implements DownloadFromYTEvents {
             response.put("missingFiles", missingFiles);
         }
 
-        if (mainFrame != null) mainFrame.log("File " + fileName + " saved");
+        if (mainFrame != null) mainFrame.log("File " + destinationFolder + file.getOriginalFilename() + " saved");
 
         return response.toString();
     }
