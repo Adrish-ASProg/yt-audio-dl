@@ -13,9 +13,9 @@ import {ModalController, Platform} from "@ionic/angular";
 import {IntentService} from "../../services/intent/intent.service";
 import {MatMenu} from "@angular/material/menu";
 import {SettingsService} from "../../services/settings/settings.service";
-import {UtilsService} from "../../services/utils/utils.service";
-import {forkJoin, fromEvent} from "rxjs";
-import {debounceTime, tap} from "rxjs/operators";
+import {forkJoin, fromEvent, timer} from "rxjs";
+import {debounceTime, take, tap} from "rxjs/operators";
+import {MatTabGroup} from "@angular/material/tabs";
 
 @Component({
     selector: 'app-home',
@@ -24,14 +24,14 @@ import {debounceTime, tap} from "rxjs/operators";
 })
 export class HomeComponent implements OnInit, AfterViewInit {
 
-    @ViewChild('fileInput') fileInput: any;
-    selectedFiles: any[] = [];
-
     @ViewChild('filterInput') filterInput: any;
     filterInputValue: string = "";
 
     @ViewChild('mainMenu')
     public menu: MatMenu;
+
+    @ViewChild(MatTabGroup)
+    public tabs: MatTabGroup;
 
     @ViewChild(FileStatusTableComponent)
     fileStatusTable: FileStatusTableComponent;
@@ -43,12 +43,9 @@ export class HomeComponent implements OnInit, AfterViewInit {
         Validators.pattern("^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$")
     ]);
 
-    playlistContent: string | ArrayBuffer = "";
-
     constructor(private platform: Platform,
                 private intentService: IntentService,
                 private settingsService: SettingsService,
-                public utilsService: UtilsService,
                 public appManager: AppManager,
                 private dialog: MatDialog,
                 private modalController: ModalController) {
@@ -72,14 +69,15 @@ export class HomeComponent implements OnInit, AfterViewInit {
         fromEvent(this.filterInput.nativeElement, 'keyup')
             .pipe(debounceTime(500), tap(e => this.refresh()))
             .subscribe();
+
+        // Hacky way to fix default tab not having its inkbar
+        timer(500)
+            .pipe(take(1))
+            .subscribe(() => this.tabs.realignInkBar());
     }
 
 
     //#region Menu
-
-    public uploadActionClicked() {
-        this.fileInput.nativeElement.click();
-    }
 
     public updateDisplayedColumns(value: string) {
         this.displayedColumns.includes(value)
@@ -93,28 +91,6 @@ export class HomeComponent implements OnInit, AfterViewInit {
 
     public settingsActionClicked() {
         this.openSettingsDialog();
-    }
-
-    // #endregion
-
-    //#region Upload
-
-    /** After file loaded **/
-    onFileChange(event) {
-        if (event.target.files.length != 1 ||
-            !event.target.files[0].type ||
-            event.target.files[0].type != 'application/x-mpegurl') {
-            this.utilsService.showToast("Invalid file, only m3u8 files allowed");
-            return;
-        }
-
-        this.selectedFiles = [];
-        for (const file of event.target.files) this.selectedFiles.push(file);
-
-        const reader = new FileReader();
-        reader.onload = () => this.playlistContent = reader.result;
-        reader.onerror = e => this.utilsService.showToast('Error when reading file: ' + e);
-        reader.readAsText(event.target.files[0]);
     }
 
     // #endregion

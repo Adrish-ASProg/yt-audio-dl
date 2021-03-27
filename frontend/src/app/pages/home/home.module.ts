@@ -24,6 +24,7 @@ import {SettingsDialogModule} from "../../components/settings-dialog/settings-di
 import {ToolsDialog} from "../../components/tools-dialog/tools-dialog.component";
 import {ToolsDialogModule} from "../../components/tools-dialog/tools-dialog.module";
 import {MatTabsModule} from "@angular/material/tabs";
+import {UploadTabModule} from "../../tabs/upload/upload.tab.module";
 
 @NgModule({
     entryComponents: [TagEditorDialog, ToolsDialog, SettingsDialog],
@@ -39,6 +40,7 @@ import {MatTabsModule} from "@angular/material/tabs";
         TagEditorDialogModule,
         ToolsDialogModule,
         SettingsDialogModule,
+        UploadTabModule,
 
         FormsModule,
         ReactiveFormsModule,

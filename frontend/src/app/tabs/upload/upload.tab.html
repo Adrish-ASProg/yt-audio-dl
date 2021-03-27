@@ -1,0 +1,18 @@
+<div class="tab-upload-content">
+    <div class="upload-buttons-container">
+        <ion-button (click)="selectPlaylistBtnClicked()" color="primary" size="small">Select playlist</ion-button>
+        <ion-button (click)="uploadPlaylistBtnClicked()"
+                    [disabled]="selectedFiles.length != 1"
+                    color="success" size="small">
+            Upload
+        </ion-button>
+    </div>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Playlist content</mat-label>
+        <textarea [(ngModel)]="playlistContent" [ngClass]="{'expanded': selectedFiles.length == 1}" matInput readonly wrap="soft"></textarea>
+    </mat-form-field>
+
+    <!-- Form upload playlist -->
+    <input #fileInput (change)="onFileChange($event)" hidden multiple="multiple" name="file" type="file"/>
+</div>
