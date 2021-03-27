@@ -8,6 +8,15 @@
     <!-- Table -->
     <table [dataSource]="dataSource" class="mat-elevation-z8" mat-table matSort matSortActive="startDate" matSortDirection="desc" matSortDisableClear>
 
+        <!-- Empty table -->
+        <ng-container>
+            <tr *matNoDataRow class="mat-row">
+                <td class="mat-cell" colspan="9999">
+                    No files found
+                </td>
+            </tr>
+        </ng-container>
+
         <!-- Checkbox Column -->
         <ng-container matColumnDef="select">
             <th *matHeaderCellDef class="checkbox-header-cell" mat-header-cell>
