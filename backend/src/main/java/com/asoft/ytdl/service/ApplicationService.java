@@ -56,11 +56,16 @@ public class ApplicationService implements DownloadFromYTEvents {
     @Autowired(required = false)
     MainFrame mainFrame;
 
-    private XmlConfiguration config;
-    private Map<String, FileStatus> filesStatus;
+    private final XmlConfiguration config;
+    private final YTDownloadManager dlManager;
+    private final Map<String, FileStatus> filesStatus;
 
     ApplicationService() {
         config = XMLManager.read();
+
+        dlManager = new YTDownloadManager(this);
+        dlManager.printYtDlVersion();
+
         filesStatus = getExistingFiles();
     }
 
@@ -114,7 +119,6 @@ public class ApplicationService implements DownloadFromYTEvents {
      * POST /ytdl
      **/
     public void downloadFileFromYT(String url) {
-        YTDownloadManager dlManager = new YTDownloadManager(this);
         dlManager.setSkippedId(new ArrayList<>(filesStatus.keySet()));
         dlManager.download(url, new File(config.getAudioFolder()));
     }

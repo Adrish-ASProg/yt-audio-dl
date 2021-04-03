@@ -22,6 +22,14 @@ public class YTDownloadManager {
     private final DownloadFromYTEvents eventHandler;
     private List<String> skippedId = new ArrayList<>();
 
+    public void printYtDlVersion() {
+        var cmdManager = new CmdManager(false);
+        cmdManager.setOutputEvent(text -> {
+            System.out.printf("Using youtube-dl version %s%n", text);
+        });
+        cmdManager.executeCommand("youtube-dl --version");
+    }
+
     /**
      * Téléchargement de vidéo / playlist YouTube au format mp3
      */
@@ -47,7 +55,7 @@ public class YTDownloadManager {
             return;
         }
 
-        System.out.println(String.format("Starting download of %d files..\n", fileNames.size()));
+        System.out.printf("Starting download of %d files..\n%n", fileNames.size());
 
         final ExecutorService executor = Executors.newFixedThreadPool(5);
         for (int i = 0; i < fileNames.keySet().size(); i++) {
@@ -62,7 +70,7 @@ public class YTDownloadManager {
     }
 
     private void downloadFile(String dlCommand, String id, String fileName, ExecutorService executor) {
-        System.out.println(String.format("########## Downloading « %s » ##########", fileName));
+        System.out.printf("########## Downloading « %s » ##########%n", fileName);
 
         eventHandler.onProgress(id, ProgressStatus.STARTING_DOWNLOAD);
 
@@ -108,7 +116,7 @@ public class YTDownloadManager {
                 String title = splittedOutput[1].replace("_", " ");
                 result.put(id, title);
                 eventHandler.onTitleRetrieved(id, title);
-                System.out.println(String.format("File name: « %s »", title));
+                System.out.printf("File name: « %s »%n", title);
             }
         });
         cmdManager.executeCommand(getNameCommand);

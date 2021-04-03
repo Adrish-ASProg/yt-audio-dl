@@ -51,7 +51,9 @@ public class CmdManager {
         } catch (Exception err) {
             err.printStackTrace();
         }
-        outputEvent.onOutput("Process terminated in " + (System.currentTimeMillis() - startTime) + "ms");
+
+        if (verboseMode)
+            outputEvent.onOutput("Process terminated in " + (System.currentTimeMillis() - startTime) + "ms");
     }
 
     /**
