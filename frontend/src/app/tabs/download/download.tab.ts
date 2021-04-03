@@ -75,6 +75,7 @@ export class DownloadTab implements OnInit, AfterViewInit {
     }
 
     public downloadButtonClicked() {
+
         const selectedItems: FileStatus[] = this.fileStatusTable.getSelected().filter(fs => fs.status == "COMPLETED");
 
         if (selectedItems.length < 1) {
@@ -126,6 +127,10 @@ export class DownloadTab implements OnInit, AfterViewInit {
                     console.error(error);
                 },
                 () => this.refresh());
+    }
+
+    public playButtonClicked(selectedItem: FileStatus) {
+        this.appManager.sendListenRequest(selectedItem.id);
     }
 
     // #endregion

@@ -55,6 +55,7 @@ export class APIService {
     private downloadPlaylistUrl: string = "/dl-playlist";
     private setTagsUrl: string = "/tags";
     private deleteUrl: string = "/delete";
+    private listenUrl: string = "/listen";
 
     get apiUrl() {
         return this.settings.getServerAddress();
@@ -119,5 +120,10 @@ export class APIService {
             ids,
             jsonHttpOptions
         );
+    }
+
+    /** POST: listen song */
+    listenSong(id: string): void {
+        window.open(`${this.apiUrl}${this.listenUrl}?id=${id}`, '_blank');
     }
 }

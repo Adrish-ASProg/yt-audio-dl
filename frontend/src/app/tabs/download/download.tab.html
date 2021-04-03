@@ -8,7 +8,7 @@
             </button>
         </mat-form-field>
         <ion-button (click)="convertButtonClicked()" [disabled]="this.urlFormControl.invalid"
-                    class="convert-button" size="small">
+                    class="convert-button" fill="clear" size="small">
             <ion-icon name="send" slot="icon-only"></ion-icon>
         </ion-button>
     </div>
@@ -27,6 +27,7 @@
         <!--  Table files status -->
         <app-file-status-table #fileStatusTable
                                (fileNameClicked)="openTagEditorDialog($event)"
+                               (playButtonClicked)="playButtonClicked($event)"
                                [displayedColumns]="displayedColumns"
                                [filter]="filterInputValue">
         </app-file-status-table>

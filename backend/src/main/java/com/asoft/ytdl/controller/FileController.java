@@ -95,6 +95,17 @@ public class FileController {
         return new ResponseEntity<>(applicationService.deleteFiles(ids), HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/listen", method = RequestMethod.GET)
+    public void listen(@RequestParam String id,
+                       HttpServletResponse response) throws FileNotFoundException, BadRequestException {
+
+        if (id == null) {
+            throw new BadRequestException("Id not provided");
+        }
+
+        applicationService.listenSong(id, response);
+    }
+
 
     @RequestMapping(value = "/test")
     public ResponseEntity<Object> test() {

@@ -27,7 +27,7 @@ export class HomeComponent implements AfterViewInit {
     @ViewChild(DownloadTab)
     public downloadTab: DownloadTab;
 
-    displayedColumns: string[] = ['select', 'name', 'status', 'startDate'];
+    displayedColumns: string[] = ['select', 'name', 'status', 'listen', 'startDate'];
 
     _toolbarButtonsNoFilesSelected: any[] = [
         {
@@ -71,7 +71,7 @@ export class HomeComponent implements AfterViewInit {
         this.displayedColumns = this.settingsService.getDisplayedColumns().split("|");
 
         // Hacky way to fix default tab not having its inkbar
-        timer(500)
+        timer(600)
             .pipe(take(1))
             .subscribe(() => this.tabs.realignInkBar());
     }

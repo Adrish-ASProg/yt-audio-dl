@@ -19,7 +19,16 @@ table {
         width: 32px;
     }
 
-    ::ng-deep th.status-header-cell {
+    ::ng-deep th.status-header-cell,
+    ::ng-deep th.status-cell,
+    ::ng-deep th.listen-header-cell,
+    ::ng-deep td.listen-cell {
+        width: 64px;
+        text-align: center;
+    }
+
+    ::ng-deep th.status-header-cell,
+    ::ng-deep th.listen-header-cell {
         .mat-sort-header-container {
             justify-content: center;
         }
@@ -28,7 +37,7 @@ table {
     ::ng-deep th.date-header-cell,
     ::ng-deep td.date-cell {
         padding: 0;
-        width: 100px;
+        width: 120px;
     }
 
     .mat-column-select {

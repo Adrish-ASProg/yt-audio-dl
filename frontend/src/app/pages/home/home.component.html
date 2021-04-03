@@ -26,6 +26,7 @@
 
 <!-- Table column submenu -->
 <mat-menu #tableColumnMenu="matMenu">
+    <mat-checkbox (change)="updateDisplayedColumns('listen')" (click)="$event.stopPropagation()" [checked]="displayedColumns.includes('listen')" class="mat-menu-item">Listen</mat-checkbox>
     <mat-checkbox (change)="updateDisplayedColumns('status')" (click)="$event.stopPropagation()" [checked]="displayedColumns.includes('status')" class="mat-menu-item">Status</mat-checkbox>
     <mat-checkbox (change)="updateDisplayedColumns('startDate')" (click)="$event.stopPropagation()" [checked]="displayedColumns.includes('startDate')" class="mat-menu-item">Date</mat-checkbox>
 </mat-menu>

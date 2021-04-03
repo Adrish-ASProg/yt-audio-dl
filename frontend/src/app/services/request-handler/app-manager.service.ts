@@ -73,6 +73,10 @@ export class AppManager {
         return this.wrapRequestWithLoading(request, "Deleting file(s)..");
     }
 
+    sendListenRequest(id: string): void {
+        this.apiService.listenSong(id);
+    }
+
     sendTagRequest(id: string, name: string, metadata: Mp3Metadata): Observable<Mp3Metadata> {
         return this.apiService.setTags(id, name, metadata);
     }

@@ -20,6 +20,7 @@ import {APIService} from "../../services/api/api.service";
 export class FileStatusTableComponent implements OnInit, AfterViewInit {
 
     @Output("fileNameClicked") fileNameClicked = new EventEmitter();
+    @Output("playButtonClicked") playButtonClicked = new EventEmitter();
 
     @Input() displayedColumns: string[] = [];
     @Input() filter: string = "";

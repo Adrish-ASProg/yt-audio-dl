@@ -35,6 +35,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -321,6 +324,33 @@ public class ApplicationService implements DownloadFromYTEvents {
         }
 
         return allFilesDeleted;
+    }
+
+    /**
+     * POST /listen
+     **/
+    public void listenSong(final String id,
+                           final HttpServletResponse response) throws FileNotFoundException {
+
+        if (!filesStatus.containsKey(id)) {
+            throw new FileNotFoundException("Unable to find file with id " + id);
+        }
+
+        var file = filesStatus.get(id);
+
+        if (!ProgressStatus.COMPLETED.equals(file.getStatus())) {
+            throw new FileNotFoundException("Unable to read file not in COMPLETED status. Current status: " + file.getStatus());
+        }
+
+        try {
+            Path path = Paths.get(file.getAbsolutePath());
+            response.setContentLength((int) Files.size(path));
+            response.setContentType("audio/mp3");
+            Files.copy(path, response.getOutputStream());
+            response.flushBuffer();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // #endregion

@@ -69,6 +69,16 @@
             </td>
         </ng-container>
 
+        <!-- Listen Column -->
+        <ng-container matColumnDef="listen">
+            <th *matHeaderCellDef class="listen-header-cell" mat-header-cell mat-sort-header> Listen</th>
+            <td *matCellDef="let element" class="listen-cell" mat-cell>
+                <ion-button (click)="playButtonClicked.emit(element)" [disabled]="element.status !== 'COMPLETED'" fill="clear" size="small" style="display: inline-block;">
+                    <ion-icon name="play" slot="icon-only"></ion-icon>
+                </ion-button>
+            </td>
+        </ng-container>
+
         <!-- Date Column -->
         <ng-container matColumnDef="startDate">
             <th *matHeaderCellDef class="date-header-cell" mat-header-cell mat-sort-header> Date</th>
