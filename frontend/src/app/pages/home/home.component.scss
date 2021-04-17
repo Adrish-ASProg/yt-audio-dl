@@ -2,3 +2,15 @@
     max-height: 48px;
     margin-left: 15px;
 }
+
+.spacer {
+    flex: 1
+}
+
+.audio-player-container {
+    position: -webkit-sticky;
+    position: sticky;
+    bottom: 0;
+    width: 100%;
+    z-index: 99;
+}

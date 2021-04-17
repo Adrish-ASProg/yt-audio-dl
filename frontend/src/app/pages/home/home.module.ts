@@ -12,6 +12,8 @@ import {MatTabsModule} from "@angular/material/tabs";
 import {DownloadTabModule} from "../../tabs/download/download.tab.module";
 import {UploadTabModule} from "../../tabs/upload/upload.tab.module";
 import {IonicModule} from "@ionic/angular";
+import {NgxAudioPlayerModule} from "ngx-audio-player";
+import {AudioPlayerModule} from "../../services/audio/audio-player.module";
 
 @NgModule({
     entryComponents: [SettingsDialog],
@@ -25,10 +27,13 @@ import {IonicModule} from "@ionic/angular";
         SettingsDialogModule,
         DownloadTabModule,
         UploadTabModule,
+        AudioPlayerModule,
 
         MatMenuModule,
         MatCheckboxModule,
-        MatTabsModule
+        MatTabsModule,
+
+        NgxAudioPlayerModule
     ]
 })
 export class HomeModule {

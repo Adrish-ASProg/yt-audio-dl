@@ -15,8 +15,6 @@ import {AppComponent} from './app.component';
 import {HomeModule} from "./pages/home/home.module";
 import {AppManagerModule} from "./services/request-handler/app-manager.module";
 import {AndroidPermissions} from "@ionic-native/android-permissions/ngx";
-import {ServiceWorkerModule} from '@angular/service-worker';
-import {environment} from '../environments/environment';
 
 @NgModule({
     declarations: [AppComponent],
@@ -29,13 +27,7 @@ import {environment} from '../environments/environment';
         AppManagerModule,
         HomeModule,
 
-        MatMenuModule,
-          ServiceWorkerModule.register('ngsw-worker.js', {
-            enabled: environment.production,
-            // Register the ServiceWorker as soon as the app is stable
-            // or after 30 seconds (whichever comes first).
-            registrationStrategy: 'registerWhenStable:30000'
-          })
+        MatMenuModule
     ],
     providers: [
         StatusBar,

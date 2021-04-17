@@ -103,8 +103,7 @@ export class APIService {
         );
     }
 
-    /** POST: listen song */
-    listenSong(id: string): void {
-        window.open(`${this.apiUrl}${this.listenUrl}?id=${id}`, '_blank');
+    getSongUrl(id: string): string {
+        return `${this.apiUrl}${this.listenUrl}?id=${id}`;
     }
 }

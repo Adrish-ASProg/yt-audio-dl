@@ -12,6 +12,7 @@ import {TagEditorDialog} from "../../components/tag-editor-dialog/tag-editor-dia
 import {YTDLUtils} from "../../utils/ytdl-utils";
 import {ToolsDialog} from "../../components/tools-dialog/tools-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
+import {AudioPlayerService} from "../../services/audio/audio-player.service";
 
 @Component({
     selector: 'app-download-tab',
@@ -34,6 +35,7 @@ export class DownloadTab implements OnInit, AfterViewInit {
     @Input() displayedColumns: string[] = [];
 
     constructor(private appManager: AppManager,
+                private audioPlayerService: AudioPlayerService,
                 private dialog: MatDialog,
                 private intentService: IntentService,
                 private platform: Platform,) {
@@ -130,7 +132,7 @@ export class DownloadTab implements OnInit, AfterViewInit {
     }
 
     public playButtonClicked(selectedItem: FileStatus) {
-        this.appManager.sendListenRequest(selectedItem.id);
+        this.audioPlayerService.listenSong(selectedItem.id);
     }
 
     // #endregion

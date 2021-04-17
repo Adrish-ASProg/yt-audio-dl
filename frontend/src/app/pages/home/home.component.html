@@ -50,3 +50,11 @@
         <app-upload-tab></app-upload-tab>
     </mat-tab>
 </mat-tab-group>
+
+<div class="spacer"></div>
+
+<div [hidden]="!audioPlayerService.currentPlaylist?.length" class="audio-player-container">
+    <ngx-audio-player [disablePositionSlider]="true"
+                      [displayDuration]="true" [displayPlaylist]="false" [displayRepeatControls]="false"
+                      [displayTitle]="false" [playlist]="audioPlayerService.currentPlaylist"></ngx-audio-player>
+</div>

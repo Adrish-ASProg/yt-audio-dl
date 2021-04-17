@@ -9,6 +9,8 @@ import {timer} from "rxjs";
 import {take} from "rxjs/operators";
 import {MatTabGroup} from "@angular/material/tabs";
 import {DownloadTab} from "../../tabs/download/download.tab";
+import {AudioPlayerService} from "../../services/audio/audio-player.service";
+import {AudioPlayerComponent} from "ngx-audio-player";
 
 @Component({
     selector: 'app-home',
@@ -16,6 +18,9 @@ import {DownloadTab} from "../../tabs/download/download.tab";
     styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements AfterViewInit {
+
+    @ViewChild(AudioPlayerComponent)
+    player: AudioPlayerComponent;
 
     @ViewChild('mainMenu')
     public menu: MatMenu;
@@ -51,6 +56,7 @@ export class HomeComponent implements AfterViewInit {
     ];
 
     constructor(public appManager: AppManager,
+                public audioPlayerService: AudioPlayerService,
                 private modalController: ModalController,
                 private settingsService: SettingsService) {
     }
@@ -62,6 +68,7 @@ export class HomeComponent implements AfterViewInit {
     }
 
     ngAfterViewInit() {
+        this.audioPlayerService.setPlayer(this.player);
         this.displayedColumns = this.settingsService.getDisplayedColumns().split("|");
 
         // Hacky way to fix default tab not having its inkbar
