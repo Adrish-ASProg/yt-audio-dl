@@ -29,10 +29,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -80,29 +76,12 @@ public class ApplicationService implements DownloadFromYTEvents {
     /**
      * POST /dl
      **/
-    public void downloadFile(String id, HttpServletResponse response) throws FileNotFoundException, UncompletedDownloadException {
-        checkFileIsPresent(id);
+    public void downloadFile(String id, HttpServletResponse response) throws IOException, UncompletedDownloadException {
+        checkFileIsCompleted(id);
 
-        FileStatus fileStatus = filesStatus.get(id);
-
-        // File not downloaded yet
-        if (fileStatus.getStatus() != ProgressStatus.COMPLETED) {
-            throw new UncompletedDownloadException("File not downloaded yet. Current status: " + fileStatus.getStatus());
-        }
-
-        try {
-            File file = getFile(fileStatus.getAbsolutePath());
-            InputStream in = new FileInputStream(file);
-            response.setContentType("audio/mpeg");
-            response.setHeader("Content-Disposition", "attachment; filename=" + file.getName());
-            response.setHeader("Content-Length", String.valueOf(file.length()));
-            response.setHeader("FileName", fileStatus.getName() + ".mp3");
-            response.setStatus(HttpServletResponse.SC_OK);
-            FileCopyUtils.copy(in, response.getOutputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("[AppService.downloadFile] IOException, see logs above");
-        }
+        var fileStatus = filesStatus.get(id);
+        var file = getFile(fileStatus.getAbsolutePath());
+        returnFile(file, response, true);
     }
 
     /**
@@ -193,8 +172,8 @@ public class ApplicationService implements DownloadFromYTEvents {
     /**
      * POST /tags
      **/
-    public Mp3Metadata setTags(TagRequest tag) throws IOException, NotSupportedException {
-        checkFileIsPresent(tag.getId());
+    public Mp3Metadata setTags(TagRequest tag) throws IOException, NotSupportedException, UncompletedDownloadException {
+        checkFileIsCompleted(tag.getId());
         FileStatus fs = filesStatus.get(tag.getId());
 
         String fileName = fs.getAbsolutePath();
@@ -281,27 +260,12 @@ public class ApplicationService implements DownloadFromYTEvents {
      * POST /listen
      **/
     public void listenSong(final String id,
-                           final HttpServletResponse response) throws FileNotFoundException {
+                           final HttpServletResponse response) throws IOException, UncompletedDownloadException {
+        checkFileIsCompleted(id);
 
-        if (!filesStatus.containsKey(id)) {
-            throw new FileNotFoundException("Unable to find file with id " + id);
-        }
-
-        var file = filesStatus.get(id);
-
-        if (!ProgressStatus.COMPLETED.equals(file.getStatus())) {
-            throw new FileNotFoundException("Unable to read file not in COMPLETED status. Current status: " + file.getStatus());
-        }
-
-        try {
-            Path path = Paths.get(file.getAbsolutePath());
-            response.setContentLength((int) Files.size(path));
-            response.setContentType("audio/mp3");
-            Files.copy(path, response.getOutputStream());
-            response.flushBuffer();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        var fileStatus = filesStatus.get(id);
+        var file = getFile(fileStatus.getAbsolutePath());
+        returnFile(file, response, false);
     }
 
     // #endregion
@@ -350,10 +314,17 @@ public class ApplicationService implements DownloadFromYTEvents {
 
     //#region Private methods
 
-    private void checkFileIsPresent(String id) throws FileNotFoundException {
+    private void checkFileIsCompleted(String id) throws FileNotFoundException, UncompletedDownloadException {
         // ID not found
         if (!filesStatus.containsKey(id)) {
             throw new FileNotFoundException("Unable to find file with id « " + id + " »");
+        }
+
+        var fileStatus = filesStatus.get(id);
+
+        // File not downloaded yet
+        if (fileStatus.getStatus() != ProgressStatus.COMPLETED) {
+            throw new UncompletedDownloadException("File not downloaded yet. Current status: " + fileStatus.getStatus());
         }
     }
 
@@ -373,6 +344,22 @@ public class ApplicationService implements DownloadFromYTEvents {
                         .absolutePath(f.getAbsolutePath())
                         .build())
                 .collect(Collectors.toMap(FileStatus::getId, Function.identity()));
+    }
+
+    private void returnFile(final File file, final HttpServletResponse response,
+                            final boolean asAttachment) throws IOException {
+
+        var in = new FileInputStream(file);
+        response.setContentType("audio/mpeg");
+        response.setHeader("Content-Length", String.valueOf(file.length()));
+        response.setHeader("FileName", file.getName());
+
+        if (asAttachment) {
+            response.setHeader("Content-Disposition", "attachment; filename=" + file.getName());
+        }
+
+        response.setStatus(HttpServletResponse.SC_OK);
+        FileCopyUtils.copy(in, response.getOutputStream());
     }
 
     // #endregion

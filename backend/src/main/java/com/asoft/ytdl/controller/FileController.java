@@ -48,7 +48,7 @@ public class FileController {
     @RequestMapping(value = "/dl", method = RequestMethod.POST, produces = "audio/mpeg")
     public @ResponseBody
     void download(HttpServletResponse response, @RequestBody DLFileRequest request)
-            throws FileNotFoundException, UncompletedDownloadException {
+            throws IOException, UncompletedDownloadException {
         applicationService.downloadFile(request.getId(), response);
     }
 
@@ -75,7 +75,7 @@ public class FileController {
 
 
     @RequestMapping(value = "/tags", method = RequestMethod.POST)
-    public ResponseEntity<Mp3Metadata> setTags(@RequestBody TagRequest tags) throws IOException, NotSupportedException {
+    public ResponseEntity<Mp3Metadata> setTags(@RequestBody TagRequest tags) throws IOException, NotSupportedException, UncompletedDownloadException {
         return new ResponseEntity<>(applicationService.setTags(tags), HttpStatus.OK);
     }
 
@@ -87,7 +87,7 @@ public class FileController {
 
     @RequestMapping(value = "/listen", method = RequestMethod.GET)
     public void listen(@RequestParam String id,
-                       HttpServletResponse response) throws FileNotFoundException, BadRequestException {
+                       HttpServletResponse response) throws IOException, BadRequestException, UncompletedDownloadException {
 
         if (id == null) {
             throw new BadRequestException("Id not provided");
