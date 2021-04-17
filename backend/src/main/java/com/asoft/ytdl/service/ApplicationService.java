@@ -2,7 +2,6 @@ package com.asoft.ytdl.service;
 
 import com.asoft.ytdl.constants.enums.ProgressStatus;
 import com.asoft.ytdl.constants.interfaces.DownloadFromYTEvents;
-import com.asoft.ytdl.exception.BadRequestException;
 import com.asoft.ytdl.exception.UncompletedDownloadException;
 import com.asoft.ytdl.model.FileStatus;
 import com.asoft.ytdl.model.Mp3Metadata;
@@ -15,18 +14,14 @@ import com.asoft.ytdl.model.request.TagRequest;
 import com.asoft.ytdl.ui.MainFrame;
 import com.asoft.ytdl.utils.FileUtils;
 import com.asoft.ytdl.utils.Mp3Tagger;
-import com.asoft.ytdl.utils.PlaylistUtils;
 import com.asoft.ytdl.utils.XMLManager;
 import com.asoft.ytdl.utils.YTDownloadManager;
 import com.mpatric.mp3agic.NotSupportedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -73,50 +68,6 @@ public class ApplicationService implements DownloadFromYTEvents {
     }
 
     //#region Requests handler
-
-    /**
-     * POST /upload
-     */
-    public String uploadFile(MultipartFile file, boolean handleMissingFiles) throws BadRequestException, IOException {
-        JSONObject response = new JSONObject();
-
-        // Null or empty file
-        if (file == null || file.isEmpty()) throw new BadRequestException("FileObject is null or empty");
-
-        String fileName = file.getOriginalFilename();
-        boolean fileIsSong = fileName != null && fileName.toLowerCase().endsWith(".mp3");
-        boolean fileIsPlaylist = fileName != null && fileName.toLowerCase().endsWith(".m3u8");
-
-        // Extension check
-        if (!fileIsSong && !fileIsPlaylist) throw new BadRequestException("Bad file format, only mp3 and m3u8 are allowed");
-
-        // Save file
-        String destinationFolder = fileIsPlaylist ? config.getPlaylistFolder() : config.getAudioFolder();
-        destinationFolder += File.separator;
-        String saveError = FileUtils.saveFile(file, destinationFolder, file.getOriginalFilename(), true);
-
-        // Error during save
-        if (!saveError.equals("")) throw new BadRequestException(saveError);
-
-        response.put("status", "success");
-        response.put("message", "File saved successfully");
-
-        // Retrieve missing files if provided file is a playlist
-        if (handleMissingFiles && file.getOriginalFilename().toLowerCase().endsWith(".m3u8")) {
-
-            // Replace path in playlist
-            String filePath = destinationFolder + file.getOriginalFilename();
-
-            // Retrieve missing files
-            var missingFiles = new JSONArray(PlaylistUtils.processPlaylist(filePath, config.getOutputFolder()));
-            response.put("status", "success");
-            response.put("missingFiles", missingFiles);
-        }
-
-        if (mainFrame != null) mainFrame.log("File " + destinationFolder + file.getOriginalFilename() + " saved");
-
-        return response.toString();
-    }
 
     /**
      * POST /ytdl

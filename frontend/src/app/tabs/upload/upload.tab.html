@@ -1,11 +1,6 @@
 <div class="tab-upload-content">
     <div class="upload-buttons-container">
         <ion-button (click)="selectPlaylistBtnClicked()" color="primary" size="small">Select playlist</ion-button>
-        <ion-button (click)="uploadPlaylistBtnClicked()"
-                    [disabled]="selectedFiles.length != 1"
-                    color="success" size="small">
-            Upload
-        </ion-button>
     </div>
 
     <mat-form-field appearance="outline">

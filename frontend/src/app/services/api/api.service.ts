@@ -27,19 +27,6 @@ const playlistHttpOptions = {
 };
 
 
-export class UploadData {
-    fileName: string;
-    formData: FormData;
-    onFinishedCallback: (result) => void;
-
-    constructor(fileName, formData, callback?) {
-        this.fileName = fileName;
-        this.formData = formData;
-        if (callback) this.onFinishedCallback = callback;
-    }
-}
-
-
 @Injectable({providedIn: APIModule})
 export class APIService {
 
@@ -47,7 +34,6 @@ export class APIService {
                 private settings: SettingsService) {
     }
 
-    private uploadUrl: string = "/upload";
     private convertUrl: string = "/ytdl";
     private statusUrl: string = "/status";
     private downloadUrl: string = "/dl";
@@ -59,11 +45,6 @@ export class APIService {
 
     get apiUrl() {
         return this.settings.getServerAddress();
-    }
-
-    /** POST: upload file */
-    uploadFile(formData) {
-        return this.http.post<{ id: string }>(`${this.apiUrl}${this.uploadUrl}`, formData, {reportProgress: true, observe: 'events'});
     }
 
     /** POST: process new file */

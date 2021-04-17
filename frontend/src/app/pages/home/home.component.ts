@@ -9,7 +9,6 @@ import {timer} from "rxjs";
 import {take} from "rxjs/operators";
 import {MatTabGroup} from "@angular/material/tabs";
 import {DownloadTab} from "../../tabs/download/download.tab";
-import {UtilsService} from "../../services/utils/utils.service";
 
 @Component({
     selector: 'app-home',
@@ -30,10 +29,6 @@ export class HomeComponent implements AfterViewInit {
     displayedColumns: string[] = ['select', 'name', 'status', 'listen', 'startDate'];
 
     _toolbarButtonsNoFilesSelected: any[] = [
-        {
-            icon: "download",
-            action: () => this.utilsService.showTransferModal()
-        },
         {
             icon: "refresh",
             action: () => this.downloadTab.refresh()
@@ -57,8 +52,7 @@ export class HomeComponent implements AfterViewInit {
 
     constructor(public appManager: AppManager,
                 private modalController: ModalController,
-                private settingsService: SettingsService,
-                private utilsService: UtilsService) {
+                private settingsService: SettingsService) {
     }
 
     get toolbarButtons() {

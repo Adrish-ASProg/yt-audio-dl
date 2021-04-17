@@ -13,8 +13,8 @@ import com.asoft.ytdl.model.request.FileStatusResponse;
 import com.asoft.ytdl.model.request.TagRequest;
 import com.asoft.ytdl.service.ApplicationService;
 import com.mpatric.mp3agic.NotSupportedException;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.validator.routines.UrlValidator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileNotFoundException;
@@ -32,19 +31,10 @@ import java.util.Collection;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 public class FileController {
 
-    @Autowired
-    ApplicationService applicationService;
-
-    @RequestMapping(value = "/upload", method = RequestMethod.POST)
-    public ResponseEntity<String> upload(@RequestParam(value = "handleMissingFiles", required = false) Boolean handleMissingFiles,
-                                         @RequestParam(value = "file") MultipartFile file) throws BadRequestException, IOException {
-
-        var result = applicationService.uploadFile(file, Boolean.TRUE.equals(handleMissingFiles));
-        return new ResponseEntity<>(result, HttpStatus.OK);
-    }
-
+    private final ApplicationService applicationService;
 
     @RequestMapping(value = "/ytdl", method = RequestMethod.POST)
     public ResponseEntity<Void> downloadFromYT(@RequestBody DLFromYTRequest request) throws BadRequestException {

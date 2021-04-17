@@ -25,10 +25,6 @@ export class UploadTab implements OnInit {
         this.fileInput.nativeElement.click();
     }
 
-    public uploadPlaylistBtnClicked() {
-        this.appManager.sendUploadRequest(this.selectedFiles, true);
-    }
-
     /** After file loaded **/
     onFileChange(event) {
         if (event.target.files.length != 1 ||
