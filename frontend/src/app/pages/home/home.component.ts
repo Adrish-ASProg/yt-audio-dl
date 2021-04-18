@@ -52,6 +52,10 @@ export class HomeComponent implements AfterViewInit {
         {
             icon: "trash-outline",
             action: () => this.downloadTab.deleteButtonClicked()
+        },
+        {
+            icon: "refresh",
+            action: () => this.downloadTab.refresh()
         }
     ];
 
