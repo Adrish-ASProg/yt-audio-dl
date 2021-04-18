@@ -69,10 +69,10 @@
             </td>
         </ng-container>
 
-        <!-- Listen Column -->
-        <ng-container matColumnDef="listen">
-            <th *matHeaderCellDef class="listen-header-cell" mat-header-cell mat-sort-header> Listen</th>
-            <td *matCellDef="let element" class="listen-cell" mat-cell>
+        <!-- Play Column -->
+        <ng-container matColumnDef="play">
+            <th *matHeaderCellDef class="play-header-cell" mat-header-cell mat-sort-header> Play</th>
+            <td *matCellDef="let element" class="play-cell" mat-cell>
                 <ion-button (click)="playButtonClicked.emit(element)" [disabled]="element.status !== 'COMPLETED'" fill="clear" size="small" style="display: inline-block;">
                     <ion-icon name="play" slot="icon-only"></ion-icon>
                 </ion-button>

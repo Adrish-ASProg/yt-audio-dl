@@ -31,7 +31,7 @@ export class HomeComponent implements AfterViewInit {
     @ViewChild(DownloadTab)
     public downloadTab: DownloadTab;
 
-    displayedColumns: string[] = ['select', 'name', 'status', 'listen', 'startDate'];
+    displayedColumns: string[] = ['select', 'name', 'status', 'play', 'startDate'];
 
     _toolbarButtonsNoFilesSelected: any[] = [
         {

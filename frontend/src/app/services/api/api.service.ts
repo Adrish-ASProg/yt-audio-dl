@@ -41,7 +41,7 @@ export class APIService {
     private downloadPlaylistUrl: string = "/dl-playlist";
     private setTagsUrl: string = "/tags";
     private deleteUrl: string = "/delete";
-    private listenUrl: string = "/listen";
+    private playUrl: string = "/play";
 
     get apiUrl() {
         return this.settings.getServerAddress();
@@ -104,6 +104,6 @@ export class APIService {
     }
 
     getSongUrl(id: string): string {
-        return `${this.apiUrl}${this.listenUrl}?id=${id}`;
+        return `${this.apiUrl}${this.playUrl}?id=${id}`;
     }
 }

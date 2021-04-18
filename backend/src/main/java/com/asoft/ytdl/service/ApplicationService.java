@@ -257,9 +257,9 @@ public class ApplicationService implements DownloadFromYTEvents {
     }
 
     /**
-     * POST /listen
+     * POST /play
      **/
-    public void listenSong(final String id,
+    public void playSong(final String id,
                            final HttpServletResponse response) throws IOException, UncompletedDownloadException {
         checkFileIsCompleted(id);
 

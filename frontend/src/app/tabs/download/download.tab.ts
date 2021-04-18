@@ -132,7 +132,7 @@ export class DownloadTab implements OnInit, AfterViewInit {
     }
 
     public playButtonClicked(selectedItem: FileStatus) {
-        this.audioPlayerService.listenSong(selectedItem.id);
+        this.audioPlayerService.playSong(selectedItem.id);
     }
 
     // #endregion

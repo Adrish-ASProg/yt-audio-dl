@@ -85,15 +85,15 @@ public class FileController {
         return new ResponseEntity<>(applicationService.deleteFiles(ids), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/listen", method = RequestMethod.GET)
-    public void listen(@RequestParam String id,
+    @RequestMapping(value = "/play", method = RequestMethod.GET)
+    public void play(@RequestParam String id,
                        HttpServletResponse response) throws IOException, BadRequestException, UncompletedDownloadException {
 
         if (id == null) {
             throw new BadRequestException("Id not provided");
         }
 
-        applicationService.listenSong(id, response);
+        applicationService.playSong(id, response);
     }
 
 

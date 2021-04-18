@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {SettingsServiceModule} from "./settings-service.module";
 
 
-enum OptionsKeys {
+enum OptionsKey {
     API_ADDRESS = "API_ADDRESS",
     DISPLAYED_COLUMNS = "DISPLAYED_COLUMNS",
     PAGE_SIZE = "PAGE_SIZE",
@@ -19,10 +19,10 @@ class Option {
 export class SettingsService {
 
     options: Option[] = [
-        {name: OptionsKeys.API_ADDRESS, value: "http://192.168.0.1:8080", defaultValue: "http://192.168.0.1:8080"},
-        {name: OptionsKeys.DISPLAYED_COLUMNS, value: "select|name|status|startDate", defaultValue: "select|name|status|startDate"},
-        {name: OptionsKeys.PAGE_SIZE, value: "10", defaultValue: "10"},
-        {name: OptionsKeys.SAVED_FOLDERS, value: "", defaultValue: ""}
+        {name: OptionsKey.API_ADDRESS, value: "http://192.168.0.1:8080", defaultValue: "http://192.168.0.1:8080"},
+        {name: OptionsKey.DISPLAYED_COLUMNS, value: "select|name|status|startDate", defaultValue: "select|name|status|startDate"},
+        {name: OptionsKey.PAGE_SIZE, value: "10", defaultValue: "10"},
+        {name: OptionsKey.SAVED_FOLDERS, value: "", defaultValue: ""}
     ];
 
     constructor() {
@@ -35,42 +35,42 @@ export class SettingsService {
     }
 
     getPageSize(): number {
-        return this.getOption(OptionsKeys.PAGE_SIZE);
+        return this.getOption(OptionsKey.PAGE_SIZE);
     }
 
     setPageSize(value: number): boolean {
-        this.setOption(OptionsKeys.PAGE_SIZE, value);
+        this.setOption(OptionsKey.PAGE_SIZE, value);
         console.debug("Page size value set to " + value);
         return true;
     }
 
     getDisplayedColumns(): string {
-        return this.getOption(OptionsKeys.DISPLAYED_COLUMNS);
+        return this.getOption(OptionsKey.DISPLAYED_COLUMNS);
     }
 
     setDisplayedColumns(value: string): boolean {
-        this.setOption(OptionsKeys.DISPLAYED_COLUMNS, value);
+        this.setOption(OptionsKey.DISPLAYED_COLUMNS, value);
         console.debug("Displayed columns value set to " + value);
         return true;
     }
 
     getServerAddress(): string {
-        return this.getOption(OptionsKeys.API_ADDRESS);
+        return this.getOption(OptionsKey.API_ADDRESS);
     }
 
     setServerAddress(value: string): boolean {
         // TODO Check
-        this.setOption(OptionsKeys.API_ADDRESS, value);
+        this.setOption(OptionsKey.API_ADDRESS, value);
         console.debug("Api address set to " + value);
         return true;
     }
 
     getSavedFolders(): string {
-        return this.getOption(OptionsKeys.SAVED_FOLDERS);
+        return this.getOption(OptionsKey.SAVED_FOLDERS);
     }
 
     setSavedFolders(value: string): boolean {
-        this.setOption(OptionsKeys.SAVED_FOLDERS, value);
+        this.setOption(OptionsKey.SAVED_FOLDERS, value);
         console.debug("Saved folders value set to " + value);
         return true;
     }

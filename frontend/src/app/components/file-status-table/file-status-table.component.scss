@@ -21,14 +21,14 @@ table {
 
     ::ng-deep th.status-header-cell,
     ::ng-deep th.status-cell,
-    ::ng-deep th.listen-header-cell,
-    ::ng-deep td.listen-cell {
+    ::ng-deep th.play-header-cell,
+    ::ng-deep td.play-cell {
         width: 64px;
         text-align: center;
     }
 
     ::ng-deep th.status-header-cell,
-    ::ng-deep th.listen-header-cell {
+    ::ng-deep th.play-header-cell {
         .mat-sort-header-container {
             justify-content: center;
         }

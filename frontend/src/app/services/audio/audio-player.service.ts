@@ -16,7 +16,7 @@ export class AudioPlayerService {
         this.player = player;
     }
 
-    public listenSong(id: string) {
+    public playSong(id: string) {
         const track = {link: this.apiService.getSongUrl(id)} as Track;
         this.currentPlaylist = [track];
         this.player.play(track);
