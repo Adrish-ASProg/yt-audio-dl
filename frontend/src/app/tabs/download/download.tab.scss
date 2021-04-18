@@ -9,21 +9,15 @@
         margin: 5px;
     }
 
-    .slide-toggle-dl-mode {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin: 0 15px;
-
-        span {
-            margin-top: 5px;
-            font-size: 12px
-        }
-    }
-
     .convert-button {
         margin: 5px;
     }
+}
+
+.slide-toggle-dl-mode {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
 }
 
 hr {

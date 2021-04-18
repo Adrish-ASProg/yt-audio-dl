@@ -31,6 +31,8 @@ export class HomeComponent implements AfterViewInit {
     @ViewChild(DownloadTab)
     public downloadTab: DownloadTab;
 
+    public YT_URLS = YT_URLS;
+
     displayedColumns: string[] = ['select', 'name', 'status', 'play', 'startDate'];
 
     _toolbarButtonsNoFilesSelected: any[] = [
@@ -101,27 +103,6 @@ export class HomeComponent implements AfterViewInit {
 
     public settingsActionClicked() {
         this.openSettingsDialog();
-    }
-
-    setUrl(event) {
-        let value;
-
-        switch (event) {
-            case "bg":
-                value = YT_URLS.Playlist_Background;
-                break;
-
-            case "test":
-                value = YT_URLS.Playlist_Test;
-                break;
-
-            case "video":
-            default:
-                value = YT_URLS.Video_Test;
-                break;
-        }
-
-        this.downloadTab.setUrl(value);
     }
 
     private async openSettingsDialog(): Promise<void> {

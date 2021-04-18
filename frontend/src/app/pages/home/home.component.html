@@ -33,9 +33,9 @@
 
 <!-- Debug Submenu -->
 <mat-menu #debugMenu="matMenu">
-    <button (click)="setUrl('bg')" mat-menu-item>Playlist Background</button>
-    <button (click)="setUrl('test')" mat-menu-item>Playlist Test</button>
-    <button (click)="setUrl('video')" mat-menu-item>Single Video</button>
+    <button (click)="downloadTab.setUrl(YT_URLS.Playlist_Background)" mat-menu-item>Playlist Background</button>
+    <button (click)="downloadTab.setUrl(YT_URLS.Playlist_Test)" mat-menu-item>Playlist Test</button>
+    <button (click)="downloadTab.setUrl(YT_URLS.Video_Test)" mat-menu-item>Single Video</button>
 </mat-menu>
 
 
