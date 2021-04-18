@@ -46,7 +46,7 @@ export class HomeComponent implements AfterViewInit {
             action: () => this.downloadTab.downloadButtonClicked()
         },
         {
-            icon: "settings-outline",
+            icon: "build-outline",
             action: () => this.downloadTab.postProcessorButtonClicked()
         },
         {
