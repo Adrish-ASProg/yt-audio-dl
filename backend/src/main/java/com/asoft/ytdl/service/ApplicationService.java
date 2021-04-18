@@ -3,14 +3,17 @@ package com.asoft.ytdl.service;
 import com.asoft.ytdl.constants.enums.ProgressStatus;
 import com.asoft.ytdl.constants.interfaces.DownloadFromYTEvents;
 import com.asoft.ytdl.exception.UncompletedDownloadException;
+import com.asoft.ytdl.exception.YTDLException;
 import com.asoft.ytdl.model.FileStatus;
 import com.asoft.ytdl.model.Mp3Metadata;
 import com.asoft.ytdl.model.XmlConfiguration;
 import com.asoft.ytdl.model.request.DLFileAsZipRequest;
+import com.asoft.ytdl.model.request.DLFromYTRequest;
 import com.asoft.ytdl.model.request.DLPlaylistRequest;
 import com.asoft.ytdl.model.request.FileStatusRequest;
 import com.asoft.ytdl.model.request.FileStatusResponse;
 import com.asoft.ytdl.model.request.TagRequest;
+import com.asoft.ytdl.model.request.VideoInfo;
 import com.asoft.ytdl.ui.MainFrame;
 import com.asoft.ytdl.utils.FileUtils;
 import com.asoft.ytdl.utils.Mp3Tagger;
@@ -29,7 +32,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -68,9 +70,32 @@ public class ApplicationService implements DownloadFromYTEvents {
     /**
      * POST /ytdl
      **/
-    public void downloadFileFromYT(String url) {
-        dlManager.setSkippedId(new ArrayList<>(filesStatus.keySet()));
-        dlManager.download(url, new File(config.getAudioFolder()));
+    public List<VideoInfo> downloadYTVideoFromUrl(final DLFromYTRequest request) {
+        var videoInfos = dlManager.getVideoInfos(request.getUrl());
+
+        if (videoInfos.size() == 0) {
+            onError(null, new YTDLException("[download] Unable to download file: No file found"));
+        }
+
+        // Allows picking specific videos rather than downloading them all
+        if (Boolean.TRUE.equals(request.getSelectFiles())) {
+            return videoInfos;
+        }
+
+        downloadYTVideoFromIds(videoInfos);
+
+        return null;
+    }
+
+    public void downloadYTVideoFromIds(final List<VideoInfo> videoInfos) {
+
+        var filesStatusToDl = videoInfos.stream()
+                .filter(info -> !filesStatus.containsKey(info.getId()))
+                .map(info -> buildFileStatus(info.getId(), info.getTitle()))
+                .collect(Collectors.toList());
+
+        filesStatusToDl.forEach(fs -> filesStatus.put(fs.getId(), fs));
+        dlManager.download(filesStatusToDl, new File(config.getAudioFolder()));
     }
 
     /**
@@ -260,7 +285,7 @@ public class ApplicationService implements DownloadFromYTEvents {
      * POST /play
      **/
     public void playSong(final String id,
-                           final HttpServletResponse response) throws IOException, UncompletedDownloadException {
+                         final HttpServletResponse response) throws IOException, UncompletedDownloadException {
         checkFileIsCompleted(id);
 
         var fileStatus = filesStatus.get(id);
@@ -289,14 +314,7 @@ public class ApplicationService implements DownloadFromYTEvents {
 
     public void onTitleRetrieved(String id, String title) {
         if (!filesStatus.containsKey(id)) {
-            filesStatus.put(id, FileStatus.builder()
-                    .id(id)
-                    .name(title)
-                    .status(ProgressStatus.INITIALIZING)
-                    .startDate(new Date().getTime())
-                    .absolutePath(config.getAudioFolder() + File.separator + title + ".mp3")
-                    .build()
-            );
+            filesStatus.put(id, buildFileStatus(id, title));
         }
     }
 
@@ -313,6 +331,17 @@ public class ApplicationService implements DownloadFromYTEvents {
 
 
     //#region Private methods
+
+    private FileStatus buildFileStatus(final String id,
+                                       final String name) {
+        return FileStatus.builder()
+                .id(id)
+                .name(name)
+                .status(ProgressStatus.INITIALIZING)
+                .startDate(new Date().getTime())
+                .absolutePath(config.getAudioFolder() + File.separator + name + ".mp3")
+                .build();
+    }
 
     private void checkFileIsCompleted(String id) throws FileNotFoundException, UncompletedDownloadException {
         // ID not found

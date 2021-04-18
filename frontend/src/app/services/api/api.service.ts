@@ -5,6 +5,7 @@ import {Mp3Metadata} from "../../model/mp3metadata.model";
 import {APIModule} from "./api.module";
 import {SettingsService} from "../settings/settings.service";
 import {FileStatusResponse} from "../../model/filestatus-response.model";
+import {VideoInfo} from "../../model/videoinfo.model";
 
 
 const jsonHttpOptions = {
@@ -35,6 +36,7 @@ export class APIService {
     }
 
     private convertUrl: string = "/ytdl";
+    private convertByIdUrl: string = "/ytdl-id";
     private statusUrl: string = "/status";
     private downloadUrl: string = "/dl";
     private downloadAsZipUrl: string = "/dl-zip";
@@ -48,8 +50,13 @@ export class APIService {
     }
 
     /** POST: process new file */
-    requestConvert(url: string): Observable<{ id: string }> {
-        return this.http.post<{ id: string }>(`${this.apiUrl}${this.convertUrl}`, {url: url, audioOnly: true}, jsonHttpOptions);
+    requestConvert(url: string, selectFiles: boolean): Observable<{ id: string }> {
+        const body = {url, selectFiles};
+        return this.http.post<{ id: string }>(`${this.apiUrl}${this.convertUrl}`, body, jsonHttpOptions);
+    }
+
+    requestConvertById(videoInfos: VideoInfo[]): Observable<void> {
+        return this.http.post<void>(`${this.apiUrl}${this.convertByIdUrl}`, videoInfos, jsonHttpOptions);
     }
 
     /** POST: download file */

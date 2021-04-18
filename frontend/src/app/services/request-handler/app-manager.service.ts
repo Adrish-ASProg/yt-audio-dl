@@ -11,6 +11,7 @@ import {LoadingService} from "../loading/loading.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {UtilsService} from "../utils/utils.service";
 import {RequestWithLoader} from "../utils/request-wrapper.util";
+import {VideoInfo} from "../../model/videoinfo.model";
 
 @Injectable({providedIn: AppManagerModule})
 export class AppManager {
@@ -26,9 +27,14 @@ export class AppManager {
 
     //#region Send_xxx_Request
 
-    sendConvertRequest(params: string) {
-        const request = this.apiService.requestConvert(params);
+    sendConvertRequest(params: string, selectFilesToDl: boolean) {
+        const request = this.apiService.requestConvert(params, selectFilesToDl);
         return this.wrapRequestWithLoading(request, "Retrieving title(s)..");
+    }
+
+    sendConvertByIdRequest(videoInfos: VideoInfo[]) {
+        const request = this.apiService.requestConvertById(videoInfos);
+        return this.wrapRequestWithLoading(request, "Sending download request..");
     }
 
     async sendDownloadRequest(id: string) {

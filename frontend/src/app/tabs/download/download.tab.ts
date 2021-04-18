@@ -13,6 +13,7 @@ import {YTDLUtils} from "../../utils/ytdl-utils";
 import {ToolsDialog} from "../../components/tools-dialog/tools-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
 import {AudioPlayerService} from "../../services/audio/audio-player.service";
+import {FileSelectDialog} from "../../components/file-select-dialog/file-select-dialog.component";
 
 @Component({
     selector: 'app-download-tab',
@@ -34,6 +35,8 @@ export class DownloadTab implements OnInit, AfterViewInit {
 
     @Input() displayedColumns: string[] = [];
 
+    selectFilesToDl: boolean = true;
+
     constructor(private appManager: AppManager,
                 private audioPlayerService: AudioPlayerService,
                 private dialog: MatDialog,
@@ -49,7 +52,7 @@ export class DownloadTab implements OnInit, AfterViewInit {
 
             this.intentService.onIntentReceived = (url) => {
                 this.urlFormControl.setValue(url);
-                this.appManager.sendConvertRequest(this.urlFormControl.value);
+                this.appManager.sendConvertRequest(this.urlFormControl.value, this.selectFilesToDl);
             };
             this.intentService.init();
         });
@@ -68,8 +71,11 @@ export class DownloadTab implements OnInit, AfterViewInit {
     public convertButtonClicked() {
         if (this.urlFormControl.invalid) return;
 
-        this.appManager.sendConvertRequest(this.urlFormControl.value)
-            .subscribe(() => this.refresh(),
+        this.appManager.sendConvertRequest(this.urlFormControl.value, this.selectFilesToDl)
+            .subscribe(data => {
+                    if (data) this.handleFileSelection(data);
+                    this.refresh();
+                },
                 response => {
                     console.error(response.error);
                     alert(response.error.message);
@@ -163,6 +169,17 @@ export class DownloadTab implements OnInit, AfterViewInit {
         dialogRef.afterClosed().subscribe((result: FileStatus[]) => {
             if (!result) return;
             forkJoin(result.map(fs => this.appManager.sendTagRequest(fs.id, fs.name, fs.metadata)))
+                .subscribe(() => this.refresh());
+        });
+    }
+
+    private handleFileSelection(data: any) {
+        const dialogRef = this.dialog.open(FileSelectDialog, {data});
+
+        dialogRef.afterClosed().subscribe(result => {
+            if (!result) return;
+
+            this.appManager.sendConvertByIdRequest(result)
                 .subscribe(() => this.refresh());
         });
     }

@@ -10,6 +10,8 @@ import {MatIconModule} from "@angular/material/icon";
 import {FileStatusTableModule} from "../../components/file-status-table/file-status-table.module";
 import {ToolsDialogModule} from "../../components/tools-dialog/tools-dialog.module";
 import {TagEditorDialogModule} from "../../components/tag-editor-dialog/tag-editor-dialog.module";
+import {FileSelectDialogModule} from "../../components/file-select-dialog/file-select-dialog.module";
+import {MatSlideToggleModule} from "@angular/material/slide-toggle";
 
 @NgModule({
     entryComponents: [],
@@ -23,11 +25,13 @@ import {TagEditorDialogModule} from "../../components/tag-editor-dialog/tag-edit
         ToolsDialogModule,
         TagEditorDialogModule,
         FileStatusTableModule,
+        FileSelectDialogModule,
 
         MatFormFieldModule,
         MatInputModule,
         MatButtonModule,
         MatIconModule,
+        MatSlideToggleModule,
     ],
     exports: [DownloadTab],
     providers: []

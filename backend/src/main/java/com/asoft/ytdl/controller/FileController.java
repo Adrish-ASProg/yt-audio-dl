@@ -11,12 +11,14 @@ import com.asoft.ytdl.model.request.DLPlaylistRequest;
 import com.asoft.ytdl.model.request.FileStatusRequest;
 import com.asoft.ytdl.model.request.FileStatusResponse;
 import com.asoft.ytdl.model.request.TagRequest;
+import com.asoft.ytdl.model.request.VideoInfo;
 import com.asoft.ytdl.service.ApplicationService;
 import com.mpatric.mp3agic.NotSupportedException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -30,6 +32,8 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
+import static org.springframework.util.CollectionUtils.isEmpty;
+
 @RestController
 @RequiredArgsConstructor
 public class FileController {
@@ -37,11 +41,20 @@ public class FileController {
     private final ApplicationService applicationService;
 
     @RequestMapping(value = "/ytdl", method = RequestMethod.POST)
-    public ResponseEntity<Void> downloadFromYT(@RequestBody DLFromYTRequest request) throws BadRequestException {
+    public ResponseEntity<Collection<VideoInfo>> downloadYTVideoFromUrl(@RequestBody DLFromYTRequest request) throws BadRequestException {
         String url = request.getUrl();
         if (url == null || !new UrlValidator(new String[]{"http", "https"}).isValid(url)) throw new BadRequestException("Invalid URL");
 
-        applicationService.downloadFileFromYT(url);
+        return new ResponseEntity<>(applicationService.downloadYTVideoFromUrl(request), HttpStatus.ACCEPTED);
+    }
+
+    @RequestMapping(value = "/ytdl-id", method = RequestMethod.POST)
+    public ResponseEntity<Collection<VideoInfo>> downloadYTVideoFromIds(@RequestBody List<VideoInfo> request) throws BadRequestException {
+        if (isEmpty(request) || request.stream().anyMatch(info -> StringUtils.isEmpty(info.getId()))) {
+            throw new BadRequestException("Missing id(s)");
+        }
+
+        applicationService.downloadYTVideoFromIds(request);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
@@ -87,7 +100,7 @@ public class FileController {
 
     @RequestMapping(value = "/play", method = RequestMethod.GET)
     public void play(@RequestParam String id,
-                       HttpServletResponse response) throws IOException, BadRequestException, UncompletedDownloadException {
+                     HttpServletResponse response) throws IOException, BadRequestException, UncompletedDownloadException {
 
         if (id == null) {
             throw new BadRequestException("Id not provided");

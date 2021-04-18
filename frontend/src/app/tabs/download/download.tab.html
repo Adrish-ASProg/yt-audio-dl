@@ -7,6 +7,12 @@
                 <mat-icon>close</mat-icon>
             </button>
         </mat-form-field>
+
+        <div class="slide-toggle-dl-mode">
+            <mat-slide-toggle [(ngModel)]="selectFilesToDl"></mat-slide-toggle>
+            <span>{{ selectFilesToDl ? "Select videos" : "DL all videos"}}</span>
+        </div>
+
         <ion-button (click)="convertButtonClicked()" [disabled]="this.urlFormControl.invalid"
                     class="convert-button" fill="clear" size="small">
             <ion-icon name="send" slot="icon-only"></ion-icon>
