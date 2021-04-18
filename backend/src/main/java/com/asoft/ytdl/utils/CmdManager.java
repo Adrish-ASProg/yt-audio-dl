@@ -48,8 +48,6 @@ public class CmdManager {
         } catch (IOException e) {
             e.printStackTrace();
             errorEvent.onError("Cannot execute command, file not found.");
-        } catch (Exception err) {
-            err.printStackTrace();
         }
 
         if (verboseMode)

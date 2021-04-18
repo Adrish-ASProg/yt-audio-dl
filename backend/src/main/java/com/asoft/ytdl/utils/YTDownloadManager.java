@@ -1,6 +1,5 @@
 package com.asoft.ytdl.utils;
 
-import com.asoft.ytdl.constants.enums.ProgressStatus;
 import com.asoft.ytdl.constants.interfaces.DownloadFromYTEvents;
 import com.asoft.ytdl.exception.YTDLException;
 import com.asoft.ytdl.model.FileStatus;
@@ -24,9 +23,7 @@ public class YTDownloadManager {
 
     public void printYtDlVersion() {
         var cmdManager = new CmdManager(false);
-        cmdManager.setOutputEvent(text -> {
-            System.out.printf("Using youtube-dl version %s%n", text);
-        });
+        cmdManager.setOutputEvent(text -> System.out.printf("Using youtube-dl version %s%n", text));
         cmdManager.executeCommand("youtube-dl --version");
     }
 
@@ -53,24 +50,8 @@ public class YTDownloadManager {
     private void downloadFile(String dlCommand, String id, String fileName, ExecutorService executor) {
         System.out.printf("########## Downloading « %s » ##########%n", fileName);
 
-        eventHandler.onProgress(id, ProgressStatus.STARTING_DOWNLOAD);
-
-        // Handle progress
-        final String downloadPagePrefix = "[youtube]";
-        final String downloadPrefix = "[download]";
-        final String convertPrefix = "[ffmpeg]";
-
         CmdManager cmdManager = new CmdManager(false);
-        cmdManager.setOutputEvent(text -> {
-            if (text.startsWith(downloadPagePrefix)) {
-                eventHandler.onProgress(id, ProgressStatus.DOWNLOADING_WEBPAGE);
-            } else if (text.startsWith(downloadPrefix)) {
-                eventHandler.onProgress(id, ProgressStatus.DOWNLOADING_VIDEO);
-            } else if (text.startsWith(convertPrefix)) {
-                eventHandler.onProgress(id, ProgressStatus.CONVERTING_TO_AUDIO);
-            }
-            System.out.println(id + " " + text);
-        });
+        cmdManager.setOutputEvent(text -> System.out.printf("%s %s%n", id, text));
         cmdManager.setErrorEvent(text -> eventHandler.onError(id, new YTDLException(text)));
         cmdManager.executeCommand(dlCommand);
 
@@ -84,10 +65,12 @@ public class YTDownloadManager {
      **/
     public List<VideoInfo> getVideoInfos(final String url) {
         final List<VideoInfo> result = new ArrayList<>();
+
         var cmdManager = new CmdManager(true);
-        cmdManager.setErrorEvent((text) ->
-                eventHandler.onError(null, new YTDLException("Unable to retrieve video title\n" + text))
-        );
+        cmdManager.setErrorEvent(text -> {
+            throw new YTDLException("Unable to retrieve video infos\n" + text);
+        });
+
         cmdManager.setOutputEvent(output -> {
             if (!output.startsWith("Process terminated")) {
                 var json = new JSONObject(output);

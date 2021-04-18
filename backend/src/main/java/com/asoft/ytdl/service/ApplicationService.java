@@ -74,7 +74,7 @@ public class ApplicationService implements DownloadFromYTEvents {
         var videoInfos = dlManager.getVideoInfos(request.getUrl());
 
         if (videoInfos.size() == 0) {
-            onError(null, new YTDLException("[download] Unable to download file: No file found"));
+            throw new YTDLException("Unable to download file: No video found");
         }
 
         // Allows picking specific videos rather than downloading them all
@@ -101,7 +101,7 @@ public class ApplicationService implements DownloadFromYTEvents {
     /**
      * POST /dl
      **/
-    public void downloadFile(String id, HttpServletResponse response) throws IOException, UncompletedDownloadException {
+    public void downloadFile(String id, HttpServletResponse response) throws IOException {
         checkFileIsCompleted(id);
 
         var fileStatus = filesStatus.get(id);
@@ -197,7 +197,7 @@ public class ApplicationService implements DownloadFromYTEvents {
     /**
      * POST /tags
      **/
-    public Mp3Metadata setTags(TagRequest tag) throws IOException, NotSupportedException, UncompletedDownloadException {
+    public Mp3Metadata setTags(TagRequest tag) throws IOException, NotSupportedException {
         checkFileIsCompleted(tag.getId());
         FileStatus fs = filesStatus.get(tag.getId());
 
@@ -284,8 +284,7 @@ public class ApplicationService implements DownloadFromYTEvents {
     /**
      * POST /play
      **/
-    public void playSong(final String id,
-                         final HttpServletResponse response) throws IOException, UncompletedDownloadException {
+    public void playSong(final String id, final HttpServletResponse response) throws IOException {
         checkFileIsCompleted(id);
 
         var fileStatus = filesStatus.get(id);
@@ -298,24 +297,12 @@ public class ApplicationService implements DownloadFromYTEvents {
 
     //#region Download from YT events
 
-    public void onProgress(String id, ProgressStatus progressStatus) {
-        if (filesStatus.containsKey(id) && !progressStatus.equals(filesStatus.get(id).getStatus())) {
-            filesStatus.get(id).setStatus(progressStatus);
-        }
-    }
-
     public void onDownloadCompleted(String id, String fileName) {
         FileStatus fs = filesStatus.get(id);
         fs.setStatus(ProgressStatus.COMPLETED);
         // FIXME extension
         File file = new File(config.getAudioFolder() + File.separator + fs.getName() + ".mp3");
         fs.setMetadata(Mp3Tagger.getTags(file));
-    }
-
-    public void onTitleRetrieved(String id, String title) {
-        if (!filesStatus.containsKey(id)) {
-            filesStatus.put(id, buildFileStatus(id, title));
-        }
     }
 
     public void onError(String id, Exception error) {
@@ -343,7 +330,7 @@ public class ApplicationService implements DownloadFromYTEvents {
                 .build();
     }
 
-    private void checkFileIsCompleted(String id) throws FileNotFoundException, UncompletedDownloadException {
+    private void checkFileIsCompleted(String id) throws FileNotFoundException {
         // ID not found
         if (!filesStatus.containsKey(id)) {
             throw new FileNotFoundException("Unable to find file with id « " + id + " »");
