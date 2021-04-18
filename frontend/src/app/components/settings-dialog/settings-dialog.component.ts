@@ -47,6 +47,14 @@ export class SettingsDialog {
         this.modalController.dismiss();
     }
 
+    onResetButtonClicked(): void {
+        if (confirm("Do you really want to reset all your preferences ?\n" +
+            "This cannot be undone.")) {
+            this.settings.resetPreferences();
+            window.location.reload();
+        }
+    }
+
     onSaveButtonClicked(): void {
         this.settings.setServerAddress(this.serverAddress);
         this.modalController.dismiss();

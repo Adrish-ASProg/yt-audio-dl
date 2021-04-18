@@ -34,6 +34,10 @@ export class SettingsService {
         });
     }
 
+    resetPreferences(): void {
+        window.localStorage.clear();
+    }
+
     getPageSize(): number {
         return this.getOption(OptionsKey.PAGE_SIZE);
     }

@@ -10,43 +10,47 @@
 </ion-header>
 
 <ion-content>
-    <!-- Server address -->
-    <div class="settings-item">
-        <span class="settings-item-title ion-text-wrap">Server address</span>
-        <mat-form-field class="input-container">
-            <input [(ngModel)]="serverAddress" matInput>
-            <button (click)="serverAddress = ''" *ngIf="serverAddress != ''" aria-label="Clear" mat-button mat-icon-button matSuffix>
-                <mat-icon>close</mat-icon>
-            </button>
-        </mat-form-field>
-    </div>
+    <div class="settings-content">
+        <!-- Server address -->
+        <div class="settings-item">
+            <span class="settings-item-title ion-text-wrap">Server address</span>
+            <mat-form-field class="input-container">
+                <input [(ngModel)]="serverAddress" matInput>
+                <button (click)="serverAddress = ''" *ngIf="serverAddress != ''" aria-label="Clear" mat-button mat-icon-button matSuffix>
+                    <mat-icon>close</mat-icon>
+                </button>
+            </mat-form-field>
+        </div>
 
-    <hr/>
+        <hr/>
 
-    <!-- Playlist folders -->
-    <div class="settings-item">
-        <span class="settings-item-title ion-text-wrap">Playlist folders</span>
-        <mat-form-field>
-            <input [(ngModel)]="folderToSave" [matAutocomplete]="autocomplete" matInput placeholder="Path">
-            <button (click)="addFolder()" *ngIf="!savedFolders.includes(folderToSave)" [disabled]="folderToSave == ''" color="primary"
-                    mat-icon-button matSuffix>
-                <i class="material-icons">add</i>
-            </button>
-            <button (click)="deleteFolder()" *ngIf="savedFolders.includes(folderToSave)" [disabled]="folderToSave == ''" color="primary"
-                    mat-icon-button matSuffix>
-                <i class="material-icons">clear</i>
-            </button>
-        </mat-form-field>
-        <mat-autocomplete #autocomplete="matAutocomplete">
-            <mat-option *ngFor="let savedFolder of savedFolders" [value]="savedFolder">{{savedFolder}}</mat-option>
-        </mat-autocomplete>
-    </div>
+        <!-- Playlist folders -->
+        <div class="settings-item">
+            <span class="settings-item-title ion-text-wrap">Playlist folders</span>
+            <mat-form-field>
+                <input [(ngModel)]="folderToSave" [matAutocomplete]="autocomplete" matInput placeholder="Path">
+                <button (click)="addFolder()" *ngIf="!savedFolders.includes(folderToSave)" [disabled]="folderToSave == ''" color="primary"
+                        mat-icon-button matSuffix>
+                    <i class="material-icons">add</i>
+                </button>
+                <button (click)="deleteFolder()" *ngIf="savedFolders.includes(folderToSave)" [disabled]="folderToSave == ''" color="primary"
+                        mat-icon-button matSuffix>
+                    <i class="material-icons">clear</i>
+                </button>
+            </mat-form-field>
+            <mat-autocomplete #autocomplete="matAutocomplete">
+                <mat-option *ngFor="let savedFolder of savedFolders" [value]="savedFolder">{{savedFolder}}</mat-option>
+            </mat-autocomplete>
+        </div>
 
-    <hr/>
+        <!-- Reset button -->
+        <ion-button (click)="onResetButtonClicked()" class="reset-button" color="danger" size="small">
+            Reset preferences
+        </ion-button>
 
-    <!-- Save button -->
-    <div class="save-button-container">
-        <ion-button (click)="onSaveButtonClicked()" color="success" size="small">
+
+        <!-- Save button -->
+        <ion-button (click)="onSaveButtonClicked()" class="save-button" color="success" size="small">
             Save settings
         </ion-button>
     </div>
