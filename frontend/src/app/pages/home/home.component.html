@@ -6,7 +6,7 @@
         <ion-title>YT-Audio-DL</ion-title>
 
         <ion-buttons *ngIf="menu" slot="end">
-            <ion-button (click)="btn.action()" *ngFor="let btn of toolbarButtons">
+            <ion-button (click)="btn.action()" *ngFor="let btn of toolbarButtons" [matTooltip]="btn.name">
                 <ion-icon [name]="btn.icon" slot="icon-only"></ion-icon>
             </ion-button>
             <ion-button [mat-menu-trigger-for]="menu">

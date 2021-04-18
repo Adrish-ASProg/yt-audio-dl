@@ -35,6 +35,7 @@ export class HomeComponent implements AfterViewInit {
 
     _toolbarButtonsNoFilesSelected: any[] = [
         {
+            name: "Refresh",
             icon: "refresh",
             action: () => this.downloadTab.refresh()
         }
@@ -42,18 +43,22 @@ export class HomeComponent implements AfterViewInit {
 
     _toolbarButtonsFilesSelected: any[] = [
         {
+            name: "Download",
             icon: "cloud-download-outline",
             action: () => this.downloadTab.downloadButtonClicked()
         },
         {
+            name: "Tools",
             icon: "build-outline",
             action: () => this.downloadTab.postProcessorButtonClicked()
         },
         {
+            name: "Delete",
             icon: "trash-outline",
             action: () => this.downloadTab.deleteButtonClicked()
         },
         {
+            name: "Refresh",
             icon: "refresh",
             action: () => this.downloadTab.refresh()
         }

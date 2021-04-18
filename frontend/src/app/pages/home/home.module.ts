@@ -14,6 +14,7 @@ import {UploadTabModule} from "../../tabs/upload/upload.tab.module";
 import {IonicModule} from "@ionic/angular";
 import {NgxAudioPlayerModule} from "ngx-audio-player";
 import {AudioPlayerModule} from "../../services/audio/audio-player.module";
+import {MatTooltipModule} from "@angular/material/tooltip";
 
 @NgModule({
     entryComponents: [SettingsDialog],
@@ -32,6 +33,7 @@ import {AudioPlayerModule} from "../../services/audio/audio-player.module";
         MatMenuModule,
         MatCheckboxModule,
         MatTabsModule,
+        MatTooltipModule,
 
         NgxAudioPlayerModule
     ]
