@@ -3,9 +3,8 @@ package com.asoft.ytdl.service;
 import com.asoft.ytdl.model.request.TagRequest;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.FileNotFoundException;
 
@@ -13,11 +12,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 
-@ContextConfiguration(classes = {ApplicationService.class})
-@WebMvcTest
+@SpringBootTest
 class ApplicationServiceTest {
 
-    @InjectMocks
+    @Autowired
     ApplicationService appService;
 
     @Nested
