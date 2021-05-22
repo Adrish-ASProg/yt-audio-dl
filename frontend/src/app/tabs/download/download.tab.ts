@@ -1,17 +1,18 @@
 import {AfterViewInit, Component, Input, OnInit, ViewChild} from '@angular/core';
 import {FormControl, Validators} from "@angular/forms";
-import {YT_URLS} from "../../utils/ytdl-constants";
+import {ActivatedRoute} from '@angular/router';
+import {MatDialog} from "@angular/material/dialog";
 import {Platform} from "@ionic/angular";
+import {debounceTime, tap} from "rxjs/operators";
+import {forkJoin, fromEvent} from "rxjs";
+import {YT_URLS} from "../../utils/ytdl-constants";
 import {IntentService} from "../../services/intent/intent.service";
 import {AppManager} from "../../services/request-handler/app-manager.service";
-import {forkJoin, fromEvent} from "rxjs";
-import {debounceTime, tap} from "rxjs/operators";
 import {FileStatus} from "../../model/filestatus.model";
 import {FileStatusTableComponent} from "../../components/file-status-table/file-status-table.component";
 import {TagEditorDialog} from "../../components/tag-editor-dialog/tag-editor-dialog.component";
 import {YTDLUtils} from "../../utils/ytdl-utils";
 import {ToolsDialog} from "../../components/tools-dialog/tools-dialog.component";
-import {MatDialog} from "@angular/material/dialog";
 import {AudioPlayerService} from "../../services/audio/audio-player.service";
 import {FileSelectDialog} from "../../components/file-select-dialog/file-select-dialog.component";
 
@@ -41,18 +42,19 @@ export class DownloadTab implements OnInit, AfterViewInit {
                 private audioPlayerService: AudioPlayerService,
                 private dialog: MatDialog,
                 private intentService: IntentService,
-                private platform: Platform,) {
+                private platform: Platform,
+                private route: ActivatedRoute) {
     }
 
     //#region Init
 
     ngOnInit() {
         this.platform.ready().then(() => {
-            this.urlFormControl.setValue(YT_URLS.Video_Test);
+            this.setInitialUrl();
 
             this.intentService.onIntentReceived = (url) => {
-                this.urlFormControl.setValue(url);
-                this.appManager.sendConvertRequest(this.urlFormControl.value, this.selectFilesToDl);
+                this.setUrl(url);
+                this.convertButtonClicked();
             };
             this.intentService.init();
         });
@@ -62,6 +64,21 @@ export class DownloadTab implements OnInit, AfterViewInit {
         fromEvent(this.filterInput.nativeElement, 'keyup')
             .pipe(debounceTime(500), tap(e => this.refresh()))
             .subscribe();
+    }
+
+    setInitialUrl() {
+        this.setUrl(YT_URLS.Video_Test);
+
+        this.route.queryParams.subscribe(params => {
+            const id = params["id"];
+
+            if (id != undefined) {
+                const urlPath = id.length === 11 ? `watch?v=${id}` : `playlist?list=${id}`;
+                this.setUrl(`https://www.youtube.com/${urlPath}`);
+                this.convertButtonClicked();
+                return;
+            }
+        });
     }
 
     // #endregion
