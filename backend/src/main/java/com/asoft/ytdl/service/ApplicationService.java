@@ -14,10 +14,9 @@ import com.asoft.ytdl.model.request.FileStatusRequest;
 import com.asoft.ytdl.model.request.FileStatusResponse;
 import com.asoft.ytdl.model.request.TagRequest;
 import com.asoft.ytdl.model.request.VideoInfo;
-import com.asoft.ytdl.ui.MainFrame;
+import com.asoft.ytdl.properties.DirectoryProperties;
 import com.asoft.ytdl.utils.FileUtils;
 import com.asoft.ytdl.utils.Mp3Tagger;
-import com.asoft.ytdl.utils.XMLManager;
 import com.asoft.ytdl.utils.YTDownloadManager;
 import com.mpatric.mp3agic.NotSupportedException;
 import org.apache.commons.lang3.StringUtils;
@@ -49,8 +48,6 @@ import static com.asoft.ytdl.utils.FileUtils.getFile;
 @Service
 public class ApplicationService implements DownloadFromYTEvents {
 
-    @Autowired(required = false)
-    MainFrame mainFrame;
 
     private final XmlConfiguration config;
     private final YTDownloadManager dlManager;
