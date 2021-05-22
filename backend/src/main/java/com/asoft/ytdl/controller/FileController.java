@@ -41,6 +41,9 @@ public class FileController {
 
     private final ApplicationService applicationService;
 
+
+    //region ########## Download from YouTube ##########
+
     @RequestMapping(value = "/ytdl", method = RequestMethod.POST)
     public ResponseEntity<Collection<VideoInfo>> downloadYTVideoFromUrl(@RequestBody DLFromYTRequest request) {
         String url = request.getUrl();
@@ -59,6 +62,22 @@ public class FileController {
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
+    //endregion
+
+
+    //region ########## Music Files ##########
+
+    @RequestMapping(value = "/status/all", method = RequestMethod.GET)
+    public ResponseEntity<Collection<FileStatus>> statusAll() {
+        return new ResponseEntity<>(applicationService.getAllFilesStatus(), HttpStatus.OK);
+    }
+
+
+    @RequestMapping(value = "/status", method = RequestMethod.POST)
+    public ResponseEntity<FileStatusResponse> status(@RequestBody FileStatusRequest request) {
+        return new ResponseEntity<>(applicationService.getFilesStatus(request), HttpStatus.OK);
+    }
+
     @RequestMapping(value = "/dl", method = RequestMethod.POST, produces = "audio/mpeg")
     public @ResponseBody
     void download(HttpServletResponse response, @RequestBody DLFileRequest request) throws IOException {
@@ -69,29 +88,6 @@ public class FileController {
     public void downloadAsZip(HttpServletResponse response, @RequestBody DLFileAsZipRequest request) {
         applicationService.downloadFiles(request, response);
     }
-
-    @RequestMapping(value = "/dl-playlist", method = RequestMethod.POST, produces = "application/x-mpegURL")
-    public void downloadPlaylist(HttpServletResponse response, @RequestBody DLPlaylistRequest request) {
-        applicationService.downloadPlaylist(request, response);
-    }
-
-
-    @RequestMapping(value = "/status/all", method = RequestMethod.GET)
-    public ResponseEntity<Collection<FileStatus>> statusAll() {
-        return new ResponseEntity<>(applicationService.getAllFilesStatus(), HttpStatus.OK);
-    }
-
-    @RequestMapping(value = "/status", method = RequestMethod.POST)
-    public ResponseEntity<FileStatusResponse> status(@RequestBody FileStatusRequest request) {
-        return new ResponseEntity<>(applicationService.getFilesStatus(request), HttpStatus.OK);
-    }
-
-
-    @RequestMapping(value = "/tags", method = RequestMethod.POST)
-    public ResponseEntity<Mp3Metadata> setTags(@RequestBody TagRequest tags) throws IOException, NotSupportedException {
-        return new ResponseEntity<>(applicationService.setTags(tags), HttpStatus.OK);
-    }
-
 
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
     public ResponseEntity<Boolean> delete(@RequestBody List<String> ids) throws FileNotFoundException {
@@ -108,6 +104,22 @@ public class FileController {
         applicationService.playSong(id, response);
     }
 
+    @RequestMapping(value = "/tags", method = RequestMethod.POST)
+    public ResponseEntity<Mp3Metadata> setTags(@RequestBody TagRequest tags) throws IOException, NotSupportedException {
+        return new ResponseEntity<>(applicationService.setTags(tags), HttpStatus.OK);
+    }
+
+
+    //endregion
+
+    //region ########## Playlists Files ##########
+
+    @RequestMapping(value = "/dl-playlist", method = RequestMethod.POST, produces = "application/x-mpegURL")
+    public void downloadPlaylist(HttpServletResponse response, @RequestBody DLPlaylistRequest request) {
+        applicationService.downloadPlaylist(request, response);
+    }
+
+    //endregion
 
     @RequestMapping(value = "/test")
     public ResponseEntity<Object> test() {
