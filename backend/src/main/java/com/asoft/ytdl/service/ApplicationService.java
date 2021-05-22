@@ -32,9 +32,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -63,6 +63,8 @@ public class ApplicationService implements DownloadFromYTEvents {
         dlManager.printYtDlVersion();
 
         filesStatus = getExistingFiles();
+
+        System.out.println(filesStatus.size() + " files retrieved");
     }
 
     //#region Requests handler
@@ -113,7 +115,7 @@ public class ApplicationService implements DownloadFromYTEvents {
      * POST /dl-zip
      **/
     public void downloadFiles(DLFileAsZipRequest request, HttpServletResponse response) {
-        Map<String, File> filesToBeZipped = new HashMap<>();
+        var filesToBeZipped = new ArrayList<File>();
 
         /*
         Filter ids, keep only:
@@ -127,22 +129,21 @@ public class ApplicationService implements DownloadFromYTEvents {
                 .filter(fs -> ProgressStatus.COMPLETED.equals(fs.getStatus()))
                 .map(fileStatus -> new File(fileStatus.getAbsolutePath()))
                 .filter(File::exists)
-                .forEach(file -> filesToBeZipped.put(file.getName(), file));
+                .forEach(filesToBeZipped::add);
 
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
 
             int zippedFilesCount = 0;
             // Package files into zip
-            for (Map.Entry<String, File> entry : filesToBeZipped.entrySet()) {
-                System.out.println("Zipping " + entry.getKey());
-                zipOutputStream.putNextEntry(new ZipEntry(entry.getKey()));
-                FileInputStream fileInputStream = new FileInputStream(entry.getValue());
-
+            for (File file : filesToBeZipped) {
+                System.out.println("Zipping " + file.getName());
+                zipOutputStream.putNextEntry(new ZipEntry(file.getName()));
+                var fileInputStream = new FileInputStream(file);
                 IOUtils.copy(fileInputStream, zipOutputStream);
 
                 fileInputStream.close();
                 zipOutputStream.closeEntry();
-                System.out.printf("%s zipped (%d/%d)\n", entry.getKey(), ++zippedFilesCount, filesToBeZipped.size());
+                System.out.printf("%s zipped (%d/%d)\n", file.getName(), ++zippedFilesCount, filesToBeZipped.size());
             }
 
             //setting headers
