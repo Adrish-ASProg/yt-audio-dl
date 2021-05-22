@@ -40,7 +40,7 @@
     "core-js": "^2.5.4",
     "ngx-audio-player": "''11.0.4",
     "ngx-ellipsis": "3.1.1",
-    "rxjs": "~6.5.1",
+    "rxjs": "~6.6.7",
     "tslib": "^2.0.0",
     "zone.js": "~0.10.2"
   },
