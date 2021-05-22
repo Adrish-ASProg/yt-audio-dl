@@ -6,7 +6,6 @@ import com.asoft.ytdl.exception.UncompletedDownloadException;
 import com.asoft.ytdl.exception.YTDLException;
 import com.asoft.ytdl.model.FileStatus;
 import com.asoft.ytdl.model.Mp3Metadata;
-import com.asoft.ytdl.model.XmlConfiguration;
 import com.asoft.ytdl.model.request.DLFileAsZipRequest;
 import com.asoft.ytdl.model.request.DLFromYTRequest;
 import com.asoft.ytdl.model.request.DLPlaylistRequest;
@@ -21,7 +20,6 @@ import com.asoft.ytdl.utils.YTDownloadManager;
 import com.mpatric.mp3agic.NotSupportedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 
@@ -49,12 +47,12 @@ import static com.asoft.ytdl.utils.FileUtils.getFile;
 public class ApplicationService implements DownloadFromYTEvents {
 
 
-    private final XmlConfiguration config;
     private final YTDownloadManager dlManager;
     private final Map<String, FileStatus> filesStatus;
+    private final DirectoryProperties directoryProperties;
 
-    ApplicationService() {
-        config = XMLManager.read();
+    ApplicationService(final DirectoryProperties directoryProperties) {
+        this.directoryProperties = directoryProperties;
 
         dlManager = new YTDownloadManager(this);
         dlManager.printYtDlVersion();
@@ -94,7 +92,7 @@ public class ApplicationService implements DownloadFromYTEvents {
                 .collect(Collectors.toList());
 
         filesStatusToDl.forEach(fs -> filesStatus.put(fs.getId(), fs));
-        dlManager.download(filesStatusToDl, new File(config.getAudioFolder()));
+        dlManager.download(filesStatusToDl, new File(directoryProperties.getAudioDirectory()));
     }
 
     /**
@@ -200,7 +198,7 @@ public class ApplicationService implements DownloadFromYTEvents {
         FileStatus fs = filesStatus.get(tag.getId());
 
         String fileName = fs.getAbsolutePath();
-        String newFileName = config.getAudioFolder() + File.separator + tag.getName() + ".mp3";
+        String newFileName = directoryProperties.getAudioDirectory() + File.separator + tag.getName() + ".mp3";
 
         // Set tags in file
         Mp3Tagger.setTags(new File(fileName), tag.getMetadata());
@@ -299,7 +297,7 @@ public class ApplicationService implements DownloadFromYTEvents {
         FileStatus fs = filesStatus.get(id);
         fs.setStatus(ProgressStatus.COMPLETED);
         // FIXME extension
-        File file = new File(config.getAudioFolder() + File.separator + fs.getName() + ".mp3");
+        File file = new File(directoryProperties.getAudioDirectory() + File.separator + fs.getName() + ".mp3");
         fs.setMetadata(Mp3Tagger.getTags(file));
     }
 
@@ -324,7 +322,7 @@ public class ApplicationService implements DownloadFromYTEvents {
                 .name(name)
                 .status(ProgressStatus.INITIALIZING)
                 .startDate(new Date().getTime())
-                .absolutePath(config.getAudioFolder() + File.separator + name + ".mp3")
+                .absolutePath(directoryProperties.getAudioDirectory() + File.separator + name + ".mp3")
                 .build();
     }
 
@@ -346,7 +344,7 @@ public class ApplicationService implements DownloadFromYTEvents {
 
         System.out.println("Retrieving files..");
 
-        return FileUtils.getAllFilesInDirectory(new File(config.getAudioFolder()))
+        return FileUtils.getAllFilesInDirectory(new File(directoryProperties.getAudioDirectory()))
                 .stream()
                 .filter(f -> f.getName().endsWith(".mp3"))
                 .map(f -> FileStatus.builder()

@@ -6,11 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 @Getter
 @Setter
-@XmlRootElement
 @Builder
 @JsonIgnoreProperties("absolutePath")
 public class FileStatus {
