@@ -8,5 +8,8 @@ server:
   error:
     include-message: always
 
+updateYtdl: false
+
 directory:
   audio: E:\Adri\Music
+  playlist: E:\Adri\Music\Playlists

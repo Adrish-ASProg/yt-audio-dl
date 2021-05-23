@@ -21,6 +21,13 @@ public class YTDownloadManager {
 
     private final DownloadFromYTEvents eventHandler;
 
+    public void updateYtDlVersion() {
+        var cmdManager = new CmdManager(false);
+        System.out.println("Updating youtube-dl..");
+        cmdManager.setOutputEvent(text -> System.out.printf("[youtube-dl update] %s%n", text));
+        cmdManager.executeCommand("youtube-dl -U");
+    }
+
     public void printYtDlVersion() {
         var cmdManager = new CmdManager(false);
         cmdManager.setOutputEvent(text -> System.out.printf("Using youtube-dl version %s%n", text));

@@ -20,9 +20,11 @@ import com.asoft.ytdl.utils.YTDownloadManager;
 import com.mpatric.mp3agic.NotSupportedException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -46,6 +48,8 @@ import static com.asoft.ytdl.utils.FileUtils.getFile;
 @Service
 public class ApplicationService implements DownloadFromYTEvents {
 
+    @Value("${updateYtdl}")
+    private Boolean updateYtDl;
 
     private final YTDownloadManager dlManager;
     private final Map<String, FileStatus> filesStatus;
@@ -55,11 +59,17 @@ public class ApplicationService implements DownloadFromYTEvents {
         this.directoryProperties = directoryProperties;
 
         dlManager = new YTDownloadManager(this);
-        dlManager.printYtDlVersion();
 
         filesStatus = getExistingFiles();
 
         System.out.println(filesStatus.size() + " files retrieved");
+    }
+
+    @PostConstruct
+    void updateYtDlVersion() {
+        if (Boolean.TRUE.equals(updateYtDl))
+            dlManager.updateYtDlVersion();
+        dlManager.printYtDlVersion();
     }
 
     //#region Requests handler
