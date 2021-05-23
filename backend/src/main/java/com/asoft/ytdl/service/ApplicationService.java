@@ -2,6 +2,7 @@ package com.asoft.ytdl.service;
 
 import com.asoft.ytdl.constants.enums.ProgressStatus;
 import com.asoft.ytdl.constants.interfaces.DownloadFromYTEvents;
+import com.asoft.ytdl.exception.NotFoundException;
 import com.asoft.ytdl.exception.UncompletedDownloadException;
 import com.asoft.ytdl.exception.YTDLException;
 import com.asoft.ytdl.model.FileStatus;
@@ -44,6 +45,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static com.asoft.ytdl.utils.FileUtils.getFile;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
 @Service
 public class ApplicationService implements DownloadFromYTEvents {
@@ -135,6 +137,10 @@ public class ApplicationService implements DownloadFromYTEvents {
                 .map(fileStatus -> new File(fileStatus.getAbsolutePath()))
                 .filter(File::exists)
                 .forEach(filesToBeZipped::add);
+
+        if (isEmpty(filesToBeZipped)) {
+            throw new NotFoundException("No files found to zip. You may want to refresh your files list");
+        }
 
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
 
