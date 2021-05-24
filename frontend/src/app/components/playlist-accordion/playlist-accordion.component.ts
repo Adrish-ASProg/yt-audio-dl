@@ -5,6 +5,8 @@ import {Playlist} from "../../model/playlist.model";
 import {CdkDragDrop, moveItemInArray} from "@angular/cdk/drag-drop";
 import {AppManager} from "../../services/request-handler/app-manager.service";
 import {SettingsService} from "../../services/settings/settings.service";
+import {finalize} from "rxjs/operators";
+import {YTDLUtils} from "../../utils/ytdl-utils";
 
 @Component({
     selector: 'app-playlist-tree',
@@ -20,6 +22,8 @@ export class PlaylistAccordionComponent {
                 private settings: SettingsService) {
         this.dataSource = new PlaylistDataSource(apiService);
     }
+
+    public trackByPlaylistName = (index, p) => p.name;
 
     public getPlaylists(): Playlist[] {
         return this.dataSource.data;
@@ -52,7 +56,20 @@ export class PlaylistAccordionComponent {
     public deletePlaylist(playlist: Playlist) {
         if (confirm(`Do you really want to delete playlist ${playlist.name} ?`))
             this.apiService.deletePlaylist(playlist.name)
-                .subscribe(() => this.dataSource.loadPlaylists());
+                .pipe(finalize(() => this.dataSource.loadPlaylists()))
+                .subscribe(() => {}, e => alert("Unable to delete playlist: " + YTDLUtils.getHttpErrorMessage(e)));
+    }
+
+    public deletePlaylistFile(playlist: Playlist, file: string, fileIndex: number) {
+
+        if (confirm(`Do you really want to delete file ${file} from playlist ${playlist.name} ?`)) {
+
+            playlist.files.splice(fileIndex, 1)
+
+            this.apiService.updatePlaylist(playlist)
+                .pipe(finalize(() => this.dataSource.loadPlaylists()))
+                .subscribe(() => {}, e => alert("Unable to update playlist: " + YTDLUtils.getHttpErrorMessage(e)));
+        }
     }
 
     public drop(playlist: Playlist, event: CdkDragDrop<string[]>) {

@@ -1,6 +1,7 @@
 import {Observable, of, throwError} from "rxjs";
 import {catchError, mergeMap, switchMap, tap} from "rxjs/operators";
 import {LoadingService} from "../loading/loading.service";
+import {YTDLUtils} from "../../utils/ytdl-utils";
 
 export class RequestWithLoader<T> {
 
@@ -19,11 +20,7 @@ export class RequestWithLoader<T> {
                 switchMap(_ => wrapped$),
                 tap(_ => this.dismissLoadingDialog()),
                 catchError(e => {
-                    const errorMessage = (e.error && e.error.message)
-                        ? e.error.message
-                        : e.message || e.statusText;
-
-                    alert(errorMessage);
+                    alert(YTDLUtils.getHttpErrorMessage(e));
 
                     this.dismissLoadingDialog();
                     return throwError(e);

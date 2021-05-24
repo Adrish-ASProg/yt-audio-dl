@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -60,8 +61,12 @@ public class PlaylistService {
     public Playlist updatePlaylist(final Playlist newPlaylist) {
         newPlaylist.sanitizeFileNames();
 
-        if (isBlank(newPlaylist.getName()) || isEmpty(newPlaylist.getFiles())) {
-            throw new BadRequestException("Missing playlist name or file list");
+        if (isBlank(newPlaylist.getName())) {
+            throw new BadRequestException("Missing playlist name");
+        }
+
+        if (isEmpty(newPlaylist.getFiles())) {
+            newPlaylist.setFiles(new ArrayList<>());
         }
 
         this.playlists.stream()

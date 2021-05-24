@@ -1,5 +1,5 @@
 <mat-accordion>
-    <mat-expansion-panel *ngFor="let playlist of dataSource.data">
+    <mat-expansion-panel *ngFor="let playlist of dataSource.data; trackBy: trackByPlaylistName">
 
         <mat-expansion-panel-header>
             <mat-panel-title class="title-container">
@@ -9,9 +9,12 @@
         </mat-expansion-panel-header>
 
         <mat-list *ngIf="!!playlist.files && playlist.files.length > 0" cdkDropList (cdkDropListDropped)="drop(playlist, $event)">
-            <mat-list-item *ngFor="let file of playlist.files" cdkDrag>
-                <span>{{file}}</span>
+            <mat-list-item *ngFor="let file of playlist.files; let index = index" cdkDrag>
                 <mat-icon class="icon-drag-handle" cdkDragHandle>drag_handle</mat-icon>
+                <span>{{file}}</span>
+                <button mat-icon-button color="warn" (click)="deletePlaylistFile(playlist, file, index)">
+                    <mat-icon>clear</mat-icon>
+                </button>
             </mat-list-item>
         </mat-list>
 

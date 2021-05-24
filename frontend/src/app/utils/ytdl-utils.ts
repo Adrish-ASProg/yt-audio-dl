@@ -43,4 +43,11 @@ export class YTDLUtils {
             link.remove();
         }, 100);
     }
+
+    public static getHttpErrorMessage(httpResponse): string {
+
+        return (httpResponse.error && httpResponse.error.message)
+            ? httpResponse.error.message
+            : httpResponse.message || httpResponse.statusText;
+    }
 }
