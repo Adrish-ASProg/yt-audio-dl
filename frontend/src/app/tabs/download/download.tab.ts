@@ -90,13 +90,9 @@ export class DownloadTab implements OnInit, AfterViewInit {
 
         this.appManager.sendConvertRequest(this.urlFormControl.value, this.selectFilesToDl)
             .subscribe(data => {
-                    if (data) this.handleFileSelection(data);
-                    this.refresh();
-                },
-                response => {
-                    console.error(response.error);
-                    alert(response.error.message);
-                });
+                if (data) this.handleFileSelection(data);
+                this.refresh();
+            });
     }
 
     public downloadButtonClicked() {

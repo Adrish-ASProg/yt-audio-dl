@@ -19,6 +19,12 @@ export class RequestWithLoader<T> {
                 switchMap(_ => wrapped$),
                 tap(_ => this.dismissLoadingDialog()),
                 catchError(e => {
+                    const errorMessage = (e.error && e.error.message)
+                        ? e.error.message
+                        : e.message || e.statusText;
+
+                    alert(errorMessage);
+
                     this.dismissLoadingDialog();
                     return throwError(e);
                 })
