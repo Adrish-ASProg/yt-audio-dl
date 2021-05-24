@@ -119,7 +119,7 @@ public class ApplicationService implements DownloadFromYTEvents {
 
         var fileStatus = filesStatus.get(id);
         var file = getFile(fileStatus.getAbsolutePath());
-        returnFile(file, response, true);
+        returnFile(file, response);
     }
 
     /**
@@ -146,6 +146,10 @@ public class ApplicationService implements DownloadFromYTEvents {
             throw new NotFoundException("No files found to zip. You may want to refresh your files list");
         }
 
+        var fileName = "yt-audio-dl.zip";
+        response.setHeader(Constants.HttpHeader.FILE_NAME, fileName);
+        response.setHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, Constants.HttpHeader.FILE_NAME);
+
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
 
             int zippedFilesCount = 0;
@@ -161,14 +165,10 @@ public class ApplicationService implements DownloadFromYTEvents {
                 System.out.printf("%s zipped (%d/%d)\n", file.getName(), ++zippedFilesCount, filesToBeZipped.size());
             }
 
-            //setting headers
-            response.addHeader("Content-Disposition", "attachment; filename=\"yt-audio-dl.zip\"");
-            response.setStatus(HttpServletResponse.SC_OK);
         } catch (IOException e) {
             e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
-
     }
 
     /**
@@ -266,7 +266,7 @@ public class ApplicationService implements DownloadFromYTEvents {
 
         var fileStatus = filesStatus.get(id);
         var file = getFile(fileStatus.getAbsolutePath());
-        returnFile(file, response, false);
+        returnFile(file, response);
     }
 
     //endregion
@@ -339,18 +339,13 @@ public class ApplicationService implements DownloadFromYTEvents {
                 .collect(Collectors.toMap(FileStatus::getId, Function.identity()));
     }
 
-    private void returnFile(final File file, final HttpServletResponse response,
-                            final boolean asAttachment) throws IOException {
+    private void returnFile(final File file, final HttpServletResponse response) throws IOException {
 
         var in = new FileInputStream(file);
         response.setContentType("audio/mpeg");
         response.setHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(file.length()));
         response.setHeader(Constants.HttpHeader.FILE_NAME, file.getName());
         response.setHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, Constants.HttpHeader.FILE_NAME);
-
-        if (asAttachment) {
-            response.setHeader("Content-Disposition", "attachment; filename=" + file.getName());
-        }
 
         response.setStatus(HttpServletResponse.SC_OK);
         FileCopyUtils.copy(in, response.getOutputStream());

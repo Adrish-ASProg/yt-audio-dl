@@ -80,8 +80,7 @@ public class FileController {
     }
 
     @RequestMapping(value = "/dl", method = RequestMethod.POST, produces = "audio/mpeg")
-    public @ResponseBody
-    void download(HttpServletResponse response, @RequestBody DLFileRequest request) throws IOException {
+    public void download(HttpServletResponse response, @RequestBody DLFileRequest request) throws IOException {
         applicationService.downloadFile(request.getId(), response);
     }
 

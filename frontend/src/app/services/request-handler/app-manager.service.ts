@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {YTDLUtils} from "../../utils/ytdl-utils";
 import {Mp3Metadata} from "../../model/mp3metadata.model";
 import {APIService} from "../api/api.service";
-import {Observable} from "rxjs";
+import {from, Observable} from "rxjs";
 import {AppManagerModule} from "./app-manager.module";
 import {Platform} from "@ionic/angular";
 import {FileTransferService} from "../file-transfer/file-transfer.service";
@@ -12,7 +12,7 @@ import {MatSnackBar} from "@angular/material/snack-bar";
 import {UtilsService} from "../utils/utils.service";
 import {RequestWithLoader} from "../utils/request-wrapper.util";
 import {VideoInfo} from "../../model/videoinfo.model";
-import {tap} from "rxjs/operators";
+import {flatMap, map, tap} from "rxjs/operators";
 
 enum MimeType {
     AUDIO = "audio/mpeg",
@@ -66,32 +66,18 @@ export class AppManager {
         await this.handleDownloadRequest(request, MimeType.AUDIO);
     }
 
-    private async handleDownloadRequest(observable: Observable<any>, mimeType: MimeType) {
-        await this.loadingService.showDialog("Downloading file..");
-
-        observable.subscribe(
-            async (response: HttpResponse<any>) => {
-                await this.loadingService.showDialog("Saving file as " + response.headers.get('X-File-Name'));
-
-                this.handleBlobDownload(response.body, response.headers.get('X-File-Name'), mimeType)
-                    .then(_ => this.handleSaveSuccess(), error => this.handleSaveError(error));
-            },
-            error => this.handleDownloadError(error)
-        );
+    async sendDownloadAsZipRequest(ids: string[]) {
+        const request = this.apiService.downloadFilesAsZip(ids);
+        await this.handleDownloadRequest(request, MimeType.ZIP);
     }
 
-    async sendDownloadAsZipRequest(ids: string[]) {
-        await this.loadingService.showDialog("Downloading file..");
-
-        this.apiService.downloadFilesAsZip(ids).subscribe(
-            async (response: HttpResponse<any>) => {
-                await this.loadingService.showDialog("Saving file as yt-audio-dl.zip");
-
-                this.handleBlobDownload(response.body, 'yt-audio-dl.zip', MimeType.ZIP)
-                    .then(_ => this.handleSaveSuccess(), error => this.handleSaveError(error));
-            },
-            error => this.handleDownloadError(error)
-        );
+    private async handleDownloadRequest(request: Observable<any>, mimeType: MimeType) {
+        from(this.loadingService.showDialog("Downloading file.."))
+            .pipe(
+                flatMap(() => request),
+                map((response: HttpResponse<any>) => ([response.body, response.headers.get('X-File-Name')]))
+            )
+            .subscribe(([blob, fileName]) => this.handleBlobDownload(blob, fileName, mimeType), e => this.handleDownloadError(e));
     }
 
     sendDeleteRequest(ids: string[]): Observable<boolean> {
@@ -108,17 +94,20 @@ export class AppManager {
 
     //#region YT-dl
 
-    handleBlobDownload(blob: Blob, filename: string, mimeType: MimeType): Promise<any> {
+    handleBlobDownload(blob: Blob, filename: string, mimeType: MimeType) {
         // It is necessary to create a new blob object with mime-type explicitly set
         // otherwise only Chrome works like it should
         const newBlob = new Blob([blob], {type: mimeType});
+        let promise;
 
         if (this.platform.is('cordova')) {
-            return this.fileTransferService.writeBlobToStorage(newBlob, filename);
+            promise = this.fileTransferService.writeBlobToStorage(newBlob, filename);
         } else {
             YTDLUtils.saveBlobToStorage(newBlob, filename);
-            return new Promise(r => r());
+            promise = new Promise(r => r());
         }
+
+        return promise.then(_ => this.handleSaveSuccess(), e => this.handleSaveError(e));
     }
 
     handleDownloadError(error) {
