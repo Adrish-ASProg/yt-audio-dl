@@ -56,6 +56,13 @@ public class PlaylistController {
         playlistService.downloadPlaylist(playlistName, songsDirectory, response);
     }
 
+    @RequestMapping(value = "/playlists/{name}/rename", method = RequestMethod.POST)
+    public ResponseEntity<Playlist> renamePlaylist(@PathVariable(value = "name") String playlistName,
+                                                   @RequestBody String newPlaylistName) {
+
+        return new ResponseEntity<>(playlistService.renamePlaylist(playlistName, newPlaylistName), HttpStatus.OK);
+    }
+
     @RequestMapping(value = "/playlists/{name}", method = RequestMethod.DELETE)
     public ResponseEntity<Void> deletePlaylist(@PathVariable(value = "name") String playlistName) {
 

@@ -39,6 +39,16 @@ export class PlaylistAccordionComponent {
         this.appManager.sendPlaylistDownloadRequest(playlist.name, songsDirectory).then();
     }
 
+    public renamePlaylist(playlist: Playlist) {
+        const newPlaylistName = prompt("New playlist name:", playlist.name);
+        if (!newPlaylistName) {
+            return;
+        }
+
+        this.appManager.sendPlaylistRenameRequest(playlist.name, newPlaylistName)
+            .subscribe(() => this.refreshPlaylists());
+    }
+
     public deletePlaylist(playlist: Playlist) {
         if (confirm(`Do you really want to delete playlist ${playlist.name} ?`))
             this.apiService.deletePlaylist(playlist.name)

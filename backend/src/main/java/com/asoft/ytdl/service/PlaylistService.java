@@ -23,9 +23,11 @@ import java.util.stream.Collectors;
 import static com.asoft.ytdl.utils.FileUtils.buildFile;
 import static com.asoft.ytdl.utils.FileUtils.deleteFile;
 import static com.asoft.ytdl.utils.FileUtils.normalizePath;
+import static com.asoft.ytdl.utils.FileUtils.renameFile;
 import static java.lang.String.format;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.io.IOUtils.toInputStream;
+import static org.apache.commons.lang3.StringUtils.isAnyBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Service
@@ -135,6 +137,33 @@ public class PlaylistService {
         response.flushBuffer();
 
         System.out.printf("Playlist %s sent to download%n", playlistName);
+    }
+
+    /**
+     * POST /playlists/{name}/rename
+     **/
+    public Playlist renamePlaylist(final String playlistName,
+                                   final String newPlaylistName) {
+
+        if (isAnyBlank(playlistName, newPlaylistName)) {
+            throw new BadRequestException("Missing playlist current name or new name");
+        }
+
+        var playlist = findPlaylistOrThrow(playlistName);
+
+        try {
+            var oldFile = buildFile(directoryProperties.getPlaylistDirectory(), playlist.getFilename());
+            var newPath = buildFile(directoryProperties.getPlaylistDirectory(), newPlaylistName + Playlist.EXTENSION).getAbsolutePath();
+
+            renameFile(oldFile, newPath);
+        } catch (IOException e) {
+            var msg = String.format("Unable to rename playlist %s to %s: %s", playlist.getName(), newPlaylistName, e.getMessage());
+            throw new InternalServerException(msg);
+        }
+
+        playlist.setName(newPlaylistName);
+
+        return playlist;
     }
 
     /**

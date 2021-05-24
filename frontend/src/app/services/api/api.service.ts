@@ -99,6 +99,15 @@ export class APIService {
         );
     }
 
+    /** POST: rename playlist */
+    renamePlaylist(playlistName: string, newPlaylistName: string): Observable<Playlist> {
+        return this.http.post<any>(
+            `${this.apiUrl}${this.playlistsUrl}/${playlistName}/rename`,
+            newPlaylistName,
+            jsonHttpOptions
+        );
+    }
+
     /** DELETE: delete playlist */
     deletePlaylist(playlistName: string): Observable<any> {
         return this.http.delete<any>(

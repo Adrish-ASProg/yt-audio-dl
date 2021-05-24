@@ -35,3 +35,4 @@ build/
 node
 *.jar
 /settings.xml
+/yt-audio-dl-api.*

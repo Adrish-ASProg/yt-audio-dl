@@ -51,6 +51,11 @@ export class AppManager {
                 "Dismiss", {duration: 1500})));
     }
 
+    sendPlaylistRenameRequest(playlistName: string, newPlaylistName: string) {
+        const request = this.apiService.renamePlaylist(playlistName, newPlaylistName);
+        return this.wrapRequestWithLoading(request, "Renaming playlist..");
+    }
+
     async sendPlaylistDownloadRequest(playlistName: string, songsDirectory: string) {
         const request = this.apiService.downloadPlaylist(playlistName, songsDirectory);
         await this.handleDownloadRequest(request, MimeType.PLAYLIST);
@@ -61,7 +66,7 @@ export class AppManager {
         await this.handleDownloadRequest(request, MimeType.AUDIO);
     }
 
-    async handleDownloadRequest(observable: Observable<any>, mimeType: MimeType) {
+    private async handleDownloadRequest(observable: Observable<any>, mimeType: MimeType) {
         await this.loadingService.showDialog("Downloading file..");
 
         observable.subscribe(
