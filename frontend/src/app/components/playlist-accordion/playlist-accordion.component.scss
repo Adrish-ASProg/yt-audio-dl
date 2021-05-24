@@ -12,15 +12,15 @@
 }
 
 .mat-list-item {
-    cursor: move;
-    user-select: none;
 
     span {
         flex: 1;
     }
 
-    .mat-icon {
+    .icon-drag-handle {
+        cursor: move;
         color: #5d5d5d;
+        user-select: none;
     }
 
     // while dragging

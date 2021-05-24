@@ -11,7 +11,7 @@
         <mat-list *ngIf="!!playlist.files && playlist.files.length > 0" cdkDropList (cdkDropListDropped)="drop(playlist, $event)">
             <mat-list-item *ngFor="let file of playlist.files" cdkDrag>
                 <span>{{file}}</span>
-                <mat-icon>drag_handle</mat-icon>
+                <mat-icon class="icon-drag-handle" cdkDragHandle>drag_handle</mat-icon>
             </mat-list-item>
         </mat-list>
 
