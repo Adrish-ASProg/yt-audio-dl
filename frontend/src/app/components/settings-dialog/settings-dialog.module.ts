@@ -6,7 +6,6 @@ import {CommonModule} from "@angular/common";
 import {IonicModule} from "@ionic/angular";
 import {MatInputModule} from "@angular/material/input";
 import {MatButtonModule} from "@angular/material/button";
-import {MatAutocompleteModule} from "@angular/material/autocomplete";
 import {MatIconModule} from "@angular/material/icon";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 
@@ -19,10 +18,11 @@ import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
         IonicModule,
 
         SettingsServiceModule,
-        MatInputModule,
+
         MatButtonModule,
-        MatAutocompleteModule,
-        MatIconModule
+        MatIconModule,
+        MatInputModule
     ]
 })
-export class SettingsDialogModule {}
+export class SettingsDialogModule {
+}

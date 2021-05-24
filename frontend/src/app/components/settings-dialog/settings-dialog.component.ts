@@ -10,38 +10,16 @@ import {ModalController} from '@ionic/angular';
 export class SettingsDialog {
 
     serverAddress: string;
-
-    savedFolders: string[] = [];
-    folderToSave: string = "";
-    selectedFolder: string = "";
+    songDirectory: string;
 
     constructor(private settings: SettingsService,
                 private modalController: ModalController) {
 
         this.serverAddress = settings.getServerAddress();
-        this.savedFolders = settings.getSavedFolders().split("|").filter(s => s != "");
-        if (this.savedFolders.length > 0) this.selectedFolder = this.savedFolders[0];
+        this.songDirectory = settings.getSongsDirectory();
     }
 
-    //#region Playlist folders
-
-    addFolder(): void {
-        if (this.savedFolders.includes(this.folderToSave)) return;
-        this.savedFolders.push(this.folderToSave);
-        this.settings.setSavedFolders(this.savedFolders.join("|"));
-        this.selectedFolder = this.savedFolders[this.savedFolders.length - 1];
-    }
-
-    deleteFolder(): void {
-        if (!this.savedFolders.includes(this.selectedFolder)) return;
-        this.savedFolders = this.savedFolders.filter(f => f !== this.selectedFolder);
-        this.settings.setSavedFolders(this.savedFolders.join("|"));
-        if (this.savedFolders.length > 0) this.selectedFolder = this.savedFolders[0];
-    }
-
-    // #endregion
-
-    //#region Buttons
+    //region Buttons
 
     onCloseButtonClicked(): void {
         this.modalController.dismiss();
@@ -57,8 +35,9 @@ export class SettingsDialog {
 
     onSaveButtonClicked(): void {
         this.settings.setServerAddress(this.serverAddress);
+        this.settings.setSongsDirectory(this.songDirectory);
         this.modalController.dismiss();
     }
 
-    // #endregion
+    //endregion
 }

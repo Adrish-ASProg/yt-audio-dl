@@ -9,7 +9,7 @@ import {SettingsService} from "../../services/settings/settings.service";
 import {FileStatus} from "../../model/filestatus.model";
 import {merge} from "rxjs";
 import {tap} from "rxjs/operators";
-import {FileStatusDataSource} from "../../model/filestatus-datasource.model";
+import {FileStatusDataSource} from "../../datasource/filestatus-datasource.model";
 import {APIService} from "../../services/api/api.service";
 
 @Component({

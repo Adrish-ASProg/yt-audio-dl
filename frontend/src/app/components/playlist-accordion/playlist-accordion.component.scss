@@ -1,0 +1,56 @@
+@import '~@angular/material/theming';
+
+.title-container {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    color: #5d5d5d;
+
+    .mat-icon {
+        margin-right: 8px;
+    }
+}
+
+.mat-list-item {
+    cursor: move;
+    user-select: none;
+
+    span {
+        flex: 1;
+    }
+
+    .mat-icon {
+        color: #5d5d5d;
+    }
+
+    // while dragging
+    &.cdk-drag-preview {
+        @include mat-elevation(12);
+    }
+
+    // potential drop area
+    &.cdk-drag-placeholder {
+        opacity: 0;
+    }
+}
+
+// items moving away to make room for drop
+.cdk-drop-list-dragging .mat-list-item:not(.cdk-drag-placeholder) {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+// item being dropped
+.cdk-drag-animating {
+    transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+// fix default .mat-list-item-content style messed up with drag & drop
+::ng-deep .cdk-drag-preview .mat-list-item-content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 0 16px;
+    position: relative;
+    height: inherit;
+}

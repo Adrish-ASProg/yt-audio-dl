@@ -1,0 +1,20 @@
+<div class="title" mat-dialog-title>Choose playlist</div>
+
+<div class="playlist-chooser-container content" mat-dialog-content>
+    <span>A new playlist will be created if it doesn't exists.</span>
+
+    <!-- Input playlist name -->
+    <mat-form-field class="input-playlist-name">
+        <input [(ngModel)]="playlistName" [matAutocomplete]="autocomplete"
+               matInput placeholder="Playlist name">
+    </mat-form-field>
+
+    <mat-autocomplete #autocomplete="matAutocomplete">
+        <mat-option *ngFor="let playlist of data.playlists" [value]="playlist.name">{{playlist.name}}</mat-option>
+    </mat-autocomplete>
+</div>
+
+<div mat-dialog-actions>
+    <button (click)="validate()" mat-button>Ok</button>
+    <button (click)="close()" mat-button>Cancel</button>
+</div>

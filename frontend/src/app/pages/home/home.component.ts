@@ -6,11 +6,14 @@ import {ModalController} from "@ionic/angular";
 import {MatMenu} from "@angular/material/menu";
 import {SettingsService} from "../../services/settings/settings.service";
 import {timer} from "rxjs";
-import {take} from "rxjs/operators";
+import {flatMap, skipWhile, take} from "rxjs/operators";
 import {MatTabGroup} from "@angular/material/tabs";
 import {DownloadTab} from "../../tabs/download/download.tab";
 import {AudioPlayerService} from "../../services/audio/audio-player.service";
 import {AudioPlayerComponent} from "ngx-audio-player";
+import {PlaylistTab} from "../../tabs/playlist/playlist.tab";
+import {MatDialog} from "@angular/material/dialog";
+import {PlaylistChooserDialog} from "../../components/playlist-chooser-dialog/playlist-chooser-dialog.component";
 
 @Component({
     selector: 'app-home',
@@ -31,6 +34,9 @@ export class HomeComponent implements AfterViewInit {
     @ViewChild(DownloadTab)
     public downloadTab: DownloadTab;
 
+    @ViewChild(PlaylistTab)
+    public playlistTab: PlaylistTab;
+
     public YT_URLS = YT_URLS;
 
     displayedColumns: string[] = ['select', 'name', 'status', 'play', 'startDate'];
@@ -39,7 +45,7 @@ export class HomeComponent implements AfterViewInit {
         {
             name: "Refresh",
             icon: "refresh",
-            action: () => this.downloadTab.refresh()
+            action: () => this.refresh()
         }
     ];
 
@@ -55,19 +61,15 @@ export class HomeComponent implements AfterViewInit {
             action: () => this.downloadTab.postProcessorButtonClicked()
         },
         {
-            name: "Delete",
-            icon: "trash-outline",
-            action: () => this.downloadTab.deleteButtonClicked()
-        },
-        {
             name: "Refresh",
             icon: "refresh",
-            action: () => this.downloadTab.refresh()
+            action: () => this.refresh()
         }
     ];
 
     constructor(public appManager: AppManager,
                 public audioPlayerService: AudioPlayerService,
+                private dialog: MatDialog,
                 private modalController: ModalController,
                 private settingsService: SettingsService) {
     }
@@ -90,6 +92,24 @@ export class HomeComponent implements AfterViewInit {
 
 
     //#region Menu
+
+    public refresh() {
+        this.downloadTab.refresh();
+        this.playlistTab.refresh();
+    }
+
+    public addFilesToPlaylist() {
+        const playlists = this.playlistTab.getPlaylists();
+        const selectedFilesIds = this.downloadTab.getSelectedFiles().map(fs => fs.id);
+
+        this.dialog.open(PlaylistChooserDialog, {data: {playlists}})
+            .afterClosed()
+            .pipe(
+                skipWhile(name => !name),
+                flatMap(playlistName => this.appManager.sendAddToPlaylistRequest(playlistName, selectedFilesIds))
+            )
+            .subscribe(() => this.playlistTab.refresh());
+    }
 
     public updateDisplayedColumns(value: string) {
         this.displayedColumns.includes(value)

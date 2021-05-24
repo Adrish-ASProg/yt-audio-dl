@@ -16,7 +16,7 @@
             <span class="settings-item-title ion-text-wrap">Server address</span>
             <mat-form-field class="input-container">
                 <input [(ngModel)]="serverAddress" matInput>
-                <button (click)="serverAddress = ''" *ngIf="serverAddress != ''" aria-label="Clear" mat-button mat-icon-button matSuffix>
+                <button (click)="serverAddress = ''" *ngIf="serverAddress != ''" mat-button mat-icon-button matSuffix>
                     <mat-icon>close</mat-icon>
                 </button>
             </mat-form-field>
@@ -24,23 +24,15 @@
 
         <hr/>
 
-        <!-- Playlist folders -->
+        <!-- Songs directory -->
         <div class="settings-item">
-            <span class="settings-item-title ion-text-wrap">Playlist folders</span>
+            <span class="settings-item-title ion-text-wrap">Songs directory</span>
             <mat-form-field>
-                <input [(ngModel)]="folderToSave" [matAutocomplete]="autocomplete" matInput placeholder="Path">
-                <button (click)="addFolder()" *ngIf="!savedFolders.includes(folderToSave)" [disabled]="folderToSave == ''" color="primary"
-                        mat-icon-button matSuffix>
-                    <i class="material-icons">add</i>
-                </button>
-                <button (click)="deleteFolder()" *ngIf="savedFolders.includes(folderToSave)" [disabled]="folderToSave == ''" color="primary"
-                        mat-icon-button matSuffix>
-                    <i class="material-icons">clear</i>
+                <input [(ngModel)]="songDirectory" matInput>
+                <button (click)="songDirectory = ''" *ngIf="songDirectory != ''" mat-button mat-icon-button matSuffix>
+                    <mat-icon>close</mat-icon>
                 </button>
             </mat-form-field>
-            <mat-autocomplete #autocomplete="matAutocomplete">
-                <mat-option *ngFor="let savedFolder of savedFolders" [value]="savedFolder">{{savedFolder}}</mat-option>
-            </mat-autocomplete>
         </div>
 
         <!-- Reset button -->

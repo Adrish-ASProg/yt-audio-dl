@@ -6,24 +6,20 @@ import {APIModule} from "./api.module";
 import {SettingsService} from "../settings/settings.service";
 import {FileStatusResponse} from "../../model/filestatus-response.model";
 import {VideoInfo} from "../../model/videoinfo.model";
+import {Playlist} from "../../model/playlist.model";
 
 
 const jsonHttpOptions = {
     headers: new HttpHeaders({'Content-Type': 'application/json'})
 };
 
-const audioHttpOptions = {
+const blobHttpOptions = {
     responseType: 'blob' as 'json',
     observe: 'response' as 'body'
 };
 
 const zipHttpOptions = {
     responseType: 'arraybuffer' as 'json',
-    observe: 'response' as 'body'
-};
-
-const playlistHttpOptions = {
-    responseType: 'text' as 'json',
     observe: 'response' as 'body'
 };
 
@@ -40,7 +36,7 @@ export class APIService {
     private statusUrl: string = "/status";
     private downloadUrl: string = "/dl";
     private downloadAsZipUrl: string = "/dl-zip";
-    private downloadPlaylistUrl: string = "/dl-playlist";
+    private playlistsUrl: string = "/playlists";
     private setTagsUrl: string = "/tags";
     private deleteUrl: string = "/delete";
     private playUrl: string = "/play";
@@ -64,7 +60,7 @@ export class APIService {
         return this.http.post<any>(
             `${this.apiUrl}${this.downloadUrl}`,
             {id: id},
-            audioHttpOptions
+            blobHttpOptions
         );
     }
 
@@ -77,12 +73,46 @@ export class APIService {
         );
     }
 
-    /** POST: download playlist */
-    downloadPlaylist(ids: string[], filePath: string): Observable<any> {
+    /** GET: get playlists */
+    getPlaylists(): Observable<Playlist[]> {
+        return this.http.get<any>(
+            `${this.apiUrl}${this.playlistsUrl}`,
+            jsonHttpOptions
+        );
+    }
+
+    /** POST: update playlist */
+    updatePlaylist(playlist: Playlist): Observable<Playlist> {
         return this.http.post<any>(
-            `${this.apiUrl}${this.downloadPlaylistUrl}`,
-            {ids, filePath},
-            playlistHttpOptions
+            `${this.apiUrl}${this.playlistsUrl}`,
+            playlist,
+            jsonHttpOptions
+        );
+    }
+
+    /** POST: add files to playlist */
+    addFilesToPlaylist(playlistName: string, filesIds: string[]): Observable<Playlist> {
+        return this.http.post<any>(
+            `${this.apiUrl}${this.playlistsUrl}/${playlistName}/add`,
+            filesIds,
+            jsonHttpOptions
+        );
+    }
+
+    /** DELETE: delete playlist */
+    deletePlaylist(playlistName: string): Observable<any> {
+        return this.http.delete<any>(
+            `${this.apiUrl}${this.playlistsUrl}/${playlistName}`,
+            jsonHttpOptions
+        );
+    }
+
+    /** POST: download playlist */
+    downloadPlaylist(playlistName: string, songsDirectory: string): Observable<any> {
+        return this.http.post<any>(
+            `${this.apiUrl}${this.playlistsUrl}/${playlistName}/download`,
+            songsDirectory,
+            blobHttpOptions
         );
     }
 

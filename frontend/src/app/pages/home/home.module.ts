@@ -10,11 +10,12 @@ import {SettingsDialog} from "../../components/settings-dialog/settings-dialog.c
 import {SettingsDialogModule} from "../../components/settings-dialog/settings-dialog.module";
 import {MatTabsModule} from "@angular/material/tabs";
 import {DownloadTabModule} from "../../tabs/download/download.tab.module";
-import {UploadTabModule} from "../../tabs/upload/upload.tab.module";
+import {PlaylistTabModule} from "../../tabs/playlist/playlist.tab.module";
 import {IonicModule} from "@ionic/angular";
 import {NgxAudioPlayerModule} from "ngx-audio-player";
 import {AudioPlayerModule} from "../../services/audio/audio-player.module";
 import {MatTooltipModule} from "@angular/material/tooltip";
+import {PlaylistChooserDialogModule} from "../../components/playlist-chooser-dialog/playlist-chooser-dialog.module";
 
 @NgModule({
     entryComponents: [SettingsDialog],
@@ -27,7 +28,8 @@ import {MatTooltipModule} from "@angular/material/tooltip";
         SettingsServiceModule,
         SettingsDialogModule,
         DownloadTabModule,
-        UploadTabModule,
+        PlaylistChooserDialogModule,
+        PlaylistTabModule,
         AudioPlayerModule,
 
         MatMenuModule,

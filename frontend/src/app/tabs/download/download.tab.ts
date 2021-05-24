@@ -160,6 +160,10 @@ export class DownloadTab implements OnInit, AfterViewInit {
 
     // #endregion
 
+    public getSelectedFiles(): FileStatus[] {
+        return this.fileStatusTable.getSelected();
+    }
+
     public hasFileSelected(): boolean {
         return this.fileStatusTable.getSelected()?.length > 0;
     }

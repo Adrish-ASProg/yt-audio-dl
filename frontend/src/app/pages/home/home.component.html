@@ -19,6 +19,8 @@
 
 <!-- Menu -->
 <mat-menu #mainMenu="matMenu">
+    <button *ngIf="downloadTab?.hasFileSelected()" (click)="addFilesToPlaylist()" mat-menu-item>Add file(s) to playlist</button>
+    <button *ngIf="downloadTab?.hasFileSelected()" (click)="downloadTab.deleteButtonClicked()" mat-menu-item>Delete file(s)</button>
     <button [matMenuTriggerFor]="tableColumnMenu" mat-menu-item>Table columns</button>
     <button [matMenuTriggerFor]="debugMenu" mat-menu-item>Debug</button>
     <button (click)="settingsActionClicked()" mat-menu-item>Settings</button>
@@ -45,9 +47,9 @@
         <app-download-tab [displayedColumns]="displayedColumns"></app-download-tab>
     </mat-tab>
 
-    <!-- Tab upload playlist -->
-    <mat-tab label="Upload">
-        <app-upload-tab></app-upload-tab>
+    <!-- Tab playlist -->
+    <mat-tab label="Playlists">
+        <app-playlist-tab></app-playlist-tab>
     </mat-tab>
 </mat-tab-group>
 

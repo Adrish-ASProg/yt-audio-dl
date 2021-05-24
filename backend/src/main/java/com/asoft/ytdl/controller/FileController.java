@@ -6,7 +6,6 @@ import com.asoft.ytdl.model.Mp3Metadata;
 import com.asoft.ytdl.model.request.DLFileAsZipRequest;
 import com.asoft.ytdl.model.request.DLFileRequest;
 import com.asoft.ytdl.model.request.DLFromYTRequest;
-import com.asoft.ytdl.model.request.DLPlaylistRequest;
 import com.asoft.ytdl.model.request.FileStatusRequest;
 import com.asoft.ytdl.model.request.FileStatusResponse;
 import com.asoft.ytdl.model.request.TagRequest;
@@ -109,16 +108,6 @@ public class FileController {
     @RequestMapping(value = "/tags", method = RequestMethod.POST)
     public ResponseEntity<Mp3Metadata> setTags(@RequestBody TagRequest tags) throws IOException, NotSupportedException {
         return new ResponseEntity<>(applicationService.setTags(tags), HttpStatus.OK);
-    }
-
-
-    //endregion
-
-    //region ########## Playlists Files ##########
-
-    @RequestMapping(value = "/dl-playlist", method = RequestMethod.POST, produces = "application/x-mpegURL")
-    public void downloadPlaylist(HttpServletResponse response, @RequestBody DLPlaylistRequest request) {
-        applicationService.downloadPlaylist(request, response);
     }
 
     //endregion

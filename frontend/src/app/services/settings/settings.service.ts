@@ -6,7 +6,7 @@ enum OptionsKey {
     API_ADDRESS = "API_ADDRESS",
     DISPLAYED_COLUMNS = "DISPLAYED_COLUMNS",
     PAGE_SIZE = "PAGE_SIZE",
-    SAVED_FOLDERS = "SAVED_FOLDERS"
+    SONGS_DIRECTORY = "SONGS_DIRECTORY"
 }
 
 class Option {
@@ -22,7 +22,7 @@ export class SettingsService {
         {name: OptionsKey.API_ADDRESS, value: "http://192.168.0.1:8080", defaultValue: "http://192.168.0.1:8080"},
         {name: OptionsKey.DISPLAYED_COLUMNS, value: "select|name|status|startDate", defaultValue: "select|name|status|startDate"},
         {name: OptionsKey.PAGE_SIZE, value: "10", defaultValue: "10"},
-        {name: OptionsKey.SAVED_FOLDERS, value: "", defaultValue: ""}
+        {name: OptionsKey.SONGS_DIRECTORY, value: "", defaultValue: ""}
     ];
 
     constructor() {
@@ -69,12 +69,12 @@ export class SettingsService {
         return true;
     }
 
-    getSavedFolders(): string {
-        return this.getOption(OptionsKey.SAVED_FOLDERS);
+    getSongsDirectory(): string {
+        return this.getOption(OptionsKey.SONGS_DIRECTORY);
     }
 
-    setSavedFolders(value: string): boolean {
-        this.setOption(OptionsKey.SAVED_FOLDERS, value);
+    setSongsDirectory(value: string): boolean {
+        this.setOption(OptionsKey.SONGS_DIRECTORY, value);
         console.debug("Saved folders value set to " + value);
         return true;
     }

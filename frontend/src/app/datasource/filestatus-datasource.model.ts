@@ -1,6 +1,6 @@
 import {CollectionViewer, DataSource} from "@angular/cdk/collections";
 import {BehaviorSubject, Observable, of} from "rxjs";
-import {FileStatus} from "./filestatus.model";
+import {FileStatus} from "../model/filestatus.model";
 import {APIService} from "../services/api/api.service";
 import {catchError, finalize} from "rxjs/operators";
 
@@ -24,7 +24,7 @@ export class FileStatusDataSource implements DataSource<FileStatus> {
         this.loadingSubject.complete();
     }
 
-    loadFileStatus(filter = "", sort = {}, pageIndex = 0, pageSize = 10) {
+    public loadFileStatus(filter = "", sort = {}, pageIndex = 0, pageSize = 10) {
         this.loadingSubject.next(true);
 
         this.apiService.getFileStatus(filter, sort, pageIndex, pageSize)

@@ -1,0 +1,23 @@
+<mat-accordion>
+    <mat-expansion-panel *ngFor="let playlist of dataSource.data">
+
+        <mat-expansion-panel-header>
+            <mat-panel-title class="title-container">
+                <mat-icon>library_music</mat-icon>
+                {{playlist.name}}
+            </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <mat-list *ngIf="!!playlist.files && playlist.files.length > 0" cdkDropList (cdkDropListDropped)="drop(playlist, $event)">
+            <mat-list-item *ngFor="let file of playlist.files" cdkDrag>
+                <span>{{file}}</span>
+                <mat-icon>drag_handle</mat-icon>
+            </mat-list-item>
+        </mat-list>
+
+        <mat-action-row>
+            <button mat-button color="primary" (click)="downloadPlaylist(playlist)">Download</button>
+            <button mat-button color="warn" (click)="deletePlaylist(playlist)">Delete</button>
+        </mat-action-row>
+    </mat-expansion-panel>
+</mat-accordion>

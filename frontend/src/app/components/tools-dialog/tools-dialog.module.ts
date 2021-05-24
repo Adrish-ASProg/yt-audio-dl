@@ -11,8 +11,6 @@ import {CommonModule} from "@angular/common";
 import {IonicModule} from "@ionic/angular";
 
 import {EllipsisModule} from "ngx-ellipsis";
-import {MatInputModule} from "@angular/material/input";
-import {MatAutocompleteModule} from "@angular/material/autocomplete";
 
 @NgModule({
     declarations: [ToolsDialog],
@@ -27,9 +25,7 @@ import {MatAutocompleteModule} from "@angular/material/autocomplete";
         MatGridListModule,
         MatButtonModule,
 
-        EllipsisModule,
-        MatInputModule,
-        MatAutocompleteModule
+        EllipsisModule
     ]
 })
 export class ToolsDialogModule {}

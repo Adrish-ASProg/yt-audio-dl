@@ -11,6 +11,7 @@ export class LoadingService {
 
     async showDialog(message: string) {
         await this.dismissDialog();
+
         this.loadingDialog = await this.loadingController.create({message});
         await this.loadingDialog.present();
     }
@@ -18,6 +19,7 @@ export class LoadingService {
     async dismissDialog() {
         if (this.loadingDialog != null) {
             await this.loadingDialog.dismiss();
+            this.loadingDialog = null;
         }
     }
 }

@@ -1,9 +1,8 @@
 package com.asoft.ytdl.utils;
 
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,6 +10,7 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,47 +28,8 @@ public class FileUtils {
                 : normalizePath(path);
     }
 
-    /**
-     * Enregistre un fichier à l'emplacement et sous le nom indiqué
-     *
-     * @param file      Le fichier à enregistrer
-     * @param destDir   Le dossier de destination
-     * @param fileName  Le nom sous lequel enregistrer le fichier
-     * @param overwrite Écrase le fichier existant
-     * @return Une chaine vide si aucune erreur,
-     * le message de l'erreur sinon
-     */
-    public static String saveFile(final MultipartFile file,
-                                  final String destDir,
-                                  final String fileName,
-                                  final Boolean overwrite) {
-
-        var destDirFile = new File(destDir);
-
-        try {
-            // Création dossier(s) si n'existe pas
-            if (!destDirFile.exists() && !destDirFile.mkdirs()) return "Impossible de créer le dossier de destination";
-
-
-            var resultFile = new File(destDir + fileName);
-            // Le fichier existe déjà
-            if (resultFile.exists()) {
-                // Pas d'écrasement du fichier
-                if (!overwrite) return "Le fichier existe déjà";
-
-                // Écrasement du fichier
-                if (!deleteFile(resultFile)) return "Le fichier existe déjà et la suppression a échouée";
-            }
-
-            // Sauvegarde du fichier
-            file.transferTo(resultFile);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            return e.getMessage();
-        }
-
-        return "";
+    public static File buildFile(final String directory, final String fileName) {
+        return new File(normalizePath(directory, true) + fileName);
     }
 
     public static File getFile(final String filePath) throws FileNotFoundException {
@@ -77,6 +38,32 @@ public class FileUtils {
             throw new FileNotFoundException("file with path: " + file.getAbsolutePath() + " was not found.");
         }
         return file;
+    }
+
+    public static void writeToFile(final String fileName, final String destination, final String content) {
+        var filePath = normalizePath(destination, true) + fileName;
+
+        try (var fileWriter = new FileWriter(filePath)) {
+            fileWriter.write(content);
+            System.out.println("Successfully write to file " + filePath);
+        } catch (IOException e) {
+            System.out.println("An error occurred trying to write to file " + filePath);
+            e.printStackTrace();
+        }
+    }
+
+    public static List<String> readFileContentAsLines(final File file) {
+        var fileContent = new ArrayList<String>();
+
+        try (var sc = new Scanner(file)) {
+            while (sc.hasNextLine())
+                fileContent.add(sc.nextLine());
+
+            return fileContent;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static boolean renameFile(final File oldFile,
@@ -94,7 +81,6 @@ public class FileUtils {
 
     public static boolean deleteFile(final File file) {
         if (file == null) return false;
-        System.out.println("deleting file " + file.getAbsolutePath());
 
         // Récupération des fichiers dans le dossier
         var contents = file.listFiles();
@@ -110,8 +96,6 @@ public class FileUtils {
         }
         return file.delete();
     }
-
-
 
     public static Long getCreationDate(final File file) {
         try {

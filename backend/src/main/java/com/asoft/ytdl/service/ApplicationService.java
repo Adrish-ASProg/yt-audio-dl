@@ -1,5 +1,6 @@
 package com.asoft.ytdl.service;
 
+import com.asoft.ytdl.constants.Constants;
 import com.asoft.ytdl.constants.enums.ProgressStatus;
 import com.asoft.ytdl.constants.interfaces.DownloadFromYTEvents;
 import com.asoft.ytdl.exception.NotFoundException;
@@ -9,7 +10,6 @@ import com.asoft.ytdl.model.FileStatus;
 import com.asoft.ytdl.model.Mp3Metadata;
 import com.asoft.ytdl.model.request.DLFileAsZipRequest;
 import com.asoft.ytdl.model.request.DLFromYTRequest;
-import com.asoft.ytdl.model.request.DLPlaylistRequest;
 import com.asoft.ytdl.model.request.FileStatusRequest;
 import com.asoft.ytdl.model.request.FileStatusResponse;
 import com.asoft.ytdl.model.request.TagRequest;
@@ -19,14 +19,14 @@ import com.asoft.ytdl.utils.FileUtils;
 import com.asoft.ytdl.utils.Mp3Tagger;
 import com.asoft.ytdl.utils.YTDownloadManager;
 import com.mpatric.mp3agic.NotSupportedException;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
@@ -62,7 +62,7 @@ public class ApplicationService implements DownloadFromYTEvents {
 
         dlManager = new YTDownloadManager(this);
 
-        filesStatus = getExistingFiles();
+        filesStatus = getAudioFiles();
 
         System.out.println(filesStatus.size() + " files retrieved");
     }
@@ -74,7 +74,11 @@ public class ApplicationService implements DownloadFromYTEvents {
         dlManager.printYtDlVersion();
     }
 
-    //#region Requests handler
+    public List<FileStatus> getFilesStatus() {
+        return new ArrayList<>(filesStatus.values());
+    }
+
+    //region Requests handler
 
     /**
      * POST /ytdl
@@ -165,45 +169,6 @@ public class ApplicationService implements DownloadFromYTEvents {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
 
-    }
-
-    /**
-     * POST /dl-playlist
-     **/
-    public void downloadPlaylist(DLPlaylistRequest request, HttpServletResponse response) {
-        System.out.println("Creating playlist");
-
-        /*
-        Filter ids, keep only:
-         - file's id present in "fileStatus"
-         - fileStatus with COMPLETED status
-         - Existing files on disk
-        */
-        String playlistText = request.getIds().stream()
-                .filter(filesStatus::containsKey)
-                .map(filesStatus::get)
-                .filter(fs -> ProgressStatus.COMPLETED.equals(fs.getStatus()))
-                .map(fileStatus -> new File(fileStatus.getAbsolutePath()))
-                .filter(File::exists)
-                .map(File::getName)
-                .map(fileName -> request.getFilePath() + fileName)
-                .collect(Collectors.joining("\n"));
-
-        ServletOutputStream out = null;
-        try {
-            out = response.getOutputStream();
-            out.println(playlistText);
-            out.flush();
-            out.close();
-            System.out.println("Playlist created");
-
-            //setting headers
-            response.addHeader("Content-Disposition", "attachment; filename=\"yt-audio-dl.m3u8\"");
-            response.setStatus(HttpServletResponse.SC_OK);
-        } catch (IOException e) {
-            e.printStackTrace();
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        }
     }
 
     /**
@@ -304,10 +269,10 @@ public class ApplicationService implements DownloadFromYTEvents {
         returnFile(file, response, false);
     }
 
-    // #endregion
+    //endregion
 
 
-    //#region Download from YT events
+    //region Download from YT events
 
     public void onDownloadCompleted(String id, String fileName) {
         FileStatus fs = filesStatus.get(id);
@@ -326,10 +291,10 @@ public class ApplicationService implements DownloadFromYTEvents {
         }
     }
 
-    // #endregion
+    //endregion
 
 
-    //#region Private methods
+    //region Private methods
 
     private FileStatus buildFileStatus(final String id,
                                        final String name) {
@@ -356,9 +321,9 @@ public class ApplicationService implements DownloadFromYTEvents {
         }
     }
 
-    private Map<String, FileStatus> getExistingFiles() {
+    private Map<String, FileStatus> getAudioFiles() {
 
-        System.out.println("Retrieving files..");
+        System.out.println("Retrieving musics..");
 
         return FileUtils.getAllFilesInDirectory(new File(directoryProperties.getAudioDirectory()))
                 .stream()
@@ -379,8 +344,9 @@ public class ApplicationService implements DownloadFromYTEvents {
 
         var in = new FileInputStream(file);
         response.setContentType("audio/mpeg");
-        response.setHeader("Content-Length", String.valueOf(file.length()));
-        response.setHeader("FileName", file.getName());
+        response.setHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(file.length()));
+        response.setHeader(Constants.HttpHeader.FILE_NAME, file.getName());
+        response.setHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, Constants.HttpHeader.FILE_NAME);
 
         if (asAttachment) {
             response.setHeader("Content-Disposition", "attachment; filename=" + file.getName());
@@ -390,6 +356,6 @@ public class ApplicationService implements DownloadFromYTEvents {
         FileCopyUtils.copy(in, response.getOutputStream());
     }
 
-    // #endregion
+    // endregion
 
 }
