@@ -18,7 +18,7 @@
         <commons-lang3.version>3.12.0</commons-lang3.version>
         <commons-validator.version>1.7</commons-validator.version>
         <json.version>20210307</json.version>
-        <lombok.version>1.18.20</lombok.version>
+        <lombok.version>1.18.22</lombok.version>
         <mp3agic.version>0.9.1</mp3agic.version>
     </properties>
 
